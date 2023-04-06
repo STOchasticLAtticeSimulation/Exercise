@@ -1,4 +1,4 @@
-// 単振動を解いて t, x, xdot を "oscillation.dat" に出力する
+// 単振動を Runge--Kutta 4 で解いて t, x, xdot を "oscillation.dat" に出力する
 
 using namespace std;
 
