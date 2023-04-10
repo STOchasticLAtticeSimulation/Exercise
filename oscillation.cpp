@@ -19,3 +19,7 @@ int main()
     double x;
     double xdot; 
 }
+
+void RK4forHO(double &t, double &x, double &xdot, double dt){
+    
+}
