@@ -16,12 +16,12 @@ const double dt = 0.01; // 時間刻み
 // ----------------------------------------- //
 
 // 変数の初期値
-const double x0 = 1.0;
-const double xdot0 = 0.0;
+const double x0 = 0.0;
+const double xdot0 = 1.0;
 
 int main()
 {
-    ofstream ofs("oscillator.dat");
+    ofstream ofs(filename);
     double t = 0.0;
     double x = x0;
     double xdot = xdot0;
@@ -33,15 +33,13 @@ int main()
 }
 
 void RK4forHO(double &t, double &x, double &xdot, double dt){
-    vector<double> kx(4);
-    vector<double> kxdot(4);
+    vector<double> kx(4, 0.0);
+    vector<double> kxdot(4, 0.0);
     double a[4][4],b[4],c[4];
 
     for(int i=0;i<=3;i++){
-        kx[i]=0.0;
-        kxdot[i]=0.0;
         for(int j=0;j<=3;j++){
-            a[i][j]=0;
+            a[i][j]=0.;
         }
     }
 
