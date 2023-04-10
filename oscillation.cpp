@@ -15,10 +15,24 @@ const double tf = 10; // 終了時刻
 const double dt = 0.01; // 時間刻み
 // ----------------------------------------- //
 
+// 変数の初期値
+const double x0 = 1.0;
+const double xdot0 = 0.0;
+
 int main()
 {
-    double x;
-    double xdot; 
+    ofstream ofs("oscillator.dat");
+    double t = 0.0;
+    double x = x0;
+    double xdot = xdot0;
+    // 初期値
+    x = 1.0;
+    xdot = 0.0;
+    while (t<tf) {
+        cout << t << ' ' << x << ' ' << xdot << endl;
+        ofs << t << ' ' << x << ' ' << xdot << endl;
+        RK4forHO(t, x, xdot, dt);
+    }
 }
 
 void RK4forHO(double &t, double &x, double &xdot, double dt){
