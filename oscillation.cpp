@@ -25,9 +25,6 @@ int main()
     double t = 0.0;
     double x = x0;
     double xdot = xdot0;
-    // 初期値
-    x = 1.0;
-    xdot = 0.0;
     while (t<tf) {
         cout << t << ' ' << x << ' ' << xdot << endl;
         ofs << t << ' ' << x << ' ' << xdot << endl;
