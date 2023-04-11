@@ -4,6 +4,7 @@
 #include <fstream>
 #include <cmath>
 #include <vector>
+#include <sys/time.h>
 
 using namespace std;
 
@@ -21,6 +22,16 @@ const double xdot0 = 1.0;
 
 int main()
 {
+  // ---------- start timer ----------
+  struct timeval tv;
+  struct timezone tz;
+  double before, after;
+  
+  gettimeofday(&tv, &tz);
+  before = (double)tv.tv_sec + (double)tv.tv_usec * 1.e-6;
+  // --------------------------------------
+  
+  
   ofstream ofs(filename);
   double t = 0.0;
   vector<double> x{x0, xdot0};
@@ -29,6 +40,13 @@ int main()
     ofs << t << ' ' << x[0] << ' ' << x[1] << endl;
     RK4forHO(t, x, dt);
   }
+
+
+  // ---------- stop timer ----------
+  gettimeofday(&tv, &tz);
+  after = (double)tv.tv_sec + (double)tv.tv_usec * 1.e-6;
+  cout << after - before << " sec." << endl;
+  // -------------------------------------
 }
 
 void RK4forHO(double &t, vector<double> &x, double dt) {
