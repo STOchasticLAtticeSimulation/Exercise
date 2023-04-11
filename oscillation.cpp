@@ -8,7 +8,9 @@
 
 using namespace std;
 
-void RK4forHO(double &t, vector<double> &x, double dt); // t と (x, xdot) を渡すと単振動 EoM に従い dt だけ t, (x, xdot) を更新する
+void RK4(function<vector<double>(double, vector<double>)> dxdt,
+	 double &t, vector<double> &x, double dt); // t と (x, xdot) を渡すと EoM dxdt に従い dt だけ t, (x, xdot) を更新する
+vector<double> dxdt(double t, vector<double> x); // t と (x, xdot) の関数としての EoM dxdt. 今回は単振動
 
 // ------------ パラメータ ----------------- //
 const string filename = "oscillation.dat"; // 出力ファイル名
@@ -38,7 +40,7 @@ int main()
   while (t<tf) {
     cout << t << ' ' << x[0] << ' ' << x[1] << endl;
     ofs << t << ' ' << x[0] << ' ' << x[1] << endl;
-    RK4forHO(t, x, dt);
+    RK4(dxdt, t, x, dt);
   }
 
 
@@ -49,7 +51,16 @@ int main()
   // -------------------------------------
 }
 
-void RK4forHO(double &t, vector<double> &x, double dt) {
+vector<double> dxdt(double t, vector<double> x) {
+  vector<double> dxdt(2);
+
+  dxdt[0] = x[1];
+  dxdt[1] = -x[0];
+
+  return dxdt;
+}
+
+void RK4(function<vector<double>(double, vector<double>)> dxdt, double &t, vector<double> &x, double dt) {
   vector<double> kx[4]; // 4段分の勾配ベクトル kx
   double a[4][4],b[4],c[4]; // ブッチャー係数
 
@@ -78,10 +89,7 @@ void RK4forHO(double &t, vector<double> &x, double dt) {
 	X[xi] += dt * a[i][j] * kx[j][xi];
       }
 
-      // ------- EoM --------- //
-      kx[i][0] = X[1];
-      kx[i][1] = -X[0];
-      // --------------------- //
+      kx[i] = dxdt(t+c[i]*dt, X); // EoM
     }
   }
 
