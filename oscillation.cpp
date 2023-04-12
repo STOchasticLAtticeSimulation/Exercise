@@ -5,6 +5,7 @@
 #include <cmath>
 #include <vector>
 #include <sys/time.h>
+#include <functional>
 
 using namespace std;
 
