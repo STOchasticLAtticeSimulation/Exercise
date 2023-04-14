@@ -44,7 +44,7 @@ int main()
   vector<vector<vector<double>>> x1(N, xi); // dim 1
   vector<vector<vector<vector<double>>>> x2(N, x1); // dim 2
   vector<vector<vector<vector<vector<double>>>>> x(N, x2); // dim 3
-  ofstream ofs_n("chaotic_noise.dat");
+  ofstream ofs_n("NoiseMap.dat");
 
   vector<vector<vector<vector<vector<double>>>>> dxdw = noise(t,x);
 
