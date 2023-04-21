@@ -67,12 +67,11 @@ int main()
   vector<double> phi{phi0, pi0};
   vector<double> prephi(2);
   //double ep=pow(phi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(phi[1],2.0))+pow((mm*phi[0]),2.0)))),2.0));
-  double epc; // 現在の ep 保存用
   
-  while(epc = ep(phi[0],phi[1])<=1.0){
+  while(ep(phi[0],phi[1]) <= 1.0){
     prephi[0]=phi[0];
     prephi[1]=phi[1];
-    ofs<< setprecision(10)<<N<<"   "<<prephi[0]<<"   "<<prephi[1]<<"  "<<epc<<endl;
+    ofs<< setprecision(10)<<N<<"   "<<prephi[0]<<"   "<<prephi[1]<<"  "<<ep(prephi[0],prephi[1])<<endl;
     RK4(dphidN, N, phi, dN);
     //ep=pow(phi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(phi[1],2.0))+pow((mm*phi[0]),2.0)))),2.0));
   }
