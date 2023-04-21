@@ -213,13 +213,27 @@ int main()
 }
 
 
+double hubble(double phi, double pi) {
+  return sqrt((pi*pi/2. + VV(phi))/3.);
+}
 
+double ep(double phi, double pi) {
+  double HH = hubble(phi,pi);
+  return pi*pi/2./HH/HH;
+}
 
 vector<double> dphidN(double N, vector<double> phi) {
   vector<double> dphidN(2);
 
-  dphidN[0] = (phi[1]/(sqrt((1.0/6.0)*((pow(phi[1],2.0))+pow((mm*phi[0]),2.0)))));//dphi/dN=(pi/H)　ノイズなし
-  dphidN[1] = -3.0*phi[1]-((pow(mm,2.0))*phi[0])/(sqrt((1.0/6.0)*((pow(phi[1],2.0))+pow((mm*phi[0]),2.0))));//dpi/dN=-3pi-(v'/H)
+  double xx = phi[0]; // phi
+  double pp = phi[1]; // pi
+  double HH = hubble(xx,pp);
+
+  //dphidN[0] = (phi[1]/(sqrt((1.0/6.0)*((pow(phi[1],2.0))+pow((mm*phi[0]),2.0)))));//dphi/dN=(pi/H)　ノイズなし
+  //dphidN[1] = -3.0*phi[1]-((pow(mm,2.0))*phi[0])/(sqrt((1.0/6.0)*((pow(phi[1],2.0))+pow((mm*phi[0]),2.0))));//dpi/dN=-3pi-(v'/H)
+
+  dphidN[0] = pp/HH;
+  dphidN[1] = -3*pp - Vp(xx)/HH;
 
   return dphidN;
 }
