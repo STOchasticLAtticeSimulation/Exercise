@@ -15,10 +15,10 @@ using namespace std;
 
 void RK4(function<vector<double>(double, vector<double>)> pi,double &N, vector<double> &phi, double dN); // e-folds N と (phi, pi) を渡すと EoM に従い dN だけ N, (phi, pi) を更新する
 vector<double> dphidN(double N, vector<double> phi); // N と (phi, pi) の関数としての EoM
-vector<double> ep(vector<double> phi,vector<double> pi);
-vector<double> hubble(vector<double> phi,vector<double> pi);
-vector<double> VV(vector<double> phi);
-vector<double> Vp(vector<double> phi); // ポテンシャル VV の phi 微分
+double ep(double phi, double pi);
+double hubble(double phi, double pi);
+double VV(double phi);
+double Vp(double phi); // ポテンシャル VV の phi 微分
  
 // ------------ パラメータ ----------------- //
 const string filename = "Ncl.dat"; // 出力ファイル名
@@ -211,6 +211,9 @@ int main()
   cout << after - before << " sec." << endl;
   // -------------------------------------
 }
+
+
+
 
 vector<double> dphidN(double N, vector<double> phi) {
   vector<double> dphidN(2);
