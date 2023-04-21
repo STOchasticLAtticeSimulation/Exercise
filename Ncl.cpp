@@ -17,12 +17,14 @@ void RK4(function<vector<double>(double, vector<double>)> pi,double &N, vector<d
 vector<double> dphidN(double N, vector<double> phi); // N と (phi, pi) の関数としての EoM
 vector<double> ep(vector<double> phi,vector<double> pi);
 vector<double> hubble(vector<double> phi,vector<double> pi);
+vector<double> VV(vector<double> phi);
+vector<double> Vp(vector<double> phi); // ポテンシャル VV の phi 微分
  
 // ------------ パラメータ ----------------- //
 const string filename = "Ncl.dat"; // 出力ファイル名
 const double Nf = 7.0; // lattice 終了時刻
 const double dN = 0.01; // 時間刻み
-const double m=1.0e-5; // 質量
+const double mm=1.0e-5; // 質量
 // ----------------------------------------- //
 
 // 変数の初期値
@@ -38,6 +40,15 @@ const double pi0 = -8.5e-6;
 //   double z=sqrt(-2.0*log(Uniform()))*sin(2.0*M_PI*Uniform());
 //   return mu+sigma*z;//sigmaは標準偏差。分散0.01にしたいときはsigma=0.1を入れる
 // }
+
+double VV(double phi) {
+  return mm*mm*phi*phi/2.;
+}
+
+double Vp(double phi) {
+  return mm*mm*phi;
+}
+
 
 int main()
 {
@@ -55,17 +66,17 @@ int main()
   double N = Nf;
   vector<double> phi{phi0, pi0};
   vector<double> prephi(2);
-  double ep=pow(phi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(phi[1],2.0))+pow((m*phi[0]),2.0)))),2.0));
+  double ep=pow(phi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(phi[1],2.0))+pow((mm*phi[0]),2.0)))),2.0));
   
   while(ep<=1.0){
     prephi[0]=phi[0];
     prephi[1]=phi[1];
     ofs<< setprecision(10)<<N<<"   "<<prephi[0]<<"   "<<prephi[1]<<"  "<<ep<<endl;
     RK4(dphidN, N, phi, dN);
-    ep=pow(phi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(phi[1],2.0))+pow((m*phi[0]),2.0)))),2.0));
+    ep=pow(phi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(phi[1],2.0))+pow((mm*phi[0]),2.0)))),2.0));
   }
   double Ncl=N-dN;
-  ep=pow(prephi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(prephi[1],2.0))+pow((m*prephi[0]),2.0)))),2.0));
+  ep=pow(prephi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(prephi[1],2.0))+pow((mm*prephi[0]),2.0)))),2.0));
 
   cout<< setprecision(10)<<Ncl<<"   "<<prephi[0]<<"   "<<prephi[1]<<"  "<<ep<<endl;
   
@@ -78,10 +89,10 @@ int main()
     prephi[1]=phi[1];
     ofs<< setprecision(10)<<N<<"   "<<prephi[0]<<"   "<<prephi[1]<<"  "<<ep<<endl;
     RK4(dphidN, N, phi, dN1);
-    ep=pow(phi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(phi[1],2.0))+pow((m*phi[0]),2.0)))),2.0));
+    ep=pow(phi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(phi[1],2.0))+pow((mm*phi[0]),2.0)))),2.0));
   }
   Ncl=N-dN1;
-  ep=pow(prephi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(prephi[1],2.0))+pow((m*prephi[0]),2.0)))),2.0));
+  ep=pow(prephi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(prephi[1],2.0))+pow((mm*prephi[0]),2.0)))),2.0));
 
   cout<< setprecision(10)<<Ncl<<"   "<<prephi[0]<<"   "<<prephi[1]<<"  "<<ep<<endl;
   
@@ -95,10 +106,10 @@ int main()
     prephi[1]=phi[1];
     ofs<< setprecision(10)<<N<<"   "<<prephi[0]<<"   "<<prephi[1]<<"  "<<ep<<endl;
     RK4(dphidN, N, phi, dN1);
-    ep=pow(phi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(phi[1],2.0))+pow((m*phi[0]),2.0)))),2.0));
+    ep=pow(phi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(phi[1],2.0))+pow((mm*phi[0]),2.0)))),2.0));
   }
   Ncl=N-dN1;
-  ep=pow(prephi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(prephi[1],2.0))+pow((m*prephi[0]),2.0)))),2.0));
+  ep=pow(prephi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(prephi[1],2.0))+pow((mm*prephi[0]),2.0)))),2.0));
 
   cout<< setprecision(10)<<Ncl<<"   "<<prephi[0]<<"   "<<prephi[1]<<"  "<<ep<<endl;
   
@@ -112,10 +123,10 @@ int main()
     prephi[1]=phi[1];
     ofs<< setprecision(10)<<N<<"   "<<prephi[0]<<"   "<<prephi[1]<<"  "<<ep<<endl;
     RK4(dphidN, N, phi, dN1);
-    ep=pow(phi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(phi[1],2.0))+pow((m*phi[0]),2.0)))),2.0));
+    ep=pow(phi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(phi[1],2.0))+pow((mm*phi[0]),2.0)))),2.0));
   }
   Ncl=N-dN1;
-  ep=pow(prephi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(prephi[1],2.0))+pow((m*prephi[0]),2.0)))),2.0));
+  ep=pow(prephi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(prephi[1],2.0))+pow((mm*prephi[0]),2.0)))),2.0));
 
   cout<< setprecision(10)<<Ncl<<"   "<<prephi[0]<<"   "<<prephi[1]<<"  "<<ep<<endl;
   
@@ -129,10 +140,10 @@ int main()
     prephi[1]=phi[1];
     ofs<< setprecision(10)<<N<<"   "<<prephi[0]<<"   "<<prephi[1]<<"  "<<ep<<endl;
     RK4(dphidN, N, phi, dN1);
-    ep=pow(phi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(phi[1],2.0))+pow((m*phi[0]),2.0)))),2.0));
+    ep=pow(phi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(phi[1],2.0))+pow((mm*phi[0]),2.0)))),2.0));
   }
   Ncl=N-dN1;
-  ep=pow(prephi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(prephi[1],2.0))+pow((m*prephi[0]),2.0)))),2.0));
+  ep=pow(prephi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(prephi[1],2.0))+pow((mm*prephi[0]),2.0)))),2.0));
 
   cout<< setprecision(10)<<Ncl<<"   "<<prephi[0]<<"   "<<prephi[1]<<"  "<<ep<<endl;
   
@@ -146,10 +157,10 @@ int main()
     prephi[1]=phi[1];
     ofs<< setprecision(10)<<N<<"   "<<prephi[0]<<"   "<<prephi[1]<<"  "<<ep<<endl;
     RK4(dphidN, N, phi, dN1);
-    ep=pow(phi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(phi[1],2.0))+pow((m*phi[0]),2.0)))),2.0));
+    ep=pow(phi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(phi[1],2.0))+pow((mm*phi[0]),2.0)))),2.0));
   }
   Ncl=N-dN1;
-  ep=pow(prephi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(prephi[1],2.0))+pow((m*prephi[0]),2.0)))),2.0));
+  ep=pow(prephi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(prephi[1],2.0))+pow((mm*prephi[0]),2.0)))),2.0));
 
   cout<< setprecision(10)<<Ncl<<"   "<<prephi[0]<<"   "<<prephi[1]<<"  "<<ep<<endl;
   
@@ -163,10 +174,10 @@ int main()
     prephi[1]=phi[1];
     ofs<< setprecision(10)<<N<<"   "<<prephi[0]<<"   "<<prephi[1]<<"  "<<ep<<endl;
     RK4(dphidN, N, phi, dN1);
-    ep=pow(phi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(phi[1],2.0))+pow((m*phi[0]),2.0)))),2.0));
+    ep=pow(phi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(phi[1],2.0))+pow((mm*phi[0]),2.0)))),2.0));
   }
   Ncl=N-dN1;
-  ep=pow(prephi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(prephi[1],2.0))+pow((m*prephi[0]),2.0)))),2.0));
+  ep=pow(prephi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(prephi[1],2.0))+pow((mm*prephi[0]),2.0)))),2.0));
 
   cout<< setprecision(10)<<Ncl<<"   "<<prephi[0]<<"   "<<prephi[1]<<"  "<<ep<<endl;
   
@@ -180,10 +191,10 @@ int main()
     prephi[1]=phi[1];
     ofs<< setprecision(10)<<N<<"   "<<prephi[0]<<"   "<<prephi[1]<<"  "<<ep<<endl;
     RK4(dphidN, N, phi, dN1);
-    ep=pow(phi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(phi[1],2.0))+pow((m*phi[0]),2.0)))),2.0));
+    ep=pow(phi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(phi[1],2.0))+pow((mm*phi[0]),2.0)))),2.0));
   }
   Ncl=N-dN1;
-  ep=pow(prephi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(prephi[1],2.0))+pow((m*prephi[0]),2.0)))),2.0));
+  ep=pow(prephi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(prephi[1],2.0))+pow((mm*prephi[0]),2.0)))),2.0));
 
   cout<< setprecision(10)<<Ncl<<"   "<<prephi[0]<<"   "<<prephi[1]<<"  "<<ep<<endl;
   
@@ -204,8 +215,8 @@ int main()
 vector<double> dphidN(double N, vector<double> phi) {
   vector<double> dphidN(2);
 
-  dphidN[0] = (phi[1]/(sqrt((1.0/6.0)*((pow(phi[1],2.0))+pow((m*phi[0]),2.0)))));//dphi/dN=(pi/H)　ノイズなし
-  dphidN[1] = -3.0*phi[1]-((pow(m,2.0))*phi[0])/(sqrt((1.0/6.0)*((pow(phi[1],2.0))+pow((m*phi[0]),2.0))));//dpi/dN=-3pi-(v'/H)
+  dphidN[0] = (phi[1]/(sqrt((1.0/6.0)*((pow(phi[1],2.0))+pow((mm*phi[0]),2.0)))));//dphi/dN=(pi/H)　ノイズなし
+  dphidN[1] = -3.0*phi[1]-((pow(mm,2.0))*phi[0])/(sqrt((1.0/6.0)*((pow(phi[1],2.0))+pow((mm*phi[0]),2.0))));//dpi/dN=-3pi-(v'/H)
 
   return dphidN;
 }
