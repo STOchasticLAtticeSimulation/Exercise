@@ -19,6 +19,8 @@ double ep(double phi, double pi);
 double hubble(double phi, double pi);
 double VV(double phi);
 double Vp(double phi); // ポテンシャル VV の phi 微分
+double Ncl(vector<double> phi,double N);
+vector<double> prephi(2);
  
 // ------------ パラメータ ----------------- //
 const string filename = "Ncl.dat"; // 出力ファイル名
@@ -62,148 +64,11 @@ int main()
   // --------------------------------------
   
   
-  ofstream ofs(filename);
   double N = Nf;
   vector<double> phi{phi0, pi0};
-  vector<double> prephi(2);
-  //double ep=pow(phi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(phi[1],2.0))+pow((mm*phi[0]),2.0)))),2.0));
-  
-  while(ep(phi[0],phi[1]) <= 1.0){
-    prephi[0]=phi[0];
-    prephi[1]=phi[1];
-    ofs<< setprecision(10)<<N<<"   "<<prephi[0]<<"   "<<prephi[1]<<"  "<<ep(prephi[0],prephi[1])<<endl;
-    RK4(dphidN, N, phi, dN);
-    //ep=pow(phi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(phi[1],2.0))+pow((mm*phi[0]),2.0)))),2.0));
-  }
-  double Ncl=N-dN;
-  ep=pow(prephi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(prephi[1],2.0))+pow((mm*prephi[0]),2.0)))),2.0));
 
-  cout<< setprecision(10)<<Ncl<<"   "<<prephi[0]<<"   "<<prephi[1]<<"  "<<ep<<endl;
-  
-  phi[0]=prephi[0];
-  phi[1]=prephi[1];
-  double dN1=dN*0.1;
-  N=Ncl;
-  while(ep<=1.0){
-    prephi[0]=phi[0];
-    prephi[1]=phi[1];
-    ofs<< setprecision(10)<<N<<"   "<<prephi[0]<<"   "<<prephi[1]<<"  "<<ep<<endl;
-    RK4(dphidN, N, phi, dN1);
-    ep=pow(phi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(phi[1],2.0))+pow((mm*phi[0]),2.0)))),2.0));
-  }
-  Ncl=N-dN1;
-  ep=pow(prephi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(prephi[1],2.0))+pow((mm*prephi[0]),2.0)))),2.0));
-
-  cout<< setprecision(10)<<Ncl<<"   "<<prephi[0]<<"   "<<prephi[1]<<"  "<<ep<<endl;
-  
-  phi[0]=prephi[0];
-  phi[1]=prephi[1];
-  dN1*=0.1;
-  N=Ncl;
-
-  while(ep<=1.0){
-    prephi[0]=phi[0];
-    prephi[1]=phi[1];
-    ofs<< setprecision(10)<<N<<"   "<<prephi[0]<<"   "<<prephi[1]<<"  "<<ep<<endl;
-    RK4(dphidN, N, phi, dN1);
-    ep=pow(phi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(phi[1],2.0))+pow((mm*phi[0]),2.0)))),2.0));
-  }
-  Ncl=N-dN1;
-  ep=pow(prephi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(prephi[1],2.0))+pow((mm*prephi[0]),2.0)))),2.0));
-
-  cout<< setprecision(10)<<Ncl<<"   "<<prephi[0]<<"   "<<prephi[1]<<"  "<<ep<<endl;
-  
-  phi[0]=prephi[0];
-  phi[1]=prephi[1];
-  dN1*=0.1;
-  N=Ncl;
-
-  while(ep<=1.0){
-    prephi[0]=phi[0];
-    prephi[1]=phi[1];
-    ofs<< setprecision(10)<<N<<"   "<<prephi[0]<<"   "<<prephi[1]<<"  "<<ep<<endl;
-    RK4(dphidN, N, phi, dN1);
-    ep=pow(phi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(phi[1],2.0))+pow((mm*phi[0]),2.0)))),2.0));
-  }
-  Ncl=N-dN1;
-  ep=pow(prephi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(prephi[1],2.0))+pow((mm*prephi[0]),2.0)))),2.0));
-
-  cout<< setprecision(10)<<Ncl<<"   "<<prephi[0]<<"   "<<prephi[1]<<"  "<<ep<<endl;
-  
-  phi[0]=prephi[0];
-  phi[1]=prephi[1];
-  dN1*=0.1;
-  N=Ncl;
-
-  while(ep<=1.0){
-    prephi[0]=phi[0];
-    prephi[1]=phi[1];
-    ofs<< setprecision(10)<<N<<"   "<<prephi[0]<<"   "<<prephi[1]<<"  "<<ep<<endl;
-    RK4(dphidN, N, phi, dN1);
-    ep=pow(phi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(phi[1],2.0))+pow((mm*phi[0]),2.0)))),2.0));
-  }
-  Ncl=N-dN1;
-  ep=pow(prephi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(prephi[1],2.0))+pow((mm*prephi[0]),2.0)))),2.0));
-
-  cout<< setprecision(10)<<Ncl<<"   "<<prephi[0]<<"   "<<prephi[1]<<"  "<<ep<<endl;
-  
-  phi[0]=prephi[0];
-  phi[1]=prephi[1];
-  dN1*=0.1;
-  N=Ncl;
-
-  while(ep<=1.0){
-    prephi[0]=phi[0];
-    prephi[1]=phi[1];
-    ofs<< setprecision(10)<<N<<"   "<<prephi[0]<<"   "<<prephi[1]<<"  "<<ep<<endl;
-    RK4(dphidN, N, phi, dN1);
-    ep=pow(phi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(phi[1],2.0))+pow((mm*phi[0]),2.0)))),2.0));
-  }
-  Ncl=N-dN1;
-  ep=pow(prephi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(prephi[1],2.0))+pow((mm*prephi[0]),2.0)))),2.0));
-
-  cout<< setprecision(10)<<Ncl<<"   "<<prephi[0]<<"   "<<prephi[1]<<"  "<<ep<<endl;
-  
-  phi[0]=prephi[0];
-  phi[1]=prephi[1];
-  dN1*=0.1;
-  N=Ncl;
-
-  while(ep<=1.0){
-    prephi[0]=phi[0];
-    prephi[1]=phi[1];
-    ofs<< setprecision(10)<<N<<"   "<<prephi[0]<<"   "<<prephi[1]<<"  "<<ep<<endl;
-    RK4(dphidN, N, phi, dN1);
-    ep=pow(phi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(phi[1],2.0))+pow((mm*phi[0]),2.0)))),2.0));
-  }
-  Ncl=N-dN1;
-  ep=pow(prephi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(prephi[1],2.0))+pow((mm*prephi[0]),2.0)))),2.0));
-
-  cout<< setprecision(10)<<Ncl<<"   "<<prephi[0]<<"   "<<prephi[1]<<"  "<<ep<<endl;
-  
-  phi[0]=prephi[0];
-  phi[1]=prephi[1];
-  dN1*=0.1;
-  N=Ncl;
-
-  while(ep<=1.0){
-    prephi[0]=phi[0];
-    prephi[1]=phi[1];
-    ofs<< setprecision(10)<<N<<"   "<<prephi[0]<<"   "<<prephi[1]<<"  "<<ep<<endl;
-    RK4(dphidN, N, phi, dN1);
-    ep=pow(phi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(phi[1],2.0))+pow((mm*phi[0]),2.0)))),2.0));
-  }
-  Ncl=N-dN1;
-  ep=pow(prephi[1],2.0)/2.0/(pow((sqrt((1.0/6.0)*((pow(prephi[1],2.0))+pow((mm*prephi[0]),2.0)))),2.0));
-
-  cout<< setprecision(10)<<Ncl<<"   "<<prephi[0]<<"   "<<prephi[1]<<"  "<<ep<<endl;
-  
-  phi[0]=prephi[0];
-  phi[1]=prephi[1];
-  dN1*=0.1;
-  N=Ncl;
-
-
+  double NCL=Ncl(phi,N);
+  cout<< setprecision(10)<<NCL<<endl;
 
   // ---------- stop timer ----------
   gettimeofday(&Nv, &Nz);
@@ -212,6 +77,38 @@ int main()
   // -------------------------------------
 }
 
+
+double Ncl(vector<double> phi,double N){
+  ofstream ofs(filename);
+  while(ep(phi[0],phi[1]) <= 1.0){
+    prephi[0]=phi[0];
+    prephi[1]=phi[1];
+    ofs<< setprecision(10)<<N<<"   "<<prephi[0]<<"   "<<prephi[1]<<"  "<<ep(prephi[0],prephi[1])<<endl;
+    RK4(dphidN, N, phi, dN);
+  }
+  double Ncl=N-dN;
+  
+  phi[0]=prephi[0];
+  phi[1]=prephi[1];
+  double dN1=dN*0.1;
+  N=Ncl;
+
+  for(int i=0;i<=7;i++){
+  while(ep(phi[0],phi[1])<=1.0){
+    prephi[0]=phi[0];
+    prephi[1]=phi[1];
+    ofs<< setprecision(10)<<N<<"   "<<prephi[0]<<"   "<<prephi[1]<<"  "<<ep(prephi[0],prephi[1])<<endl;
+    RK4(dphidN, N, phi, dN1);
+  }
+  Ncl=N-dN1;
+  
+  phi[0]=prephi[0];
+  phi[1]=prephi[1];
+  dN1*=0.1;
+  N=Ncl;
+  }
+  return Ncl;
+}
 
 double hubble(double phi, double pi) {
   return sqrt((pi*pi/2. + VV(phi))/3.);
