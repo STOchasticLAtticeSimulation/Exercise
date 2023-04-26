@@ -13,7 +13,7 @@
 
 using namespace std;
 
-void RK4(function<vector<double>(double, vector<double>)> pi,double &N, vector<double> &phi, double dN); // e-folds N と (phi, pi) を渡すと EoM に従い dN だけ N, (phi, pi) を更新する
+void RK4(function<vector<double>(double, vector<double>)> dphidN,double &N, vector<double> &phi, double dN); // e-folds N と (phi, pi) を渡すと EoM に従い dN だけ N, (phi, pi) を更新する
 vector<double> dphidN(double N, vector<double> phi); // N と (phi, pi) の関数としての EoM
 double ep(double phi, double pi);
 double hubble(double phi, double pi);
@@ -93,19 +93,19 @@ double Ncl(vector<double> phi,double N){
   double dN1=dN*0.1;
   N=Ncl;
 
-  for(int i=0;i<=7;i++){
-  while(ep(phi[0],phi[1])<=1.0){
-    prephi[0]=phi[0];
-    prephi[1]=phi[1];
-    ofs<< setprecision(10)<<N<<"   "<<prephi[0]<<"   "<<prephi[1]<<"  "<<ep(prephi[0],prephi[1])<<endl;
-    RK4(dphidN, N, phi, dN1);
-  }
-  Ncl=N-dN1;
-  
-  phi[0]=prephi[0];
-  phi[1]=prephi[1];
-  dN1*=0.1;
-  N=Ncl;
+  for(int i=0;i<=4;i++){
+    while(ep(phi[0],phi[1])<=1.0){
+      prephi[0]=phi[0];
+      prephi[1]=phi[1];
+      ofs<< setprecision(10)<<N<<"   "<<prephi[0]<<"   "<<prephi[1]<<"  "<<ep(prephi[0],prephi[1])<<endl;
+      RK4(dphidN, N, phi, dN1);
+    }
+    Ncl=N-dN1;
+    
+    phi[0]=prephi[0];
+    phi[1]=prephi[1];
+    dN1*=0.1;
+    N=Ncl;
   }
   return Ncl;
 }
