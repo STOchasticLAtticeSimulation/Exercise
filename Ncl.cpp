@@ -19,7 +19,7 @@ double ep(double phi, double pi);
 double hubble(double phi, double pi);
 double VV(double phi);
 double Vp(double phi); // ポテンシャル VV の phi 微分
-double Ncl(vector<double> phi,double N);
+double Ncl(vector<double> phi,double N,double Nprec); // 初期条件 phi & N から end of inf までの e-folds Ncl を精度 Nprec で求める
 //vector<double> prephi(2);
  
 // ------------ パラメータ ----------------- //
@@ -27,6 +27,7 @@ const string filename = "Ncl.dat"; // 出力ファイル名
 const double Nf = 7.0; // lattice 終了時刻
 const double dN = 0.01; // 時間刻み
 const double mm=1.0e-5; // 質量
+const double NPREC = 1e-7; // Ncl の精度
 // ----------------------------------------- //
 
 // 変数の初期値
@@ -67,7 +68,7 @@ int main()
   double N = Nf;
   vector<double> phi{phi0, pi0};
 
-  double NCL=Ncl(phi,N);
+  double NCL=Ncl(phi,N,NPREC);
   cout<< setprecision(10)<<NCL<<endl;
 
   // ---------- stop timer ----------
@@ -78,7 +79,7 @@ int main()
 }
 
 
-double Ncl(vector<double> phi,double N){
+double Ncl(vector<double> phi,double N,double Nprec){
   ofstream ofs(filename);
   double dN1 = dN;
   vector<double> prephi(2);
@@ -99,7 +100,7 @@ double Ncl(vector<double> phi,double N){
   */
 
   //for(int i=0;i<=4;i++){
-  while(dN1 >= 1e-7) {
+  while(dN1 >= Nprec) {
     while(ep(phi[0],phi[1])<=1.0){
       prephi[0]=phi[0];
       prephi[1]=phi[1];
