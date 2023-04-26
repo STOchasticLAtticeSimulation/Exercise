@@ -20,7 +20,7 @@ double hubble(double phi, double pi);
 double VV(double phi);
 double Vp(double phi); // ポテンシャル VV の phi 微分
 double Ncl(vector<double> phi,double N);
-vector<double> prephi(2);
+//vector<double> prephi(2);
  
 // ------------ パラメータ ----------------- //
 const string filename = "Ncl.dat"; // 出力ファイル名
@@ -80,6 +80,10 @@ int main()
 
 double Ncl(vector<double> phi,double N){
   ofstream ofs(filename);
+  double dN1 = dN;
+  vector<double> prephi(2);
+
+  /*
   while(ep(phi[0],phi[1]) <= 1.0){
     prephi[0]=phi[0];
     prephi[1]=phi[1];
@@ -92,22 +96,25 @@ double Ncl(vector<double> phi,double N){
   phi[1]=prephi[1];
   double dN1=dN*0.1;
   N=Ncl;
+  */
 
-  for(int i=0;i<=4;i++){
+  //for(int i=0;i<=4;i++){
+  while(dN1 >= 1e-7) {
     while(ep(phi[0],phi[1])<=1.0){
       prephi[0]=phi[0];
       prephi[1]=phi[1];
       ofs<< setprecision(10)<<N<<"   "<<prephi[0]<<"   "<<prephi[1]<<"  "<<ep(prephi[0],prephi[1])<<endl;
       RK4(dphidN, N, phi, dN1);
     }
-    Ncl=N-dN1;
+    //Ncl=N-dN1;
+    N -= dN1;
     
     phi[0]=prephi[0];
     phi[1]=prephi[1];
     dN1*=0.1;
-    N=Ncl;
+    //N=Ncl;
   }
-  return Ncl;
+  return N; //Ncl;
 }
 
 double hubble(double phi, double pi) {
