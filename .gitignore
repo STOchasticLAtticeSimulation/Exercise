@@ -1,2 +1,4 @@
 /oscillation
 /NoiseMap
+*.py
+*.vscode
