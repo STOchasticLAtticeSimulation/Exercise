@@ -1,8 +1,5 @@
 // g++ -std=c++11 -O2 -o NoiseMap NoiseMap.cpp
 
-// plot.nb で ListDensityPlot3D できるようにする。
-// 最終時刻の \tilde{\zeta} のパワースペクトルもプロット。
-
 #define _USE_MATH_DEFINES
 
 #include <iostream>
@@ -91,7 +88,6 @@ int main()
     // save the data
     if(numsteps % 10 == 0 && t < tf){
       cout << t << ' ';
-      ofs_c << t << ' ';
       LOOP{
         de[i][j][k] = 3. * H(x)[i][j][k] * H(x)[i][j][k] - average_e;
         ofs_c << de[i][j][k] / x[i][j][k][0][1] / x[i][j][k][0][1] / 3. << ' ';
