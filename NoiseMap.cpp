@@ -18,15 +18,16 @@ using namespace std;
 #define mm m*m // m^2
 #define PHII 15.00 // initial value of phi
 
-const int N = 17; // Number of lattice
+const int N = 11; // Number of lattice
 const int N3 = N * N * N; // for conveniensce
 const double Ninv = 1. / N; // for conveniensce
 double t = 0.;
-double tf = 5.5; // finish time
+double tf = 4.0; // finish time
 double dt = 1.e-2; // time interval
 double sigma = 1./10.; // coarse-grained scale parameter
 const string filename_c = "Lattice.dat"; // 出力ファイル名(曲率ゆらぎ)
 const string filename_f = "field.dat"; // 出力ファイル名(phi, pi)
+vector<double> xi{15.0, -0.1*m}; // initial value
 
 // for output
 int numsteps = 0;
@@ -40,20 +41,24 @@ normal_distribution<> dist(0., 1.);
 #define LOOP for(int i = 0; i < N; i++) for(int j = 0; j < N; j++) for(int k = 0; k < N; k++)
 
 // Euler-Maruyama method
-template <class T>
-void EulerM(function<T(double, const T&)> dxdt, function<T(double, const T&)> dxdw, double &t, T &x, double dt);
+// template <class T>
+// void EulerM(function<T(double, const T&)> dxdt, function<T(double, const T&)> dxdw, double &t, T &x, double dt);
+void EulerM(function<vector<double>(double t, vector<double>x)> dxdt, vector<double> &dxdw, double &t, vector<double> &x, double dt);
 
 // for convenience
+vector<vector<double>> x1(N, xi); // dim 1
+vector<vector<vector<double>>> x2(N, x1); // dim 2
+vector<vector<vector<vector<double>>>> x(N, x2); // dim 3
 vector<double> v1(N,0);
 vector<vector<double>> v2(N,v1);
 
 // Function prototype declaration
-vector<vector<vector<vector<vector<double>>>>> dxdt(double t, const vector<vector<vector<vector<vector<double>>>>> &x);
-vector<vector<vector<double>>> V(const vector<vector<vector<vector<vector<double>>>>> &x);
-vector<vector<vector<double>>> Vphi(const vector<vector<vector<vector<vector<double>>>>> &x);
-vector<vector<vector<double>>> H(const vector<vector<vector<vector<vector<double>>>>> &x);
-vector<vector<vector<double>>> epsilon(const vector<vector<vector<vector<vector<double>>>>> &x);
-vector<vector<vector<vector<vector<double>>>>> dxdw(double t, const vector<vector<vector<vector<vector<double>>>>> &x);
+vector<double> dxdt(double t, const vector<double> phi);
+double V(double phi);
+double Vphi(double phi);
+double H(double phi, double pi);
+double epsilon(double phi, double pi);
+vector<vector<vector<vector<double>>>> dxdwlist(double t);
 
 
 int main()
@@ -67,40 +72,50 @@ int main()
   before = (double)tv.tv_sec + (double)tv.tv_usec * 1.e-6;
   // ---------------------------------------------------
 
-  vector<vector<double>> xi{{15.0,-0.1*m}}; // initial value
-  vector<vector<vector<double>>> x1(N, xi); // dim 1
-  vector<vector<vector<vector<double>>>> x2(N, x1); // dim 2
-  vector<vector<vector<vector<vector<double>>>>> x(N, x2); // dim 3
   ofstream ofs_c(filename_c);
   ofstream ofs_f(filename_f);
   ofs_c << setprecision(10);
   ofs_f << setprecision(10);
 
   // for calculate average energy
-  vector<vector<vector<double>>> de = H(x);
+  vector<vector<vector<double>>> de(N, v2); // dim 3
+  // double de = H(xi);
   double average_e;
 
   while (t < tf) {
     average_e = 0.; // initialize
-    LOOP average_e += 3. * H(x)[i][j][k] * H(x)[i][j][k];
+    LOOP average_e += 3. * H(x[i][j][k][0], x[i][j][k][1]) * H(x[i][j][k][0], x[i][j][k][1]);
     average_e /= N3; // average
 
     // save the data
     if(numsteps % 10 == 0 && t < tf){
       cout << t << ' ';
       LOOP{
-        de[i][j][k] = 3. * H(x)[i][j][k] * H(x)[i][j][k] - average_e;
-        ofs_c << de[i][j][k] / x[i][j][k][0][1] / x[i][j][k][0][1] / 3. << ' ';
+        de[i][j][k] = 3. * H(x[i][j][k][0], x[i][j][k][1]) * H(x[i][j][k][0], x[i][j][k][1]) - average_e;
+        ofs_c << de[i][j][k] / x[i][j][k][1] / x[i][j][k][1] / 3. << ' ';
       }
       cout << endl;
       ofs_c << endl;
     }
     numsteps++;
 
-    EulerM<vector<vector<vector<vector<vector<double>>>>>>(dxdt, dxdw, t, x, dt); // Euler-Maruyama 1step
+    vector<vector<vector<vector<double>>>> dxdwtemp = dxdwlist(t);
+    vector<double> dxdw(2);
+    vector<double> phi(2);
+    LOOP{
+      dxdw[0] = dxdwtemp[i][j][k][0];
+      dxdw[1] = dxdwtemp[i][j][k][1];
+      phi[0] = x[i][j][k][0];
+      phi[1] = x[i][j][k][1];
+      EulerM(dxdt, dxdw, t, phi, dt); // Euler-Maruyama 1step
+      x[i][j][k][0] = phi[0];
+      x[i][j][k][1] = phi[1];
+    }
+    t += dt;
+    // cout << t << endl;
   }
 
-  LOOP ofs_f << x[i][j][k][0][0] << ' ' << x[i][j][k][0][1] << endl; // 最終的な場の値を出力
+  LOOP ofs_f << x[i][j][k][0] << ' ' << x[i][j][k][1] << endl; // 最終的な場の値を出力
 
   // ---------------- return elapsed time --------------
   gettimeofday(&tv, &tz);
@@ -109,72 +124,36 @@ int main()
   // ---------------------------------------------------
 }
 
-vector<vector<vector<vector<vector<double>>>>> dxdt(double t, const vector<vector<vector<vector<vector<double>>>>> &x)
-{
-  vector<vector<vector<vector<vector<double>>>>> dxdt = x; // initialize
-  vector<vector<vector<double>>> Hc = H(x);
-  vector<vector<vector<double>>> Vp = Vphi(x);
-  
-  LOOP{
-    double phi0dot = x[i][j][k][0][1];
-    dxdt[i][j][k][0][0] = phi0dot / Hc[i][j][k]; // definition of phi0dot
-    dxdt[i][j][k][0][1] = - 3. * phi0dot - Vp[i][j][k] / Hc[i][j][k]; // EoM
-  }
+vector<double> dxdt(double t, vector<double> phi) {
+  vector<double> dxdt(2); // initialize
+  double xx = phi[0]; // phi
+  double pp = phi[1]; // pi
+  double HH = H(xx,pp);
+  dxdt[0] = pp / HH; // definition of phi0dot
+  dxdt[1] = - 3. * pp - Vphi(xx) / HH; // EoM
   dxdt *= dt;
 
   return dxdt;
 }
 
-vector<vector<vector<double>>> V(const vector<vector<vector<vector<vector<double>>>>> &x)
-{
-  vector<vector<vector<double>>>  v(N,v2);
-  LOOP{
-    double phi0 = x[i][j][k][0][0];
-    v[i][j][k] = 0.5 * mm * phi0 * phi0;
-  }
-
-  return v;
+double V(double phi) {
+  return 0.5 * mm * phi * phi;
 }
 
-vector<vector<vector<double>>> Vphi(const vector<vector<vector<vector<vector<double>>>>> &x)
-{
-  vector<vector<vector<double>>>  v(N,v2);
-  LOOP{
-    double phi0 = x[i][j][k][0][0];
-    v[i][j][k] = mm * phi0;
-  }
-
-  return v;
+double Vphi(double phi) {
+  return mm * phi;
 }
 
-vector<vector<vector<double>>> H(const vector<vector<vector<vector<vector<double>>>>> &x)
-{
-  vector<vector<vector<double>>>  v(N,v2);
-  vector<vector<vector<double>>> Vc = V(x);
-  LOOP{
-    double phi0dot = x[i][j][k][0][1];
-    v[i][j][k] = sqrt((phi0dot * phi0dot / 2. + Vc[i][j][k]) / 3. );
-  }
-
-  return v;
+double H(double phi, double pi) {
+  return sqrt((0.5 * pi * pi + V(phi)) / 3. );
 }
 
-vector<vector<vector<double>>> epsilon(const vector<vector<vector<vector<vector<double>>>>> &x)
-{
-  vector<vector<vector<double>>>  v(N,v2);
-  vector<vector<vector<double>>> Hc = H(x);
-  LOOP{
-    double phi0dot = x[i][j][k][0][1];
-    v[i][j][k] = (phi0dot * phi0dot) / 2. / Hc[i][j][k] / Hc[i][j][k];
-  }
-
-  return v;
+double epsilon(double phi, double pi) {
+  return 0.5 * (pi * pi) / H(phi, pi) / H(phi, pi);
 }
 
-vector<vector<vector<vector<vector<double>>>>> dxdw(double t, const vector<vector<vector<vector<vector<double>>>>> &x)
-{
-  vector<vector<vector<vector<vector<double>>>>> dxdw = x;
-  vector<vector<vector<double>>> Hc = H(x);
+vector<vector<vector<vector<double>>>> dxdwlist(double t) {
+  vector<vector<vector<vector<double>>>> dxdw = x; // Latticeと大きさを揃える
 
   // make correlation noise
   double ksigma = 2. * M_PI * sigma * exp(t) * Ninv;
@@ -199,8 +178,8 @@ vector<vector<vector<vector<vector<double>>>>> dxdw(double t, const vector<vecto
   }
 
   LOOP{
-    dxdw[i][j][k][0][0] = 0.; // initialize
-    dxdw[i][j][k][0][1] = 0.;
+    dxdw[i][j][k][0] = 0.; // initialize
+    dxdw[i][j][k][1] = 0.;
     for (int n = 0; n < Omegalist.size(); n++){
       double thet = Omegalist[n][0];
       double dpht = Omegalist[n][1];
@@ -209,19 +188,25 @@ vector<vector<vector<vector<vector<double>>>>> dxdw(double t, const vector<vecto
       double dOmegai = sin(thet) * dtheta * dpht;
       ksx = (i+0.5) * sin(thet)*cos(phit) + (j+0.5) * sin(thet)*sin(phit) + (k+0.5) * cos(thet);
       ksx *= ksigma;
-      dxdw[i][j][k][0][0] += 0.5 * sqrt(dOmegai / M_PI) * (cos(ksx) - sin(ksx)) * dwt;
+      dxdw[i][j][k][0] += 0.5 * sqrt(dOmegai / M_PI) * (cos(ksx) - sin(ksx)) * dwt;
     }
-    dxdw[i][j][k][0][0] *= 0.5 * Hc[i][j][k] / M_PI;
+    // dxdw[i][j][k][0][0] *= 0.5 * Hc[i][j][k] / M_PI;
   }
 
   return dxdw;
 }
 
 
-template <class T>
-void EulerM(function<T(double, const T&)> dxdt, function<T(double, const T&)> dxdw, double &t, T &x, double dt)
+// template <class T>
+// void EulerM(function<T(double, const T&)> dxdt, function<T(double)> dxdw, double &t, T &x, double dt)
+// {
+//   x += dxdt(t, x);
+//   x += 0.5 * H(x[0], x[1]) / M_PI * dxdw(t);
+//   t += dt;
+// }
+
+void EulerM(function<vector<double>(double t, vector<double>x)> dxdt, vector<double> &dxdw, double &t, vector<double> &x, double dt)
 {
   x += dxdt(t, x);
-  x += dxdw(t, x);
-  t += dt;
+  x += 0.5 * H(x[0], x[1]) / M_PI * dxdw;
 }
