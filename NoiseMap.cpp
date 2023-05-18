@@ -222,6 +222,11 @@ template <class T>
 void EulerM(function<T(double, const T&)> dxdt, function<T(double, const T&)> dxdw, double &t, T &x, double dt)
 {
   x += dxdt(t, x);
-  x += dxdw(t, x);
+  x += dxdw(t, x); 
   t += dt;
+
+  /* ------------------
+    1行目で更新した x を2行目の dxdw に使ってしまっているのはまずい...?
+    オイラー丸山なら OK?
+  ------------------- */
 }
