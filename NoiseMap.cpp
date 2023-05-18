@@ -9,6 +9,7 @@
 #include <sys/time.h>
 #include <random>
 #include <functional>
+#include <iomanip>
 #include "vec_op.hpp"
 
 using namespace std;
