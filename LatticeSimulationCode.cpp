@@ -25,7 +25,7 @@ double Ncl(vector<double> phi,double N,double Nprec); // 初期条件 phi & N �
  
 // ------------ パラメータ ----------------- //
 const string filename = "LatticeSimulationCode.dat"; // 出力ファイル名
-const double N = 0.;// e-foldings
+double N = 0.;// e-foldings
 const double Nf = 5.5;  // lattice 終了時刻
 const double dN = 0.01; // 時間刻み
 const double mm=1.0e-5; // 質量
@@ -112,7 +112,7 @@ int main()
     }
     numsteps++;
 
-    EulerM(dphidNlist, dwdNlist, N, x, dN); // Euler-Maruyama 1step <vector<vector<vector<vector<double>>>>>
+    EulerM<vector<vector<vector<vector<double>>>>>(dphidNlist, dwdNlist, N, x, dN); // Euler-Maruyama 1step <vector<vector<vector<vector<double>>>>>
   }
 
   //LOOP ofs_f << x[i][j][k][0] << ' ' << x[i][j][k][1] << endl; // 最終的な場の値を出力
