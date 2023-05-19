@@ -119,12 +119,12 @@ int main()
   
 
   //------------- Ncl -------------
-  double N = Nf;
+  // double N = Nf;
   LOOP{
-  vector<double> phi{x[i][j][k][0], x[i][j][k][1]};
+    vector<double> phi{x[i][j][k][0], x[i][j][k][1]};
 
-  double NCL=Ncl(phi,N,NPREC);
-  cout<< setprecision(10)<<NCL<<endl;
+    double NCL=Ncl(phi,N,NPREC);
+    cout<< setprecision(10)<<NCL<<endl;
   }
 
   // ---------- stop timer ----------
