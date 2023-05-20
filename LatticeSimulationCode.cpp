@@ -21,11 +21,11 @@ double hubble(double phi, double pi);
 double VV(double phi);
 double Vp(double phi); // ポテンシャル VV の phi 微分
 double Ncl(vector<double> phi,double N,double Nprec); // 初期条件 phi & N から end of inf までの e-folds Ncl を精度 Nprec で求める
-//vector<double> prephi(2);
  
 // ------------ パラメータ ----------------- //
-const string filename = "LatticeSimulationCode.dat"; // 出力ファイル名
-const double N = 0.;// e-foldings
+const string filename = "LatticeNcl.dat"; // 出力ファイル名(Ncl)
+const string filename_c = "Lattice.dat"; // 出力ファイル名(曲率ゆらぎ)
+const string filename_f = "field.dat"; // 出力ファイル名(phi, pi)
 const double Nf = 5.5;  // lattice 終了時刻
 const double dN = 0.01; // 時間刻み
 const double mm=1.0e-5; // 質量
@@ -33,14 +33,12 @@ const double NPREC = 1e-7; // Ncl の精度
 // ----------------------------------------- //
 
 // 変数の初期値
+double N = 0.;// e-foldings
 const double phi0 = 15.00;
 const double pi0 = -0.1*mm*mm;
 const int NL = 17; // Number of lattice
 const int N3 = NL * NL * NL; // for conveniensce
 const double Ninv = 1. / NL; // for conveniensce
-//double N = 0.;
-//ouble Nf = 5.5; // finish time
-//double dN = 1.e-2; // time interval
 double sigma = 1./10.; // coarse-grained scale parameter
 vector<double> xi{phi0, pi0}; // initial value
 
@@ -87,7 +85,11 @@ int main()
   gettimeofday(&Nv, &Nz);
   before = (double)Nv.tv_sec + (double)Nv.tv_usec * 1.e-6;
   // --------------------------------------
-
+  ofstream ofs(filename);
+  ofstream ofs_c(filename_c);
+  ofstream ofs_f(filename_f);
+  ofs_c << setprecision(10);
+  ofs_f << setprecision(10);
   vector<vector<vector<vector<double>>>> x(N, x2); // dim 3
 
   // calculate average energy
@@ -101,30 +103,30 @@ int main()
     if(numsteps % 10 == 0 && N < Nf){
       LOOP average_e += 3. * hubble(x[i][j][k][0], x[i][j][k][1]) * hubble(x[i][j][k][0], x[i][j][k][1]);
       average_e /= N3; // 平均エネルギー
-      //cout << t << ' ';
+      cout << N << ' ';
       vector<double> phi(2);
       LOOP{
         phi[0] = x[i][j][k][0];
         phi[1] = x[i][j][k][1];
         de[i][j][k] = 3. * hubble(phi[0], phi[1]) * hubble(phi[0], phi[1]) - average_e;
-        //ofs_c << de[i][j][k] / phi[1] / phi[1] / 3. << ' ';
+        ofs_c << de[i][j][k] / phi[1] / phi[1] / 3. << ' ';
       }
     }
     numsteps++;
 
-    EulerM(dphidNlist, dwdNlist, N, x, dN); // Euler-Maruyama 1step <vector<vector<vector<vector<double>>>>>
+    EulerM<vector<vector<vector<vector<double>>>>>(dphidNlist, dwdNlist, N, x, dN); // Euler-Maruyama 1step <vector<vector<vector<vector<double>>>>>
   }
 
-  //LOOP ofs_f << x[i][j][k][0] << ' ' << x[i][j][k][1] << endl; // 最終的な場の値を出力
+  LOOP ofs_f << x[i][j][k][0] << ' ' << x[i][j][k][1] << endl; // 最終的な場の値を出力
   
 
   //------------- Ncl -------------
-  double N = Nf;
+  //*double N = Nf;
   LOOP{
   vector<double> phi{x[i][j][k][0], x[i][j][k][1]};
 
   double NCL=Ncl(phi,N,NPREC);
-  cout<< setprecision(10)<<NCL<<endl;
+  ofs<< setprecision(10)<<NCL<<endl;
   }
 
   // ---------- stop timer ----------
@@ -132,19 +134,6 @@ int main()
   after = (double)Nv.tv_sec + (double)Nv.tv_usec * 1.e-6;
   cout << after - before << " sec." << endl;
   // -------------------------------------
-}
-
-template <class T>
-void EulerM(function<T(double, const T&)> dphidNlist, function<T(double, const T&)> dwdNlist, double &N, T &x, double dN)
-{
-  /* ------------------
-    1行目で更新した x を2行目の dwdN に使ってしまっているのはまずい...?
-    オイラー丸山なら OK?
-  ------------------- */
-
-  x += dphidNlist(N, x);
-  x += dwdNlist(N, x);// 0.5 * H(x[0], x[1]) / M_PI * dwdN(t);
-  N += dN;
 }
 
 vector<vector<vector<vector<double>>>> dphidNlist(double N, vector<vector<vector<vector<double>>>> xif){
@@ -204,41 +193,36 @@ vector<vector<vector<vector<double>>>> dwdNlist(double N, vector<vector<vector<v
   return dwdN;
 }
 
+template <class T>
+void EulerM(function<T(double, const T&)> dphidNlist, function<T(double, const T&)> dwdNlist, double &N, T &x, double dN)
+{
+  /* ------------------
+    1行目で更新した x を2行目の dwdN に使ってしまっているのはまずい...?
+    オイラー丸山なら OK?
+  ------------------- */
+
+  x += dphidNlist(N, x);
+  x += dwdNlist(N, x);// 0.5 * H(x[0], x[1]) / M_PI * dwdN(t);
+  N += dN;
+}
+
 double Ncl(vector<double> phi,double N,double Nprec){
   ofstream ofs(filename);
   double dN1 = dN;
   vector<double> prephi(2);
 
-  /*
-  while(ep(phi[0],phi[1]) <= 1.0){
-    prephi[0]=phi[0];
-    prephi[1]=phi[1];
-    ofs<< setprecision(10)<<N<<"   "<<prephi[0]<<"   "<<prephi[1]<<"  "<<ep(prephi[0],prephi[1])<<endl;
-    RK4(dphidN, N, phi, dN);
-  }
-  double Ncl=N-dN;
-  
-  phi[0]=prephi[0];
-  phi[1]=prephi[1];
-  double dN1=dN*0.1;
-  N=Ncl;
-  */
-
-  //for(int i=0;i<=4;i++){
   while(dN1 >= Nprec) {
     while(ep(phi[0],phi[1])<=1.0){
       prephi[0]=phi[0];
       prephi[1]=phi[1];
-      ofs<< setprecision(10)<<N<<"   "<<prephi[0]<<"   "<<prephi[1]<<"  "<<ep(prephi[0],prephi[1])<<endl;
+      //ofs<< setprecision(10)<<N<<"   "<<prephi[0]<<"   "<<prephi[1]<<"  "<<ep(prephi[0],prephi[1])<<endl;
       RK4(dphidN, N, phi, dN1);
     }
-    //Ncl=N-dN1;
     N -= dN1;
     
     phi[0]=prephi[0];
     phi[1]=prephi[1];
     dN1*=0.1;
-    //N=Ncl;
   }
   return N; //Ncl;
 }
