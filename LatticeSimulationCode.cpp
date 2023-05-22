@@ -111,6 +111,8 @@ int main()
         de[i][j][k] = 3. * hubble(phi[0], phi[1]) * hubble(phi[0], phi[1]) - average_e;
         ofs_c << de[i][j][k] / phi[1] / phi[1] / 3. << ' ';
       }
+      cout << endl;
+      ofs_c << endl;
     }
     numsteps++;
 
