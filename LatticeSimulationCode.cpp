@@ -90,10 +90,10 @@ int main()
   ofstream ofs_f(filename_f);
   ofs_c << setprecision(10);
   ofs_f << setprecision(10);
-  vector<vector<vector<vector<double>>>> x(N, x2); // dim 3
+  vector<vector<vector<vector<double>>>> x(NL, x2); // dim 3
 
   // calculate average energy
-  vector<vector<vector<double>>> de(N, v2); // dim 3
+  vector<vector<vector<double>>> de(NL, v2); // dim 3
   double average_e;
 
   while (N < Nf) {
