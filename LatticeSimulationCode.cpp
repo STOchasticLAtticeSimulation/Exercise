@@ -143,8 +143,8 @@ vector<vector<vector<vector<double>>>> dphidNlist(double N, vector<vector<vector
     vector<double> phi(2);
     phi[0] = xif[i][j][k][0];
     phi[1] = xif[i][j][k][1];
-    dphidNlist[i][j][k][0] = dphidN(N, phi)[0];
-    dphidNlist[i][j][k][1] = dphidN(N, phi)[1];
+    dphidNlist[i][j][k][0] = dphidN(N, phi)[0] * dN;
+    dphidNlist[i][j][k][1] = dphidN(N, phi)[1] * dN;
   }
 
   return dphidNlist;
@@ -203,7 +203,7 @@ void EulerM(function<T(double, const T&)> dphidNlist, function<T(double, const T
   ------------------- */
 
   x += dphidNlist(N, x);
-  x += dwdNlist(N, x);// 0.5 * H(x[0], x[1]) / M_PI * dwdN(t);
+  x += dwdNlist(N, x); // 0.5 * H(x[0], x[1]) / M_PI * dwdN(t);
   N += dN;
 }
 
