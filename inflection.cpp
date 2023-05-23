@@ -29,19 +29,27 @@ double Vp(double phi); // ポテンシャル VV の phi 微分
 double Ncl(vector<double> phi,double N,double Nprec); // 初期条件 phi & N から end of inf までの e-folds Ncl を精度 Nprec で求める
  
 // ------------ パラメータ ----------------- //
-const string filename = "LatticeNcl.dat"; // 出力ファイル名(Ncl)
-const string filename_c = "Lattice.dat"; // 出力ファイル名(曲率ゆらぎ)
-const string filename_f = "field.dat"; // 出力ファイル名(phi, pi)
+const string filename = "Ncl_inflection.dat"; // 出力ファイル名(Ncl)
+const string filename_c = "Lattice_inflection.dat"; // 出力ファイル名(曲率ゆらぎ)
+const string filename_f = "field_inflection.dat"; // 出力ファイル名(phi, pi)
 const double Nf = 5.5;  // lattice 終了時刻
 const double dN = 0.01; // 時間刻み
-const double mm=1.0e-5; // 質量
+const double AW = 0.02;
+const double BW = 1;
+const double CW = 0.04;
+const double DW = 0;
+const double GW = 3.076278e-2;
+const double RW = 0.7071067;
+const double CALV = 1000;
+const double W0 = 12.35;
+const double CUP = 0.0382;
 const double NPREC = 1e-7; // Ncl の精度
 // ----------------------------------------- //
 
 // 変数の初期値
 // double N = 0.;// e-foldings
-const double phi0 = 15.00;
-const double pi0 = -0.1*mm*mm;
+const double phi0 = 3.60547;
+const double pi0 = -2.37409e-7;
 const int NL = 17; // Number of lattice
 const int N3 = NL * NL * NL; // for conveniensce
 const double Ninv = 1. / NL; // for conveniensce
@@ -73,11 +81,15 @@ vector<vector<vector<vector<double>>>> dwdNlist(double N, vector<vector<vector<v
 vector<vector<vector<vector<double>>>> dphidNlist(double N, vector<vector<vector<vector<double>>>> xif);
 
 double VV(double phi) {
-  return mm*mm*phi*phi/2.;
+  return W0*W0/CALV/CALV/CALV * ( CUP/pow(CALV,1./3) + AW/(exp(phi/sqrt(3))-BW) - CW/exp(phi/sqrt(3))
+				  + exp(2*phi/sqrt(3))/CALV*(DW-GW/(RW*exp(sqrt(3)*phi)/CALV+1)) );
 }
 
 double Vp(double phi) {
-  return mm*mm*phi;
+  return exp(-phi/sqrt(3)) * ( CW - AW*exp(2*phi/sqrt(3))/(BW-exp(phi/sqrt(3)))/(BW-exp(phi/sqrt(3)))
+			       + 3*exp(2*sqrt(3)*phi)*GW*RW/(CALV+exp(sqrt(3)*phi)*RW)/(CALV+exp(sqrt(3)*phi)*RW)
+			       + 2*exp(sqrt(3)*phi)*(DW-CALV*GW/(CALV+exp(sqrt(3)*phi)*RW))/CALV )
+    * W0*W0/sqrt(3)/CALV/CALV/CALV;
 }
 
 
