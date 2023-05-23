@@ -168,7 +168,7 @@ int main()
 #pragma omp critical
 #endif
     ofs // << setprecision(10)
-      << NCL << endl;
+      << i+NL*j+NL*NL*k << ' ' << NCL << endl;
   }
 
   // ---------- stop timer ----------
