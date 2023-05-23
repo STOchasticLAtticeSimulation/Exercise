@@ -1,4 +1,6 @@
 // NoiseMap.cpp と Ncl.cpp を組み合わせ、end of inflation での N のマップ (or δN のマップ) を出力する lattice simulation code を作成。
+// g++ -std=c++11 -O2 -o LatticeSimulationCode LatticeSimulationCode.cpp
+// 並列化するなら g++ -std=c++11 -O2 -Xpreprocessor -fopenmp -lomp -o LatticeSimulationCode LatticeSimulationCode.cpp
 
 #include <iostream>
 #include <fstream>
@@ -10,6 +12,10 @@
 #include <iomanip>
 #include "MT.h"
 #include "vec_op.hpp"
+
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 using namespace std;
 
@@ -33,17 +39,17 @@ const double NPREC = 1e-7; // Ncl の精度
 // ----------------------------------------- //
 
 // 変数の初期値
-double N = 0.;// e-foldings
+// double N = 0.;// e-foldings
 const double phi0 = 15.00;
 const double pi0 = -0.1*mm*mm;
-const int NL = 17; // Number of lattice
+const int NL = 9; //17; // Number of lattice
 const int N3 = NL * NL * NL; // for conveniensce
 const double Ninv = 1. / NL; // for conveniensce
-double sigma = 1./10.; // coarse-grained scale parameter
-vector<double> xi{phi0, pi0}; // initial value
+const double sigma = 1./10.; // coarse-grained scale parameter
+const vector<double> xi{phi0, pi0}; // initial value
 
 // output
-int numsteps = 0;
+//int numsteps = 0;
 
 // random distribution
 random_device seed;
@@ -58,10 +64,10 @@ template <class T>
 void EulerM(function<T(double, const T&)> dphidNlist, function<T(double, const T&)> dwdNlist, double &N, T &x, double dN);
 
 // for convenience
-vector<vector<double>> x1(NL, xi); // dim 1
-vector<vector<vector<double>>> x2(NL, x1); // dim 2
-vector<double> v1(NL,0);
-vector<vector<double>> v2(NL,v1);
+//vector<vector<double>> x1(NL, xi); // dim 1
+//vector<vector<vector<double>>> x2(NL, x1); // dim 2
+//vector<double> v1(NL,0);
+//vector<vector<double>> v2(NL,v1);
 
 vector<vector<vector<vector<double>>>> dwdNlist(double N, vector<vector<vector<vector<double>>>> xif);
 vector<vector<vector<vector<double>>>> dphidNlist(double N, vector<vector<vector<vector<double>>>> xif);
@@ -85,16 +91,32 @@ int main()
   gettimeofday(&Nv, &Nz);
   before = (double)Nv.tv_sec + (double)Nv.tv_usec * 1.e-6;
   // --------------------------------------
+
+#ifdef _OPENMP
+  cout << "OpenMP : Enabled (Max # of threads = " << omp_get_max_threads() << ")" << endl;
+#endif
+
+  // output
+  int numsteps = 0;
+  
   ofstream ofs(filename);
   ofstream ofs_c(filename_c);
   ofstream ofs_f(filename_f);
+  ofs << setprecision(10);
   ofs_c << setprecision(10);
   ofs_f << setprecision(10);
+
+  vector<vector<double>> x1(NL, xi); // dim 1
+  vector<vector<vector<double>>> x2(NL, x1); // dim 2
+  vector<double> v1(NL,0);
+  vector<vector<double>> v2(NL,v1);
   vector<vector<vector<vector<double>>>> x(NL, x2); // dim 3
 
   // calculate average energy
   vector<vector<vector<double>>> de(NL, v2); // dim 3
   double average_e;
+
+  double N = 0.;// e-foldings
 
   while (N < Nf) {
     // save the data
@@ -123,11 +145,18 @@ int main()
 
   //------------- Ncl -------------
   //*double N = Nf;
+#ifdef _OPENMP
+#pragma omp parallel for
+#endif
   LOOP{
     vector<double> phi{x[i][j][k][0], x[i][j][k][1]};
     
-    double NCL=Ncl(phi,N,NPREC);
-    ofs<< setprecision(10)<<NCL<<endl;
+    double NCL = Ncl(phi,N,NPREC);
+#ifdef _OPENMP
+#pragma omp critical
+#endif
+    ofs // << setprecision(10)
+      << NCL << endl;
   }
 
   // ---------- stop timer ----------
@@ -163,7 +192,7 @@ vector<vector<vector<vector<double>>>> dwdNlist(double N, vector<vector<vector<v
   vector<double> dOmegai(divth);
 
   // inner product of coarse-grained vector and position vector
-  double ksx = 0.;
+  // double ksx = 0.;
   vector<vector<double>> Omegalist;
   for (int n = 0; n < divth; n++) {
     thetai[n] = (n + 0.5) * dtheta;
@@ -175,6 +204,9 @@ vector<vector<vector<vector<double>>>> dwdNlist(double N, vector<vector<vector<v
     }
   }
 
+#ifdef _OPENMP
+#pragma omp parallel for
+#endif
   LOOP{
     dwdN[i][j][k][0] = 0.; // initialize
     dwdN[i][j][k][1] = 0.;
@@ -184,7 +216,7 @@ vector<vector<vector<vector<double>>>> dwdNlist(double N, vector<vector<vector<v
       double phit = Omegalist[n][2];
       double dwt = Omegalist[n][3];
       double dOmegai = sin(thet) * dtheta * dpht;
-      ksx = (i+0.5) * sin(thet)*cos(phit) + (j+0.5) * sin(thet)*sin(phit) + (k+0.5) * cos(thet);
+      double ksx = (i+0.5) * sin(thet)*cos(phit) + (j+0.5) * sin(thet)*sin(phit) + (k+0.5) * cos(thet);
       ksx *= ksigma;
       dwdN[i][j][k][0] += 0.5 * sqrt(dOmegai / M_PI) * (cos(ksx) - sin(ksx)) * dwt;
     }
@@ -208,7 +240,7 @@ void EulerM(function<T(double, const T&)> dphidNlist, function<T(double, const T
 }
 
 double Ncl(vector<double> phi,double N,double Nprec){
-  ofstream ofs(filename);
+  // ofstream ofs(filename);
   double dN1 = dN;
   vector<double> prephi(2);
 
