@@ -97,13 +97,12 @@ int main()
   double average_e;
 
   while (N < Nf) {
-    average_e = 0.; // initialize
-
     // save the data
     if(numsteps % 10 == 0 && N < Nf){
+      average_e = 0.; // initialize
       LOOP average_e += 3. * hubble(x[i][j][k][0], x[i][j][k][1]) * hubble(x[i][j][k][0], x[i][j][k][1]);
       average_e /= N3; // 平均エネルギー
-      cout << N << ' ';
+      cout << N << ' ' << x[0][0][0][0] << ' ' << x[0][0][0][1] << ' ';
       vector<double> phi(2);
       LOOP{
         phi[0] = x[i][j][k][0];
@@ -111,7 +110,7 @@ int main()
         de[i][j][k] = 3. * hubble(phi[0], phi[1]) * hubble(phi[0], phi[1]) - average_e;
         ofs_c << de[i][j][k] / phi[1] / phi[1] / 3. << ' ';
       }
-      cout << endl;
+      cout << de[0][0][0]/phi[1]/phi[1]/3. << endl;
       ofs_c << endl;
     }
     numsteps++;
@@ -126,9 +125,9 @@ int main()
   //*double N = Nf;
   LOOP{
     vector<double> phi{x[i][j][k][0], x[i][j][k][1]};
-
-  double NCL=Ncl(phi,N,NPREC);
-  ofs<< setprecision(10)<<NCL<<endl;
+    
+    double NCL=Ncl(phi,N,NPREC);
+    ofs<< setprecision(10)<<NCL<<endl;
   }
 
   // ---------- stop timer ----------
