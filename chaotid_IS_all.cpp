@@ -55,7 +55,7 @@ const vector<double> xi{phi0, pi0}; // initial value
 random_device seed;
 mt19937 engine(seed());
 normal_distribution<> dist(0., 1.);
-normal_distribution<> dist1(100., 1.);
+normal_distribution<> dist1(10., 1.);
 // useful macro
 #define LOOP for(int i = 0; i < NL; i++) for(int j = 0; j < NL; j++) for(int k = 0; k < NL; k++)
 
@@ -194,7 +194,8 @@ vector<vector<vector<vector<double>>>> dwdNlist(double N, vector<vector<vector<v
   // inner product of coarse-grained vector and position vector
   // double ksx = 0.;
   vector<vector<double>> Omegalist;
-  if (N == 3.0){
+  if (3 <= N && N < 3+dN){
+    cout << "biased!" << endl;
     for (int n = 0; n < divth; n++) {
       thetai[n] = (n + 0.5) * dtheta;
       dphi[n] = 0.2 * M_PI * Ninv / ksigma / sin(thetai[n]);
