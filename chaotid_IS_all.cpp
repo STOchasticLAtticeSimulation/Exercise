@@ -1,4 +1,4 @@
-// chaotic inflation　に importance sampling を実行．全ての omega に対して Normal Distributionを変更．
+// chaotic inflation に importance sampling を実行．全ての omega に対して Normal Distributionを変更．
 // g++ -std=c++11 -O2 -o chaotid_IS_1 chaotid_IS_1.cpp
 // 並列化するなら g++ -std=c++11 -O2 -Xpreprocessor -fopenmp -lomp -o chaotid_IS_1 chaotid_IS_1.cpp
 
