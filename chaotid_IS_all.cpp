@@ -194,7 +194,7 @@ vector<vector<vector<vector<double>>>> dwdNlist(double N, vector<vector<vector<v
   // inner product of coarse-grained vector and position vector
   // double ksx = 0.;
   vector<vector<double>> Omegalist;
-  if(N=3.0){
+  if (N == 3.0){
     for (int n = 0; n < divth; n++) {
       thetai[n] = (n + 0.5) * dtheta;
       dphi[n] = 0.2 * M_PI * Ninv / ksigma / sin(thetai[n]);
@@ -204,7 +204,7 @@ vector<vector<vector<vector<double>>>> dwdNlist(double N, vector<vector<vector<v
         Omegalist.push_back({thetai[n], dphi[n], phii, sqrt(dN) * dist1(engine)});
       }
     }
-  }else{  
+  } else {
     for (int n = 0; n < divth; n++) {
       thetai[n] = (n + 0.5) * dtheta;
       dphi[n] = 0.2 * M_PI * Ninv / ksigma / sin(thetai[n]);
