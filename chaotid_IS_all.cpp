@@ -34,7 +34,7 @@ const string filename_c = "Lattice_chaotic_biased.dat"; // 出力ファイル名
 const string filename_f = "field_chaotic_biased.dat"; // 出力ファイル名(phi, pi)
 const double Nf = 5.0;  // lattice 終了時刻
 const double dN = 0.01; // 時間刻み
-const double mm = 1.0e-1; // 質量
+const double mm = 1.0e-2; // 質量
 const double NPREC = 1e-7; // Ncl の精度
 // ----------------------------------------- //
 
@@ -55,7 +55,7 @@ const vector<double> xi{phi0, pi0}; // initial value
 random_device seed;
 mt19937 engine(seed());
 normal_distribution<> dist(0., 1.);
-normal_distribution<> dist1(10., 1.);
+normal_distribution<> dist1(100., 1.);
 // useful macro
 #define LOOP for(int i = 0; i < NL; i++) for(int j = 0; j < NL; j++) for(int k = 0; k < NL; k++)
 
