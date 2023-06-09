@@ -30,9 +30,9 @@ double Vp(double phi); // ポテンシャル VV の phi 微分
 double Ncl(vector<double> phi,double N,double Nprec); // 初期条件 phi & N から end of inf までの e-folds Ncl を精度 Nprec で求める
  
 // ------------ パラメータ ----------------- //
-const string filename = "Ncl_inflection.dat"; // 出力ファイル名(Ncl)
+const string filename = "Ncl_inflection_biased.dat"; // 出力ファイル名(Ncl)
 const string filename_c = "Lattice_inflection_biased.dat"; // 出力ファイル名(曲率ゆらぎ)
-const string filename_f = "field_inflection.dat"; // 出力ファイル名(phi, pi)
+const string filename_f = "field_inflection_biased.dat"; // 出力ファイル名(phi, pi)
 const double Nf = 5.0;  // lattice 終了時刻
 const double dN = 0.01; // 時間刻み
 const double AW = 0.02;
@@ -42,7 +42,7 @@ const double DW = 0;
 const double GW = 3.076278e-2;
 const double RW = 0.7071067;
 const double CALV = 1000;
-const double W0 = 12.35;
+const double W0 = 12.35;//320182;//
 const double CUP = 0.0382;
 const double NPREC = 1e-7; // Ncl の精度
 // ----------------------------------------- //
@@ -64,7 +64,7 @@ const vector<double> xi{phi0, pi0}; // initial value
 random_device seed;
 mt19937 engine(seed());
 normal_distribution<> dist(0., 1.);
-normal_distribution<> dist1(10., 1.);
+normal_distribution<> dist1(20., 1.);
 
 // useful macro
 #define LOOP for(int i = 0; i < NL; i++) for(int j = 0; j < NL; j++) for(int k = 0; k < NL; k++)
@@ -256,13 +256,9 @@ vector<vector<vector<vector<double>>>> dwdNlist(double N, vector<vector<vector<v
 template <class T>
 void EulerM(function<T(double, const T&)> dphidNlist, function<T(double, const T&)> dwdNlist, double &N, T &x, double dN)
 {
-  /* ------------------
-    1行目で更新した x を2行目の dwdN に使ってしまっているのはまずい...?
-    オイラー丸山なら OK?
-  ------------------- */
-
-  x += dphidNlist(N, x);
-  x += dwdNlist(N, x); // 0.5 * H(x[0], x[1]) / M_PI * dwdN(t);
+  T xem = x;
+  x += dphidNlist(N, xem);
+  x += dwdNlist(N, xem);
   N += dN;
 }
 
@@ -272,13 +268,12 @@ double Ncl(vector<double> phi,double N,double Nprec){
   vector<double> prephi(2);
 
   while(dN1 >= Nprec) {
-    // cout << setprecision(10) << ep(phi[0],phi[1]) << endl;
     while(ep(phi[0],phi[1])<=1.0){
       prephi[0]=phi[0];
       prephi[1]=phi[1];
       //ofs<< setprecision(10)<<N<<"   "<<prephi[0]<<"   "<<prephi[1]<<"  "<<ep(prephi[0],prephi[1])<<endl;
       RK4(dphidN, N, phi, dN1);
-    //   cout << "epp" << ep(phi[0],phi[1]) << endl;
+    cout << setprecision(10) << ep(phi[0],phi[1]) << ' ' << phi[0] << ' ' << phi[1] << endl;
     }
     N -= dN1;
     
