@@ -64,7 +64,7 @@ const vector<double> xi{phi0, pi0}; // initial value
 random_device seed;
 mt19937 engine(seed());
 normal_distribution<> dist(0., 1.);
-normal_distribution<> dist1(20., 1.);
+normal_distribution<> dist1(10., 1.);
 
 // useful macro
 #define LOOP for(int i = 0; i < NL; i++) for(int j = 0; j < NL; j++) for(int k = 0; k < NL; k++)
@@ -273,7 +273,7 @@ double Ncl(vector<double> phi,double N,double Nprec){
       prephi[1]=phi[1];
       //ofs<< setprecision(10)<<N<<"   "<<prephi[0]<<"   "<<prephi[1]<<"  "<<ep(prephi[0],prephi[1])<<endl;
       RK4(dphidN, N, phi, dN1);
-    cout << setprecision(10) << ep(phi[0],phi[1]) << ' ' << phi[0] << ' ' << phi[1] << endl;
+    // cout << setprecision(10) << ep(phi[0],phi[1]) << ' ' << phi[0] << ' ' << phi[1] << endl;
     }
     N -= dN1;
     
