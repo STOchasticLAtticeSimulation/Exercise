@@ -29,12 +29,12 @@ double Vp(double phi); // ポテンシャル VV の phi 微分
 double Ncl(vector<double> phi,double N,double Nprec); // 初期条件 phi & N から end of inf までの e-folds Ncl を精度 Nprec で求める
  
 // ------------ パラメータ ----------------- //
-const string filename = "LatticeNcl.dat"; // 出力ファイル名(Ncl)
-const string filename_c = "Lattice.dat"; // 出力ファイル名(曲率ゆらぎ)
-const string filename_f = "field.dat"; // 出力ファイル名(phi, pi)
+const string filename = "Ncl_chaotic_biased.dat"; // 出力ファイル名(Ncl)
+const string filename_c = "Lattice_chaotic_biased.dat"; // 出力ファイル名(曲率ゆらぎ)
+const string filename_f = "field_chaotic_biased.dat"; // 出力ファイル名(phi, pi)
 const double Nf = 5.0;  // lattice 終了時刻
 const double dN = 0.01; // 時間刻み
-const double mm=1.0e-1; // 質量
+const double mm = 1.0e-1; // 質量
 const double NPREC = 1e-7; // Ncl の精度
 // ----------------------------------------- //
 
