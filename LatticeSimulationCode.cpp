@@ -34,7 +34,7 @@ const string filename_c = "Lattice.dat"; // 出力ファイル名(曲率ゆら�
 const string filename_f = "field.dat"; // 出力ファイル名(phi, pi)
 const double Nf = 5.5;  // lattice 終了時刻
 const double dN = 0.01; // 時間刻み
-const double mm = 0.1; //1.0e-5; // 質量
+const double mm = 1.0e-5; // 質量
 const double NPREC = 1e-7; // Ncl の精度
 // ----------------------------------------- //
 
