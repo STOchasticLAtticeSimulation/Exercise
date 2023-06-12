@@ -56,7 +56,7 @@ const int N3 = NL * NL * NL; // for conveniensce
 const double Ninv = 1. / NL; // for conveniensce
 const double sigma = 1./10.; // coarse-grained scale parameter
 const vector<double> xi{phi0, pi0}; // initial value
-const double Nbias = 2.0; // Biased time
+const double Nbias = 3; //2.0; // Biased time
 
 // output
 //int numsteps = 0;
