@@ -33,7 +33,7 @@ double Ncl(vector<double> phi,double N,double Nprec); // 初期条件 phi & N �
 const string filename = "Ncl_inflection_biased.dat"; // 出力ファイル名(Ncl)
 const string filename_c = "Lattice_inflection_biased.dat"; // 出力ファイル名(曲率ゆらぎ)
 const string filename_f = "field_inflection_biased.dat"; // 出力ファイル名(phi, pi)
-const double Nf = 5.0;  // lattice 終了時刻
+const double Nf = 5.5; //5.0;  // lattice 終了時刻
 const double dN = 0.01; // 時間刻み
 const double AW = 0.02;
 const double BW = 1;
@@ -65,7 +65,8 @@ const double Nbias = 2.0; // Biased time
 random_device seed;
 mt19937 engine(seed());
 normal_distribution<> dist(0., 1.);
-normal_distribution<> dist1(5., 1.);
+const double bias = 10; // 5.;
+normal_distribution<> dist1(bias, 1.);
 
 // useful macro
 #define LOOP for(int i = 0; i < NL; i++) for(int j = 0; j < NL; j++) for(int k = 0; k < NL; k++)
