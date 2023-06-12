@@ -51,11 +51,12 @@ const double NPREC = 1e-7; // Ncl の精度
 // double N = 0.;// e-foldings
 const double phi0 = 3.60547;
 const double pi0 = -2.37409e-7;
-const int NL = 9; // Number of lattice
+const int NL = 17; // Number of lattice
 const int N3 = NL * NL * NL; // for conveniensce
 const double Ninv = 1. / NL; // for conveniensce
 const double sigma = 1./10.; // coarse-grained scale parameter
 const vector<double> xi{phi0, pi0}; // initial value
+const double Nbias = 2.0; // Biased time
 
 // output
 //int numsteps = 0;
@@ -64,7 +65,7 @@ const vector<double> xi{phi0, pi0}; // initial value
 random_device seed;
 mt19937 engine(seed());
 normal_distribution<> dist(0., 1.);
-normal_distribution<> dist1(10., 1.);
+normal_distribution<> dist1(5., 1.);
 
 // useful macro
 #define LOOP for(int i = 0; i < NL; i++) for(int j = 0; j < NL; j++) for(int k = 0; k < NL; k++)
@@ -208,7 +209,7 @@ vector<vector<vector<vector<double>>>> dwdNlist(double N, vector<vector<vector<v
   // inner product of coarse-grained vector and position vector
   // double ksx = 0.;
   vector<vector<double>> Omegalist;
-  if (3 <= N && N < 3+dN){
+  if (Nbias <= N && N < Nbias+dN){
     cout << "biased!" << endl;
     for (int n = 0; n < divth; n++) {
       thetai[n] = (n + 0.5) * dtheta;
@@ -228,7 +229,7 @@ vector<vector<vector<vector<double>>>> dwdNlist(double N, vector<vector<vector<v
         double phii = l * dphi[n];
         Omegalist.push_back({thetai[n], dphi[n], phii, sqrt(dN) * dist(engine)});
       }
-    } 
+    }
   }
 
 #ifdef _OPENMP
@@ -248,6 +249,7 @@ vector<vector<vector<vector<double>>>> dwdNlist(double N, vector<vector<vector<v
       dwdN[i][j][k][0] += 0.5 * sqrt(dOmegai / M_PI) * (cos(ksx) - sin(ksx)) * dwt;
     }
     dwdN[i][j][k][0] *= 0.5 * hubble(xif[i][j][k][0], xif[i][j][k][1]) / M_PI; // 係数を追加
+    // if (Nbias <= N && N < Nbias+dN && i==0) cout << i << ' ' << j << ' ' << k << ' ' << hubble(xif[i][j][k][0], xif[i][j][k][1]) << ' ' << dwdN[i][j][k][0] << endl; // ノイズ確認用
   }
 
   return dwdN;
