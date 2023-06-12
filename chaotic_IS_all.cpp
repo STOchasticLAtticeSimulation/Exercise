@@ -229,7 +229,8 @@ vector<vector<vector<vector<double>>>> dwdNlist(double N, vector<vector<vector<v
       double phit = Omegalist[n][2];
       double dwt = Omegalist[n][3];
       double dOmegai = sin(thet) * dtheta * dpht;
-      double ksx = (i+0.5) * sin(thet)*cos(phit) + (j+0.5) * sin(thet)*sin(phit) + (k+0.5) * cos(thet);
+      //double ksx = (i+0.5) * sin(thet)*cos(phit) + (j+0.5) * sin(thet)*sin(phit) + (k+0.5) * cos(thet);
+      double ksx = i * sin(thet)*cos(phit) + j * sin(thet)*sin(phit) + k * cos(thet);
       ksx *= ksigma;
       dwdN[i][j][k][0] += 0.5 * sqrt(dOmegai / M_PI) * (cos(ksx) - sin(ksx)) * dwt;
     }
