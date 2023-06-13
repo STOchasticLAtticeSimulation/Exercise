@@ -65,7 +65,7 @@ const double Nbias = 3; //2.0; // Biased time
 random_device seed;
 mt19937 engine(seed());
 normal_distribution<> dist(0., 1.);
-const double bias = 5.;
+const double bias = 7.; //5.;
 normal_distribution<> dist1(bias, 1.);
 
 // useful macro
