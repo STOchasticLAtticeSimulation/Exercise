@@ -51,7 +51,6 @@ const vector<double> xi{phi0, pi0}; // initial value
 
 // output
 //int numsteps = 0;
-double DN=0.1;
 // random distribution
 random_device seed;
 mt19937 engine(seed());
