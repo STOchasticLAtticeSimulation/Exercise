@@ -211,9 +211,9 @@ vector<vector<vector<vector<double>>>> dwdNlist(double N, vector<vector<vector<v
   // inner product of coarse-grained vector and position vector
   // double ksx = 0.;
   vector<vector<double>> Omegalist;
-  double bias = 0.1;
-  double dNGaussianInv = 1./0.3;
-  double Gaussian_Bais = bias * exp(-0.5*(N-Nbias)*(N-Nbias)*dNGaussianInv*dNGaussianInv);
+  double bias = 0.05;
+  double dNGaussianInv = 1./1.2;
+  double Gaussian_Bais = bias / sqrt(2.*M_PI) * dNGaussianInv * exp(-0.5*(N-Nbias)*(N-Nbias)*dNGaussianInv*dNGaussianInv);
   normal_distribution<> dist1(Gaussian_Bais, 1.);
   for (int n = 0; n < divth; n++) {
     thetai[n] = (n + 0.5) * dtheta;
