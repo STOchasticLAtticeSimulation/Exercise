@@ -213,8 +213,9 @@ vector<vector<vector<vector<double>>>> dwdNlist(double N, vector<vector<vector<v
   vector<vector<double>> Omegalist;
   double bias = 0.05;
   double dNGaussianInv = 1./1.2;
-  double Gaussian_Bais = bias / sqrt(2.*M_PI) * dNGaussianInv * exp(-0.5*(N-Nbias)*(N-Nbias)*dNGaussianInv*dNGaussianInv);
-  normal_distribution<> dist1(Gaussian_Bais, 1.);
+  double GaussianFactor = dNGaussianInv / sqrt(2.*M_PI) * exp(-0.5*(N-Nbias)*(N-Nbias)*dNGaussianInv*dNGaussianInv) / sqrt(dN);
+  double GaussianBais = bias * GaussianFactor;
+  normal_distribution<> dist1(GaussianBais, 1.);
   for (int n = 0; n < divth; n++) {
     thetai[n] = (n + 0.5) * dtheta;
     dphi[n] = 0.2 * M_PI * Ninv / ksigma / sin(thetai[n]);
