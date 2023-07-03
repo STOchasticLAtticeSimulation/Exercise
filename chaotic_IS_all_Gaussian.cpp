@@ -43,7 +43,7 @@ const double NPREC = 1e-7; // Ncl の精度
 // double N = 0.;// e-foldings
 const double phi0 = 15.00;
 const double pi0 = -0.1*mm*mm;
-const int NL = 17; // Number of lattice
+const int NL = 9; // Number of lattice
 const int N3 = NL * NL * NL; // for conveniensce
 const double Ninv = 1. / NL; // for conveniensce
 const double sigma = 1./10.; // coarse-grained scale parameter
@@ -196,7 +196,7 @@ vector<vector<vector<vector<double>>>> dwdNlist(double N, vector<vector<vector<v
   // inner product of coarse-grained vector and position vector
   // double ksx = 0.;
   vector<vector<double>> Omegalist;
-  double DN=0.3;
+  double DN=0.1;
   double bias=10./sqrt(2.*M_PI*pow(DN,2));
   double Gaussian_Baias = bias*exp(-(pow((N-3.0),2))/(2.0*pow(DN,2)));
   normal_distribution<> dist1(Gaussian_Baias,1);
