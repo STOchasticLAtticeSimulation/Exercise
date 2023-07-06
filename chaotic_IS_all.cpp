@@ -46,6 +46,7 @@ const int NL = 17; // Number of lattice
 const int N3 = NL * NL * NL; // for conveniensce
 const double Ninv = 1. / NL; // for conveniensce
 const double sigma = 1./10.; // coarse-grained scale parameter
+const double Nbias = 3.0; //Biased time
 const vector<double> xi{phi0, pi0}; // initial value
 
 // output
@@ -194,7 +195,7 @@ vector<vector<vector<vector<double>>>> dwdNlist(double N, vector<vector<vector<v
   // inner product of coarse-grained vector and position vector
   // double ksx = 0.;
   vector<vector<double>> Omegalist;
-  if (3 <= N && N < 3+dN){
+  if (Nbias <= N && N < Nbias+dN){
     cout << "biased!" << endl;
     for (int n = 0; n < divth; n++) {
       thetai[n] = (n + 0.5) * dtheta;
