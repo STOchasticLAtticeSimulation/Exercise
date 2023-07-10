@@ -1,6 +1,6 @@
 // chaotic inflation に importance sampling を実行．全ての omega に対して Normal Distributionを変更．DNを使って、なだらかなノイズを追加し importance sampling を実行
 // g++ -std=c++11 -O2 -o chaotid_IS_1 chaotid_IS_1.cpp
-// 並列化するなら g++ -std=c++11 -O2 -Xpreprocessor -fopenmp -lomp -o chaotid_IS_1 chaotid_IS_1.cpp
+// 並列化するなら g++ -std=c++11 -O2 -Xpreprocessor -fopenmp -lomp -o chaotic_IS_1 chaotic_IS_1.cpp
 
 #include <iostream>
 #include <fstream>
@@ -43,7 +43,7 @@ const double NPREC = 1e-7; // Ncl の精度
 // double N = 0.;// e-foldings
 const double phi0 = 15.00;
 const double pi0 = -0.1*mm*mm;
-const int NL = 9; // Number of lattice
+const int NL = 17; // Number of lattice
 const int N3 = NL * NL * NL; // for conveniensce
 const double Ninv = 1. / NL; // for conveniensce
 const double sigma = 1./10.; // coarse-grained scale parameter
@@ -197,7 +197,7 @@ vector<vector<vector<vector<double>>>> dwdNlist(double N, vector<vector<vector<v
   // inner product of coarse-grained vector and position vector
   // double ksx = 0.;
   vector<vector<double>> Omegalist;
-  double bias=5.;
+  double bias=0.05;
   double DN=0.3;
   double GaussianFactor = (1./ DN)* (1./ sqrt(2.*M_PI)) * exp(-0.5*(N-Nbias)*(N-Nbias)/(DN*DN)) * (1./ sqrt(dN));
   double Gaussian_Bias = bias*GaussianFactor;
