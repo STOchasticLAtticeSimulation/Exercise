@@ -198,8 +198,8 @@ vector<vector<vector<vector<double>>>> dwdNlist(double N, vector<vector<vector<v
   // double ksx = 0.;
   vector<vector<double>> Omegalist;
   double bias=0.05;
-  double DN=0.3;
-  double GaussianFactor = (1./ DN)* (1./ sqrt(2.*M_PI)) * exp(-0.5*(N-Nbias)*(N-Nbias)/(DN*DN)) * (1./ sqrt(dN));
+  double DN=0.01;
+  double GaussianFactor = (1./ DN)* (1./ sqrt(2.*M_PI)) * exp(-0.5*(N-Nbias)*(N-Nbias)/(DN*DN)) * sqrt(dN);
   double Gaussian_Bias = bias*GaussianFactor;
   normal_distribution<> dist1(Gaussian_Bias,1);
 
