@@ -30,8 +30,8 @@ double Vp(double phi); // ポテンシャル VV の phi 微分
 double Ncl(vector<double> phi,double N,double Nprec); // 初期条件 phi & N から end of inf までの e-folds Ncl を精度 Nprec で求める
  
 // ------------ パラメータ ----------------- //
-const string filename = "Ncl_inflection_biased_g1.dat"; // 出力ファイル名(Ncl)
-const string filename_c = "Lattice_inflection_biased_g1.dat"; // 出力ファイル名(曲率ゆらぎ)
+const string filename = "Ncl_inflection_biased_g.dat"; // 出力ファイル名(Ncl)
+const string filename_c = "Lattice_inflection_biased_g.dat"; // 出力ファイル名(曲率ゆらぎ)
 const string filename_f = "field_inflection_biased_g.dat"; // 出力ファイル名(phi, pi)
 const double Nf = 5.; // lattice 終了時刻
 const double dN = 0.01; // 時間刻み
