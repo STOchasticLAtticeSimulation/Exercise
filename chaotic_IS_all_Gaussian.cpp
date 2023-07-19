@@ -195,20 +195,22 @@ vector<vector<vector<vector<double>>>> dwdNlist(double N, vector<vector<vector<v
   vector<double> dOmegai(divth);
 
   // inner product of coarse-grained vector and position vector
-  // double ksx = 0.;
-  vector<vector<double>> Omegalist;
-  double bias=0.05;
-  double DN=0.01;
-  double GaussianFactor = (1./ DN)* (1./ sqrt(2.*M_PI)) * exp(-0.5*(N-Nbias)*(N-Nbias)/(DN*DN)) * sqrt(dN);
-  double Gaussian_Bias = bias*GaussianFactor;
-  normal_distribution<> dist1(Gaussian_Bias,1);
 
+  vector<vector<double>> Omegalist;
   for (int n = 0; n < divth; n++) {
     thetai[n] = (n + 0.5) * dtheta;
     dphi[n] = 0.2 * M_PI * Ninv / ksigma / sin(thetai[n]);
     divph[n] = int(2. * M_PI / dphi[n]);
     for (int l = 0; l < divph[n]; l++){
       double phii = l * dphi[n];
+
+      double bias=10.0;
+      double DN=0.01;
+      double dOmegai = sin(thetai[n]) * dtheta * dphi[n];
+      double GaussianFactor = (1./ DN)* (1./ sqrt(2.*M_PI)) * exp(-0.5*(N-Nbias)*(N-Nbias)/(DN*DN)) * sqrt(dN*dOmegai)/(2*sqrt(M_PI));
+      double Gaussian_Bias = bias*GaussianFactor;
+      normal_distribution<> dist1(Gaussian_Bias,1);
+
       Omegalist.push_back({thetai[n], dphi[n], phii, sqrt(dN) * dist1(engine)});
     }
   } 
@@ -229,6 +231,8 @@ vector<vector<vector<vector<double>>>> dwdNlist(double N, vector<vector<vector<v
       double ksx = i * sin(thet)*cos(phit) + j * sin(thet)*sin(phit) + k * cos(thet);
       ksx *= ksigma;
       dwdN[i][j][k][0] += 0.5 * sqrt(dOmegai / M_PI) * (cos(ksx) - sin(ksx)) * dwt;
+
+      
     }
     dwdN[i][j][k][0] *= 0.5 * hubble(xif[i][j][k][0], xif[i][j][k][1]) / M_PI; // 係数を追加
   }
