@@ -32,9 +32,9 @@ double Ncl(vector<double> phi,double N,double Nprec); // 初期条件 phi & N �
 const string filename = "LatticeNcl.dat"; // 出力ファイル名(Ncl)
 const string filename_c = "Lattice.dat"; // 出力ファイル名(曲率ゆらぎ)
 const string filename_f = "field.dat"; // 出力ファイル名(phi, pi)
-const double Nf = 5.5;  // lattice 終了時刻
+const double Nf = 5; //5.5;  // lattice 終了時刻
 const double dN = 0.01; // 時間刻み
-const double mm = 1.0e-5; // 質量
+const double mm = 0.01; //1.0e-5; // 質量
 const double NPREC = 1e-7; // Ncl の精度
 // ----------------------------------------- //
 
@@ -42,7 +42,7 @@ const double NPREC = 1e-7; // Ncl の精度
 // double N = 0.;// e-foldings
 const double phi0 = 15.00;
 const double pi0 = -0.1*mm*mm;
-const int NL = 17; // Number of lattice
+const int NL = 9; //17; // Number of lattice
 const int N3 = NL * NL * NL; // for conveniensce
 const double Ninv = 1. / NL; // for conveniensce
 const double sigma = 1./10.; // coarse-grained scale parameter
