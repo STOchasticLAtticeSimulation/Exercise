@@ -30,11 +30,11 @@ double Vp(double phi); // ポテンシャル VV の phi 微分
 double Ncl(vector<double> phi,double N,double Nprec); // 初期条件 phi & N から end of inf までの e-folds Ncl を精度 Nprec で求める
  
 // ------------ パラメータ ----------------- //
-const string filename = "Ncl_inflection_biased_g.dat"; // 出力ファイル名(Ncl)
-const string filename_c = "Lattice_inflection_biased_g.dat"; // 出力ファイル名(曲率ゆらぎ)
+const string filename = "Ncl_inflection_biased_g1.dat"; // 出力ファイル名(Ncl)
+const string filename_c = "Lattice_inflection_biased_g1.dat"; // 出力ファイル名(曲率ゆらぎ)
 const string filename_f = "field_inflection_biased_g.dat"; // 出力ファイル名(phi, pi)
 const double Nf = 5.; // lattice 終了時刻
-const double dN = 0.001; // 時間刻み
+const double dN = 0.01; // 時間刻み
 const double AW = 0.02;
 const double BW = 1;
 const double CW = 0.04;
@@ -211,16 +211,17 @@ vector<vector<vector<vector<double>>>> dwdNlist(double N, vector<vector<vector<v
   // inner product of coarse-grained vector and position vector
   // double ksx = 0.;
   vector<vector<double>> Omegalist;
-  double bias = 0.5;
-  double dNGaussianInv = 1./0.8;
-  double GaussianFactor = dNGaussianInv / sqrt(2.*M_PI) * exp(-0.5*(N-Nbias)*(N-Nbias)*dNGaussianInv*dNGaussianInv) * sqrt(dN);
-  double GaussianBais = bias * GaussianFactor;
-  normal_distribution<> dist1(GaussianBais, 1.);
+  double bias = 10;
+  double dNGaussianInv = 1./0.05;
   for (int n = 0; n < divth; n++) {
     thetai[n] = (n + 0.5) * dtheta;
     dphi[n] = 0.2 * M_PI * Ninv / ksigma / sin(thetai[n]);
     divph[n] = int(2. * M_PI / dphi[n]);
     for (int l = 0; l < divph[n]; l++){
+      double dOmegai = sin(thetai[n]) * dtheta * dphi[n];
+      double GaussianFactor = dNGaussianInv / sqrt(2.*M_PI) * exp(-0.5*(N-Nbias)*(N-Nbias)*dNGaussianInv*dNGaussianInv) * sqrt(dN*dOmegai/M_PI) * 0.5;
+      double GaussianBais = bias * GaussianFactor;
+      normal_distribution<> dist1(GaussianBais, 1.);
       double phii = l * dphi[n];
       Omegalist.push_back({thetai[n], dphi[n], phii, sqrt(dN) * dist1(engine)});
     } 
