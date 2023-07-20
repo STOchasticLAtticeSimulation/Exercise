@@ -1,0 +1,199 @@
+#ifndef INCLUDED_STOLAS_
+
+#define INCLUDED_STOLAS_
+
+#include <cmath>
+#include <functional>
+#include <random>
+#include "vec_op.hpp"
+
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
+// ------------ USER DEFINE ----------------
+double VV(double phi); // potential V
+double Vp(double phi); // \partial_\phi V
+// -----------------------------------------
+
+const double sigma = 0.1; // coarse-graining param. User can change it
+
+void RK4(std::function<std::vector<double>(double, std::vector<double>)> dphidN, double &N, std::vector<double> &phi, double dN); // update e-folds &N and &phi = {phi, pi} by time step dN following EoM dphidN in Runge--Kutta 4
+std::vector<double> dphidN(double N, std::vector<double> phi); // EoM
+double ep(double phi, double pi); // epsilonH = -Hdot / H^2
+double hubble(double phi, double pi); // Hubble param.
+
+double Ncl(std::vector<double> phi, double N, double dN, double Nprec); // classical efolds Ncl from i.c. phi & N to the end of inflation epsilonH = 1 at the precision Nprec with the initial time step dN
+
+template <class T>
+void EulerM(std::function<T(double, const T&)> dNlist, std::function<T(double, const T&)> dwlist, double &N, T &x, double dN); // Euler--Maruyama
+
+std::vector<std::vector<std::vector<std::vector<double>>>> dNlist(double N, std::vector<std::vector<std::vector<std::vector<double>>>> xif, double dN); // coeff. of dN
+std::vector<std::vector<std::vector<std::vector<double>>>> dwlist(double N, std::vector<std::vector<std::vector<std::vector<double>>>> xif, double dN); // coeff. of dW
+
+
+void RK4(std::function<std::vector<double>(double, std::vector<double>)> dphidN, double &N, std::vector<double> &phi, double dN) {
+  std::vector<double> kx[4]; // 4-stage slopes kx
+  double a[4][4],b[4],c[4]; // Butcher
+
+  // -------------- initialise kx, a, b, c --------------- //
+  for(int i=0;i<=3;i++){
+    kx[i].assign(phi.size(), 0.);
+    
+    for(int j=0;j<=3;j++){
+      a[i][j]=0.;
+    }
+  }
+  
+  a[1][0]=1./2;  a[2][1]=1./2;  a[3][2]=1.;
+  b[0]=1./6;     b[1]=1./3;     b[2]=1./3;    b[3]=1./6; 
+  c[0]=0;        c[1]=1./2;     c[2]=1./2;    c[3]=1;
+  // ----------------------------------------------------- //
+  
+
+  std::vector<double> X = phi; // position at i-stage
+    
+  for(int i=0;i<=3;i++){
+    X = phi; // initialise X
+    
+    for(int j=0;j<=3;j++){
+      for (size_t xi = 0, size = phi.size(); xi < size; xi++) {
+	X[xi] += dN * a[i][j] * kx[j][xi];
+      }
+
+      kx[i] = dphidN(N+c[i]*dN, X); // EoM
+    }
+  }
+
+  for (size_t xi = 0, size = phi.size(); xi < size; xi++) {
+    phi[xi] += dN*(b[0]*kx[0][xi] + b[1]*kx[1][xi] + b[2]*kx[2][xi] + b[3]*kx[3][xi]);
+  }
+  
+  N+=dN;
+}
+
+std::vector<double> dphidN(double N, std::vector<double> phi) {
+  std::vector<double> dphidN(2);
+
+  double xx = phi[0]; // phi
+  double pp = phi[1]; // pi
+  double HH = hubble(xx,pp);
+
+  dphidN[0] = pp/HH;
+  dphidN[1] = -3*pp - Vp(xx)/HH;
+  
+  return dphidN;
+}
+
+double ep(double phi, double pi) {
+  double HH = hubble(phi,pi);
+  return pi*pi/2./HH/HH;
+}
+
+double hubble(double phi, double pi) {
+  return sqrt((pi*pi/2. + VV(phi))/3.);
+}
+
+double Ncl(std::vector<double> phi, double N, double dN, double Nprec){
+  double dN1 = dN;
+  std::vector<double> prephi(2);
+
+  while(dN1 >= Nprec) {
+    while(ep(phi[0],phi[1])<=1.0){
+      prephi[0]=phi[0];
+      prephi[1]=phi[1];
+      RK4(dphidN, N, phi, dN1);
+    }
+    N -= dN1;
+    
+    phi[0]=prephi[0];
+    phi[1]=prephi[1];
+    dN1*=0.1;
+  }
+  return N;
+}
+
+
+template <class T>
+void EulerM(std::function<T(double, const T&)> dNlist, std::function<T(double, const T&)> dwlist, double &N, T &x, double dN)
+{
+  T xem = x;
+  x += dphidNlist(N, xem);
+  x += dwdNlist(N, xem);
+  N += dN;
+}
+
+std::vector<std::vector<std::vector<std::vector<double>>>> dNlist(double N, std::vector<std::vector<std::vector<std::vector<double>>>> xif, double dN){
+  std::vector<std::vector<std::vector<std::vector<double>>>> dNlist = xif;
+  
+  for(size_t i = 0; i < xif.size(); i++) for(size_t j = 0; j < xif[i].size(); j++) for(size_t k = 0; k < xif[i][j].size(); k++) {
+    std::vector<double> phi(2);
+    phi[0] = xif[i][j][k][0];
+    phi[1] = xif[i][j][k][1];
+    dNlist[i][j][k][0] = dphidN(N, phi)[0] * dN;
+    dNlist[i][j][k][1] = dphidN(N, phi)[1] * dN;
+  }
+
+  return dNlist;
+}
+
+std::vector<std::vector<std::vector<std::vector<double>>>> dwlist(double N, std::vector<std::vector<std::vector<std::vector<double>>>> xif, double dN) {
+  std::vector<std::vector<std::vector<std::vector<double>>>> dwlist = xif; 
+
+  // make correlation noise
+  int NL = xif.size();
+  double ksigma = 2. * M_PI * sigma * exp(N) / NL;
+  double dtheta = 0.2 * M_PI * Ninv / ksigma;
+  int divth = int(M_PI / dtheta);
+  vector<double> divph(divth);
+  vector<double> thetai(divth);
+  vector<double> dphi(divth);
+  vector<double> dOmegai(divth);
+
+  // inner product of coarse-grained vector and position vector
+  // double ksx = 0.;
+  vector<vector<double>> Omegalist;
+  double bias = 10;
+  double dNGaussianInv = 1./0.05;
+  for (int n = 0; n < divth; n++) {
+    thetai[n] = (n + 0.5) * dtheta;
+    dphi[n] = 0.2 * M_PI * Ninv / ksigma / sin(thetai[n]);
+    divph[n] = int(2. * M_PI / dphi[n]);
+    for (int l = 0; l < divph[n]; l++){
+      double dOmegai = sin(thetai[n]) * dtheta * dphi[n];
+      double GaussianFactor = dNGaussianInv / sqrt(2.*M_PI) * exp(-0.5*(N-Nbias)*(N-Nbias)*dNGaussianInv*dNGaussianInv) * sqrt(dN*dOmegai/M_PI) * 0.5;
+      double GaussianBais = bias * GaussianFactor;
+      normal_distribution<> dist1(GaussianBais, 1.);
+      double phii = l * dphi[n];
+      Omegalist.push_back({thetai[n], dphi[n], phii, sqrt(dN) * dist1(engine)});
+    } 
+  }
+
+#ifdef _OPENMP
+#pragma omp parallel for
+#endif
+  LOOP{
+    dwdN[i][j][k][0] = 0.; // initialize
+    dwdN[i][j][k][1] = 0.;
+    for (int n = 0; n < Omegalist.size(); n++){
+      double thet = Omegalist[n][0];
+      double dpht = Omegalist[n][1];
+      double phit = Omegalist[n][2];
+      double dwt = Omegalist[n][3];
+      double dOmegai = sin(thet) * dtheta * dpht;
+      //double ksx = (i+0.5) * sin(thet)*cos(phit) + (j+0.5) * sin(thet)*sin(phit) + (k+0.5) * cos(thet);
+      double ksx = i * sin(thet)*cos(phit) + j * sin(thet)*sin(phit) + k * cos(thet);
+      ksx *= ksigma;
+      dwdN[i][j][k][0] += 0.5 * sqrt(dOmegai / M_PI) * (cos(ksx) - sin(ksx)) * dwt;
+    }
+    dwdN[i][j][k][0] *= 0.5 * hubble(xif[i][j][k][0], xif[i][j][k][1]) / M_PI; // 係数を追加
+    // if (Nbias <= N && N < Nbias+dN && i==0) cout << i << ' ' << j << ' ' << k << ' ' << hubble(xif[i][j][k][0], xif[i][j][k][1]) << ' ' << dwdN[i][j][k][0] << endl; // ノイズ確認用
+  }
+
+  return dwdN;
+}
+
+
+
+
+#endif
