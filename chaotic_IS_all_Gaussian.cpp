@@ -205,7 +205,7 @@ vector<vector<vector<vector<double>>>> dwdNlist(double N, vector<vector<vector<v
       double phii = l * dphi[n];
 
       double bias=10.0;
-      double DN=0.01;
+      double DN=0.1;
       double dOmegai = sin(thetai[n]) * dtheta * dphi[n];
       double GaussianFactor = (1./ DN)* (1./ sqrt(2.*M_PI)) * exp(-0.5*(N-Nbias)*(N-Nbias)/(DN*DN)) * sqrt(dN*dOmegai)/(2*sqrt(M_PI));
       double Gaussian_Bias = bias*GaussianFactor;
