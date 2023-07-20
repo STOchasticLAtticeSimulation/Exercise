@@ -16,7 +16,10 @@ double VV(double phi); // potential V
 double Vp(double phi); // \partial_\phi V
 // -----------------------------------------
 
-const double sigma = 0.1; // coarse-graining param. User can change it
+// ------------ User may change --------------------------
+const double sigma = 0.1; // coarse-graining param. 
+const double kdx = 0.1; // ksigma Deltax / 2pi.
+// -------------------------------------------------------
 
 void RK4(std::function<std::vector<double>(double, std::vector<double>)> dphidN, double &N, std::vector<double> &phi, double dN); // update e-folds &N and &phi = {phi, pi} by time step dN following EoM dphidN in Runge--Kutta 4
 std::vector<double> dphidN(double N, std::vector<double> phi); // EoM
@@ -30,6 +33,11 @@ void EulerM(std::function<T(double, const T&)> dNlist, std::function<T(double, c
 
 std::vector<std::vector<std::vector<std::vector<double>>>> dNlist(double N, std::vector<std::vector<std::vector<std::vector<double>>>> xif, double dN); // coeff. of dN
 std::vector<std::vector<std::vector<std::vector<double>>>> dwlist(double N, std::vector<std::vector<std::vector<std::vector<double>>>> xif, double dN); // coeff. of dW
+
+// random distribution
+std::random_device seed;
+std::mt19937 engine(seed());
+std::normal_distribution<> dist(0., 1.);
 
 
 void RK4(std::function<std::vector<double>(double, std::vector<double>)> dphidN, double &N, std::vector<double> &phi, double dN) {
@@ -143,54 +151,56 @@ std::vector<std::vector<std::vector<std::vector<double>>>> dwlist(double N, std:
   // make correlation noise
   int NL = xif.size();
   double ksigma = 2. * M_PI * sigma * exp(N) / NL;
-  double dtheta = 0.2 * M_PI * Ninv / ksigma;
+  double dtheta = 2. * M_PI * kdx / NL / ksigma;
   int divth = int(M_PI / dtheta);
-  vector<double> divph(divth);
-  vector<double> thetai(divth);
-  vector<double> dphi(divth);
-  vector<double> dOmegai(divth);
+  std::vector<double> divph(divth);
+  std::vector<double> thetai(divth);
+  std::vector<double> dphi(divth);
+  std::vector<double> dOmegai(divth);
 
-  // inner product of coarse-grained vector and position vector
-  // double ksx = 0.;
-  vector<vector<double>> Omegalist;
-  double bias = 10;
-  double dNGaussianInv = 1./0.05;
+  // ------------ make noise ----------------
+  std::vector<std::vector<double>> Omegalist;
+  //double bias = 10;
+  //double dNGaussianInv = 1./0.05;
   for (int n = 0; n < divth; n++) {
     thetai[n] = (n + 0.5) * dtheta;
-    dphi[n] = 0.2 * M_PI * Ninv / ksigma / sin(thetai[n]);
+    dphi[n] = 2. * M_PI * kdx / NL / ksigma / sin(thetai[n]);
     divph[n] = int(2. * M_PI / dphi[n]);
     for (int l = 0; l < divph[n]; l++){
       double dOmegai = sin(thetai[n]) * dtheta * dphi[n];
-      double GaussianFactor = dNGaussianInv / sqrt(2.*M_PI) * exp(-0.5*(N-Nbias)*(N-Nbias)*dNGaussianInv*dNGaussianInv) * sqrt(dN*dOmegai/M_PI) * 0.5;
-      double GaussianBais = bias * GaussianFactor;
-      normal_distribution<> dist1(GaussianBais, 1.);
+      //double GaussianFactor = dNGaussianInv / sqrt(2.*M_PI) * exp(-0.5*(N-Nbias)*(N-Nbias)*dNGaussianInv*dNGaussianInv) * sqrt(dN*dOmegai/M_PI) * 0.5;
+      //double GaussianBais = bias * GaussianFactor;
+      //normal_distribution<> dist1(GaussianBais, 1.);
       double phii = l * dphi[n];
-      Omegalist.push_back({thetai[n], dphi[n], phii, sqrt(dN) * dist1(engine)});
+      //Omegalist.push_back({thetai[n], dphi[n], phii, sqrt(dN) * dist1(engine)});
+      Omegalist.push_back({thetai[n], dphi[n], phii, sqrt(dN) * dist(engine)});
     } 
   }
-
+  // -----------------------------------------
+  
+  // -------------- add noise ----------------
 #ifdef _OPENMP
 #pragma omp parallel for
 #endif
-  LOOP{
-    dwdN[i][j][k][0] = 0.; // initialize
-    dwdN[i][j][k][1] = 0.;
-    for (int n = 0; n < Omegalist.size(); n++){
-      double thet = Omegalist[n][0];
-      double dpht = Omegalist[n][1];
-      double phit = Omegalist[n][2];
-      double dwt = Omegalist[n][3];
-      double dOmegai = sin(thet) * dtheta * dpht;
-      //double ksx = (i+0.5) * sin(thet)*cos(phit) + (j+0.5) * sin(thet)*sin(phit) + (k+0.5) * cos(thet);
-      double ksx = i * sin(thet)*cos(phit) + j * sin(thet)*sin(phit) + k * cos(thet);
-      ksx *= ksigma;
-      dwdN[i][j][k][0] += 0.5 * sqrt(dOmegai / M_PI) * (cos(ksx) - sin(ksx)) * dwt;
-    }
-    dwdN[i][j][k][0] *= 0.5 * hubble(xif[i][j][k][0], xif[i][j][k][1]) / M_PI; // 係数を追加
-    // if (Nbias <= N && N < Nbias+dN && i==0) cout << i << ' ' << j << ' ' << k << ' ' << hubble(xif[i][j][k][0], xif[i][j][k][1]) << ' ' << dwdN[i][j][k][0] << endl; // ノイズ確認用
-  }
+  for(size_t i = 0; i < xif.size(); i++) for(size_t j = 0; j < xif[i].size(); j++) for(size_t k = 0; k < xif[i][j].size(); k++) {
+	dwlist[i][j][k][0] = 0.; // initialize
+	dwlist[i][j][k][1] = 0.;
+	for (size_t n = 0; n < Omegalist.size(); n++){
+	  double thet = Omegalist[n][0];
+	  double dpht = Omegalist[n][1];
+	  double phit = Omegalist[n][2];
+	  double dwt = Omegalist[n][3];
+	  double dOmegai = sin(thet) * dtheta * dpht;
+	  //double ksx = (i+0.5) * sin(thet)*cos(phit) + (j+0.5) * sin(thet)*sin(phit) + (k+0.5) * cos(thet);
+	  double ksx = i * sin(thet)*cos(phit) + j * sin(thet)*sin(phit) + k * cos(thet);
+	  ksx *= ksigma;
+	  dwlist[i][j][k][0] += 0.5 * sqrt(dOmegai / M_PI) * (cos(ksx) - sin(ksx)) * dwt;
+	}
+	dwlist[i][j][k][0] *= 0.5 * hubble(xif[i][j][k][0], xif[i][j][k][1]) / M_PI; 
+      }
+  // -----------------------------------------
 
-  return dwdN;
+  return dwlist;
 }
 
 
