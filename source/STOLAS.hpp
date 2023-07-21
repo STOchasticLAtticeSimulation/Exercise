@@ -126,8 +126,8 @@ template <class T>
 void EulerM(std::function<T(double, const T&, double)> dNlist, std::function<T(double, const T&, double)> dwlist, double &N, T &x, double dN)
 {
   T xem = x;
-  x += dNlist(N, xem);
-  x += dwlist(N, xem);
+  x += dNlist(N, xem, dN);
+  x += dwlist(N, xem, dN);
   N += dN;
 }
 
