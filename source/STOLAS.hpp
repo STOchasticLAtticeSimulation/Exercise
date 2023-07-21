@@ -29,7 +29,7 @@ double hubble(double phi, double pi); // Hubble param.
 double Ncl(std::vector<double> phi, double N, double dN, double Nprec); // classical efolds Ncl from i.c. phi & N to the end of inflation epsilonH = 1 at the precision Nprec with the initial time step dN
 
 template <class T>
-void EulerM(std::function<T(double, const T&)> dNlist, std::function<T(double, const T&)> dwlist, double &N, T &x, double dN); // Euler--Maruyama
+void EulerM(std::function<T(double, const T&, double)> dNlist, std::function<T(double, const T&, double)> dwlist, double &N, T &x, double dN); // Euler--Maruyama
 
 std::vector<std::vector<std::vector<std::vector<double>>>> dNlist(double N, std::vector<std::vector<std::vector<std::vector<double>>>> xif, double dN); // coeff. of dN
 std::vector<std::vector<std::vector<std::vector<double>>>> dwlist(double N, std::vector<std::vector<std::vector<std::vector<double>>>> xif, double dN); // coeff. of dW
@@ -123,11 +123,11 @@ double Ncl(std::vector<double> phi, double N, double dN, double Nprec){
 
 
 template <class T>
-void EulerM(std::function<T(double, const T&)> dNlist, std::function<T(double, const T&)> dwlist, double &N, T &x, double dN)
+void EulerM(std::function<T(double, const T&, double)> dNlist, std::function<T(double, const T&, double)> dwlist, double &N, T &x, double dN)
 {
   T xem = x;
-  x += dphidNlist(N, xem);
-  x += dwdNlist(N, xem);
+  x += dNlist(N, xem);
+  x += dwlist(N, xem);
   N += dN;
 }
 
