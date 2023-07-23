@@ -33,7 +33,7 @@ double Ncl(vector<double> phi,double N,double Nprec); // 初期条件 phi & N �
 const string filename = "Ncl_inflection_biased_g.dat"; // 出力ファイル名(Ncl)
 const string filename_c = "Lattice_inflection_biased_g.dat"; // 出力ファイル名(曲率ゆらぎ)
 const string filename_f = "field_inflection_biased_g.dat"; // 出力ファイル名(phi, pi)
-const double Nf = 5.; // lattice 終了時刻
+const double Nf = 5.5; // lattice 終了時刻
 const double dN = 0.01; // 時間刻み
 const double AW = 0.02;
 const double BW = 1;
@@ -51,7 +51,7 @@ const double NPREC = 1e-7; // Ncl の精度
 // double N = 0.;// e-foldings
 const double phi0 = 3.60547;
 const double pi0 = -2.37409e-7;
-const int NL = 9; // Number of lattice
+const int NL = 17; // Number of lattice
 const int N3 = NL * NL * NL; // for conveniensce
 const double Ninv = 1. / NL; // for conveniensce
 const double sigma = 1./10.; // coarse-grained scale parameter
@@ -212,7 +212,7 @@ vector<vector<vector<vector<double>>>> dwdNlist(double N, vector<vector<vector<v
   // double ksx = 0.;
   vector<vector<double>> Omegalist;
   double bias = 10;
-  double dNGaussianInv = 1./0.05;
+  double dNGaussianInv = 1./0.001;
   for (int n = 0; n < divth; n++) {
     thetai[n] = (n + 0.5) * dtheta;
     dphi[n] = 0.2 * M_PI * Ninv / ksigma / sin(thetai[n]);
