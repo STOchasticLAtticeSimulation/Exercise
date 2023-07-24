@@ -42,7 +42,7 @@ const double NPREC = 1e-7; // Ncl の精度
 // double N = 0.;// e-foldings
 const double phi0 = 15.00;
 const double pi0 = -0.1*mm*mm;
-const int NL = 17; // Number of lattice
+const int NL = 9; //17; // Number of lattice
 const int N3 = NL * NL * NL; // for conveniensce
 const double Ninv = 1. / NL; // for conveniensce
 const double sigma = 1./10.; // coarse-grained scale parameter
@@ -203,6 +203,11 @@ vector<vector<vector<vector<double>>>> dwdNlist(double N, vector<vector<vector<v
       divph[n] = int(2. * M_PI / dphi[n]);
       for (int l = 0; l < divph[n]; l++){
         double phii = l * dphi[n];
+
+	double bias = 1.5;
+	double dOmegai = sin(thetai[n]) * dtheta * dphi[n];
+	double Bias = bias * sqrt(dOmegai)/2./sqrt(M_PI);
+	normal_distribution<> dist1(Bias,0);
         Omegalist.push_back({thetai[n], dphi[n], phii, sqrt(dN) * dist1(engine)});
       }
     }
