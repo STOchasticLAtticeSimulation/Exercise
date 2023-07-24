@@ -55,8 +55,8 @@ const vector<double> xi{phi0, pi0}; // initial value
 // random distribution
 random_device seed;
 mt19937 engine(seed());
-normal_distribution<> dist(0., 1.);
-normal_distribution<> dist1(1.5, 0.);
+normal_distribution<> dist(0., 0./*1.*/);
+normal_distribution<> dist1(1.5, 0./*1.*/);
 // useful macro
 #define LOOP for(int i = 0; i < NL; i++) for(int j = 0; j < NL; j++) for(int k = 0; k < NL; k++)
 
