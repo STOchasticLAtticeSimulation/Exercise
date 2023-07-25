@@ -33,8 +33,8 @@ double Ncl(vector<double> phi,double N,double Nprec); // 初期条件 phi & N �
 const string filename = "Ncl_inflection_biased_g.dat"; // 出力ファイル名(Ncl)
 const string filename_c = "Lattice_inflection_biased_g.dat"; // 出力ファイル名(曲率ゆらぎ)
 const string filename_f = "field_inflection_biased_g.dat"; // 出力ファイル名(phi, pi)
-const double Nf = 5.5; // lattice 終了時刻
-const double dN = 0.01; // 時間刻み
+const double Nf = 5.; // lattice 終了時刻
+const double dN = 0.002; // 時間刻み
 const double AW = 0.02;
 const double BW = 1;
 const double CW = 0.04;
@@ -51,7 +51,7 @@ const double NPREC = 1e-7; // Ncl の精度
 // double N = 0.;// e-foldings
 const double phi0 = 3.60547;
 const double pi0 = -2.37409e-7;
-const int NL = 17; // Number of lattice
+const int NL = 9; // Number of lattice
 const int N3 = NL * NL * NL; // for conveniensce
 const double Ninv = 1. / NL; // for conveniensce
 const double sigma = 1./10.; // coarse-grained scale parameter
@@ -73,8 +73,10 @@ normal_distribution<> dist(0., 1.);
 #define LOOP for(int i = 0; i < NL; i++) for(int j = 0; j < NL; j++) for(int k = 0; k < NL; k++)
 
 // Euler-Maruyama method
+// template <class T>
+// void EulerM(function<T(double, const T&)> dphidNlist, function<T(double, const T&)> dwdNlist, double &N, T &x, double dN);
 template <class T>
-void EulerM(function<T(double, const T&)> dphidNlist, function<T(double, const T&)> dwdNlist, double &N, T &x, double dN);
+void RK4M(function<T(double, const T&)> dphidNlist, function<T(double, const T&)> dwdNlist, double &N, T &x, double dN);
 
 // for convenience
 //vector<vector<double>> x1(NL, xi); // dim 1
@@ -83,7 +85,8 @@ void EulerM(function<T(double, const T&)> dphidNlist, function<T(double, const T
 //vector<vector<double>> v2(NL,v1);
 
 vector<vector<vector<vector<double>>>> dwdNlist(double N, vector<vector<vector<vector<double>>>> xif);
-vector<vector<vector<vector<double>>>> dphidNlist(double N, vector<vector<vector<vector<double>>>> xif);
+// vector<vector<vector<vector<double>>>> dphidNlist(double N, vector<vector<vector<vector<double>>>> xif);
+vector<vector<vector<vector<double>>>> dphidNlistRK4(double N, vector<vector<vector<vector<double>>>> xif);
 
 double VV(double phi) {
   return W0*W0/CALV/CALV/CALV * ( CUP/pow(CALV,1./3) + AW/(exp(phi/sqrt(3))-BW) - CW/exp(phi/sqrt(3))
@@ -154,7 +157,8 @@ int main()
     }
     numsteps++;
 
-    EulerM<vector<vector<vector<vector<double>>>>>(dphidNlist, dwdNlist, N, x, dN); // Euler-Maruyama 1step <vector<vector<vector<vector<double>>>>>
+    // EulerM<vector<vector<vector<vector<double>>>>>(dphidNlistRK4, dwdNlist, N, x, dN); // Euler-Maruyama 1step <vector<vector<vector<vector<double>>>>>
+    RK4M<vector<vector<vector<vector<double>>>>>(dphidNlistRK4, dwdNlist, N, x, dN); // Euler-Maruyama 1step <vector<vector<vector<vector<double>>>>>
   }
 
   LOOP ofs_f << x[i][j][k][0] << ' ' << x[i][j][k][1] << endl; // 最終的な場の値を出力
@@ -183,18 +187,18 @@ int main()
   // -------------------------------------
 }
 
-vector<vector<vector<vector<double>>>> dphidNlist(double N, vector<vector<vector<vector<double>>>> xif){
-  vector<vector<vector<vector<double>>>> dphidNlist = xif; // Latticeと大きさを揃える
-  LOOP{
-    vector<double> phi(2);
-    phi[0] = xif[i][j][k][0];
-    phi[1] = xif[i][j][k][1];
-    dphidNlist[i][j][k][0] = dphidN(N, phi)[0] * dN;
-    dphidNlist[i][j][k][1] = dphidN(N, phi)[1] * dN;
-  }
+// vector<vector<vector<vector<double>>>> dphidNlist(double N, vector<vector<vector<vector<double>>>> xif){
+//   vector<vector<vector<vector<double>>>> dphidNlist = xif; // Latticeと大きさを揃える
+//   LOOP{
+//     vector<double> phi(2);
+//     phi[0] = xif[i][j][k][0];
+//     phi[1] = xif[i][j][k][1];
+//     dphidNlist[i][j][k][0] = dphidN(N, phi)[0] * dN;
+//     dphidNlist[i][j][k][1] = dphidN(N, phi)[1] * dN;
+//   }
 
-  return dphidNlist;
-}
+//   return dphidNlist;
+// }
 
 vector<vector<vector<vector<double>>>> dwdNlist(double N, vector<vector<vector<vector<double>>>> xif) {
   vector<vector<vector<vector<double>>>> dwdN = xif; // Latticeと大きさを揃える
@@ -211,8 +215,8 @@ vector<vector<vector<vector<double>>>> dwdNlist(double N, vector<vector<vector<v
   // inner product of coarse-grained vector and position vector
   // double ksx = 0.;
   vector<vector<double>> Omegalist;
-  double bias = 10;
-  double dNGaussianInv = 1./0.001;
+  double bias = 0;
+  double dNGaussianInv = 1./1.;
   for (int n = 0; n < divth; n++) {
     thetai[n] = (n + 0.5) * dtheta;
     dphi[n] = 0.2 * M_PI * Ninv / ksigma / sin(thetai[n]);
@@ -224,7 +228,7 @@ vector<vector<vector<vector<double>>>> dwdNlist(double N, vector<vector<vector<v
       normal_distribution<> dist1(GaussianBais, 1.);
       double phii = l * dphi[n];
       Omegalist.push_back({thetai[n], dphi[n], phii, sqrt(dN) * dist1(engine)});
-    } 
+    }
   }
 
 #ifdef _OPENMP
@@ -239,29 +243,26 @@ vector<vector<vector<vector<double>>>> dwdNlist(double N, vector<vector<vector<v
       double phit = Omegalist[n][2];
       double dwt = Omegalist[n][3];
       double dOmegai = sin(thet) * dtheta * dpht;
-      //double ksx = (i+0.5) * sin(thet)*cos(phit) + (j+0.5) * sin(thet)*sin(phit) + (k+0.5) * cos(thet);
       double ksx = i * sin(thet)*cos(phit) + j * sin(thet)*sin(phit) + k * cos(thet);
       ksx *= ksigma;
       dwdN[i][j][k][0] += 0.5 * sqrt(dOmegai / M_PI) * (cos(ksx) - sin(ksx)) * dwt;
     }
     dwdN[i][j][k][0] *= 0.5 * hubble(xif[i][j][k][0], xif[i][j][k][1]) / M_PI; // 係数を追加
-    // if (Nbias <= N && N < Nbias+dN && i==0) cout << i << ' ' << j << ' ' << k << ' ' << hubble(xif[i][j][k][0], xif[i][j][k][1]) << ' ' << dwdN[i][j][k][0] << endl; // ノイズ確認用
   }
 
   return dwdN;
 }
 
-template <class T>
-void EulerM(function<T(double, const T&)> dphidNlist, function<T(double, const T&)> dwdNlist, double &N, T &x, double dN)
-{
-  T xem = x;
-  x += dphidNlist(N, xem);
-  x += dwdNlist(N, xem);
-  N += dN;
-}
+// template <class T>
+// void EulerM(function<T(double, const T&)> dphidNlist, function<T(double, const T&)> dwdNlist, double &N, T &x, double dN)
+// {
+//   T xem = x;
+//   x += dphidNlist(N, xem);
+//   x += dwdNlist(N, xem);
+//   N += dN;
+// }
 
 double Ncl(vector<double> phi,double N,double Nprec){
-  // ofstream ofs(filename);
   double dN1 = dN;
   vector<double> prephi(2);
 
@@ -269,9 +270,7 @@ double Ncl(vector<double> phi,double N,double Nprec){
     while(ep(phi[0],phi[1])<=1.0){
       prephi[0]=phi[0];
       prephi[1]=phi[1];
-      //ofs<< setprecision(10)<<N<<"   "<<prephi[0]<<"   "<<prephi[1]<<"  "<<ep(prephi[0],prephi[1])<<endl;
       RK4(dphidN, N, phi, dN1);
-    // cout << setprecision(10) << ep(phi[0],phi[1]) << ' ' << phi[0] << ' ' << phi[1] << endl;
     }
     N -= dN1;
     
@@ -279,7 +278,7 @@ double Ncl(vector<double> phi,double N,double Nprec){
     phi[1]=prephi[1];
     dN1*=0.1;
   }
-  return N; //Ncl;
+  return N;
 }
 
 double hubble(double phi, double pi) {
@@ -330,7 +329,7 @@ void RK4(function<vector<double>(double, vector<double>)> dphidN, double &N, vec
     
     for(int j=0;j<=3;j++){
       for (size_t xi = 0, size = phi.size(); xi < size; xi++) {
-	X[xi] += dN * a[i][j] * kx[j][xi];
+        X[xi] += dN * a[i][j] * kx[j][xi];
       }
 
       kx[i] = dphidN(N+c[i]*dN, X); // EoM
@@ -342,4 +341,29 @@ void RK4(function<vector<double>(double, vector<double>)> dphidN, double &N, vec
   }
   
   N+=dN;
+}
+
+// RK4 - Maruyama
+vector<vector<vector<vector<double>>>> dphidNlistRK4(double N, vector<vector<vector<vector<double>>>> xif){
+  vector<vector<vector<vector<double>>>> dphidNlist = xif; // Latticeと大きさを揃える
+  LOOP{
+    vector<double> phi(2);
+    phi[0] = xif[i][j][k][0];
+    phi[1] = xif[i][j][k][1];
+    RK4(dphidN, N, phi, dN);
+    N -= dN;
+    dphidNlist[i][j][k][0] = phi[0];
+    dphidNlist[i][j][k][1] = phi[1];
+  }
+
+  return dphidNlist;
+}
+
+template <class T>
+void RK4M(function<T(double, const T&)> dphidNlist, function<T(double, const T&)> dwdNlist, double &N, T &x, double dN)
+{
+  T xem = x;
+  x = dphidNlistRK4(N, xem);
+  x += dwdNlist(N, xem);
+  N += dN;
 }
