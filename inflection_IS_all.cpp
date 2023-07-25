@@ -34,7 +34,8 @@ const string filename = "Ncl_inflection_biased.dat"; // 出力ファイル名(Nc
 const string filename_c = "Lattice_inflection_biased.dat"; // 出力ファイル名(曲率ゆらぎ)
 const string filename_f = "field_inflection_biased.dat"; // 出力ファイル名(phi, pi)
 const double Nf = 5.0; //5.0;  // lattice 終了時刻
-const double dN = 0.01; // 時間刻み
+const double dN = 1e-4; //0.01; // 時間刻み
+const int EXPSTEP = 1000; // データ出力刻み
 const double AW = 0.02;
 const double BW = 1;
 const double CW = 0.04;
@@ -45,6 +46,7 @@ const double CALV = 1000;
 const double W0 = 12.35;//320182;//
 const double CUP = 0.0382;
 const double NPREC = 1e-7; // Ncl の精度
+const double bias = 20;
 // ----------------------------------------- //
 
 // 変数の初期値
@@ -64,9 +66,9 @@ const double Nbias = 3; //2.0; // Biased time
 // random distribution
 random_device seed;
 mt19937 engine(seed());
-normal_distribution<> dist(0., 1.);
-const double bias = 7.; //5.;
-normal_distribution<> dist1(bias, 1.);
+normal_distribution<> dist(0., 0./*1.*/);
+//const double bias = 7.; //5.;
+//normal_distribution<> dist1(bias, 1.);
 
 // useful macro
 #define LOOP for(int i = 0; i < NL; i++) for(int j = 0; j < NL; j++) for(int k = 0; k < NL; k++)
@@ -136,7 +138,7 @@ int main()
 
   while (N < Nf) {
     // save the data
-    if(numsteps % 10 == 0 && N < Nf){
+    if(numsteps % EXPSTEP == 0 && N < Nf){
       average_e = 0.; // initialize
       LOOP average_e += 3. * hubble(x[i][j][k][0], x[i][j][k][1]) * hubble(x[i][j][k][0], x[i][j][k][1]);
       average_e /= N3; // 平均エネルギー
@@ -218,6 +220,10 @@ vector<vector<vector<vector<double>>>> dwdNlist(double N, vector<vector<vector<v
       divph[n] = int(2. * M_PI / dphi[n]);
       for (int l = 0; l < divph[n]; l++){
         double phii = l * dphi[n];
+
+	double dOmegai = sin(thetai[n]) * dtheta * dphi[n];
+	double Bias = bias * sqrt(dOmegai)/2./sqrt(M_PI) /sqrt(dN);
+	normal_distribution<> dist1(Bias,0);
         Omegalist.push_back({thetai[n], dphi[n], phii, sqrt(dN) * dist1(engine)});
       }
     }
