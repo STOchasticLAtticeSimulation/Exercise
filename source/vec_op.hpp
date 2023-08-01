@@ -3,7 +3,6 @@
 #define INCLUDED_vec_op_hpp_
 
 #include <vector>
-#include <complex>
 
 
 template <class T1, class T2>
@@ -36,34 +35,6 @@ std::vector<T1>& operator-=(std::vector<T1> &v1, const std::vector<T2> &v2) {
   return v1;
 }
 
-template <class T>
-std::vector<T>& operator*=(std::vector<T> &v, const T &c) {
-  for (T &e : v)
-    e *= c;
-  return v;
-}
-
-template <class T>
-std::vector<std::complex<T>>& operator*=(std::vector<std::complex<T>> &v, const T &c) {
-  for (std::complex<T> &e : v)
-    e *= c;
-  return v;
-}
-
-template <class T>
-std::vector<std::vector<std::complex<T>>>& operator*=(std::vector<std::vector<std::complex<T>>> &v, const T &c) {
-  for (std::vector<std::complex<T>> &e : v)
-    e *= c;
-  return v;
-}
-
-template <class T>
-std::vector<std::vector<std::vector<std::complex<T>>>>& operator*=(std::vector<std::vector<std::vector<std::complex<T>>>> &v, const T &c) {
-  for (std::vector<std::vector<std::complex<T>>> &e : v)
-    e *= c;
-  return v;
-}
-
 template <class Tv, class Tc>
 std::vector<Tv> operator*(const std::vector<Tv> &v, const Tc &c) {
   std::vector<Tv> ans = v;
@@ -85,6 +56,18 @@ std::vector<Tv>& operator*=(std::vector<Tv> &v, const Tc &c) {
   for (Tv &e : v)
     e *= c;
   return v;
+}
+
+
+void init(double &x) {
+  x = 0;
+}
+
+template <class T>
+void init(std::vector<T> &v) {
+  for (T &e : v) {
+    init(e);
+  }
 }
 
 #endif

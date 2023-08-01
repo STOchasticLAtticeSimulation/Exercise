@@ -2,16 +2,12 @@
 
 #define INCLUDED_STOLAS_
 
-#include <cmath>
-#include <functional>
 #include <random>
-#include "vec_op.hpp"
+#include "RK4.hpp"
 
 #ifdef _OPENMP
 #include <omp.h>
 #endif
-
-#include <iostream>
 
 // ------------ USER DEFINE ----------------
 double VV(double phi); // potential V
@@ -22,10 +18,6 @@ double Vp(double phi); // \partial_\phi V
 const double sigma = 0.1; // coarse-graining param. 
 const double kdx = 0.1; // ksigma Deltax / 2pi.
 // -------------------------------------------------------
-
-//void RK4(std::function<std::vector<double>(double, std::vector<double>)> dphidN, double &N, std::vector<double> &phi, double dN); // update e-folds &N and &phi = {phi, pi} by time step dN following EoM dphidN in Runge--Kutta 4
-template <class T>
-void RK4(std::function<T(double, T)> dxdt, double &t, T &x, double dt);
 
 std::vector<double> dphidN(double N, std::vector<double> phi); // EoM
 double ep(double phi, double pi); // epsilonH = -Hdot / H^2
@@ -47,96 +39,6 @@ std::random_device seed;
 std::mt19937 engine(seed());
 std::normal_distribution<> dist(0., 1.);
 
-
-/*
-void RK4(std::function<std::vector<double>(double, std::vector<double>)> dphidN, double &N, std::vector<double> &phi, double dN) {
-  std::vector<double> kx[4]; // 4-stage slopes kx
-  double a[4][4],b[4],c[4]; // Butcher
-
-  // -------------- initialise kx, a, b, c --------------- //
-  for(int i=0;i<=3;i++){
-    kx[i].assign(phi.size(), 0.);
-    
-    for(int j=0;j<=3;j++){
-      a[i][j]=0.;
-    }
-  }
-  
-  a[1][0]=1./2;  a[2][1]=1./2;  a[3][2]=1.;
-  b[0]=1./6;     b[1]=1./3;     b[2]=1./3;    b[3]=1./6; 
-  c[0]=0;        c[1]=1./2;     c[2]=1./2;    c[3]=1;
-  // ----------------------------------------------------- //
-  
-
-  std::vector<double> X = phi; // position at i-stage
-    
-  for(int i=0;i<=3;i++){
-    X = phi; // initialise X
-    
-    for(int j=0;j<=3;j++){
-      for (size_t xi = 0, size = phi.size(); xi < size; xi++) {
-	X[xi] += dN * a[i][j] * kx[j][xi];
-      }
-
-      kx[i] = dphidN(N+c[i]*dN, X); // EoM
-    }
-  }
-
-  for (size_t xi = 0, size = phi.size(); xi < size; xi++) {
-    phi[xi] += dN*(b[0]*kx[0][xi] + b[1]*kx[1][xi] + b[2]*kx[2][xi] + b[3]*kx[3][xi]);
-  }
-  
-  N+=dN;
-}
-*/
-
-void init(double &x) {
-  x = 0;
-}
-
-template <class T>
-void init(std::vector<T> &v) {
-  for (T &e : v) {
-    init(e);
-  }
-}
-
-template <class T>
-void RK4(std::function<T(double, T)> dxdt, double &t, T &x, double dt) {
-  T kx[4]; // 4-stage slopes kx
-  double a[4][4],b[4],c[4]; // Butcher
-
-  // -------------- initialise kx, a, b, c --------------- //
-  for(int i=0;i<=3;i++){
-    //kx[i].assign(x.size(), 0.);
-    kx[i] = x;
-    init(kx[i]);
-    
-    for(int j=0;j<=3;j++){
-      a[i][j]=0.;
-    }
-  }
-  
-  a[1][0]=1./2;  a[2][1]=1./2;  a[3][2]=1.;
-  b[0]=1./6;     b[1]=1./3;     b[2]=1./3;    b[3]=1./6; 
-  c[0]=0;        c[1]=1./2;     c[2]=1./2;    c[3]=1;
-  // ----------------------------------------------------- //
-  
-
-  T X = x; // position at i-stage
-    
-  for(int i=0;i<=3;i++){
-    X = x; // initialise X
-    
-    for(int j=0;j<=3;j++){
-      X += dt * a[i][j] * kx[j];
-      kx[i] = dxdt(t,X);
-    }
-  }
-
-  t += dt;
-  x += dt*(b[0]*kx[0] + b[1]*kx[1] + b[2]*kx[2] + b[3]*kx[3]);
-}
 
 std::vector<double> dphidN(double N, std::vector<double> phi) {
   std::vector<double> dphidN(2);
