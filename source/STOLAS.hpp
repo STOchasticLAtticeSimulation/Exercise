@@ -135,10 +135,10 @@ void EulerM(std::function<T(double, const T&, double)> dNlist, std::function<T(d
 }
 
 template <class T>
-void RK4M(std::function<T(double, const T&, double)> dNlistRK4, std::function<T(double, const T&, double)> dwlist, double &N, T &x, double dN, double bias, double Nbias, double DN)
+void RK4M(std::function<T(double, const T&, double)> dNlistRK4, std::function<T(double, const T&, double)> dwlist, double &N, T &x, double dN)
 {
   T xem = x;
-  x = dNlistRK4(N, xem, dN, bias, Nbias, DN);
+  x = dNlistRK4(N, xem, dN);
   x += dwlist(N, xem, dN);
   N += dN;
 }
@@ -158,7 +158,7 @@ std::vector<std::vector<std::vector<std::vector<double>>>> dNlist(double N, std:
   return dNlist;
 }
 
-std::vector<std::vector<std::vector<std::vector<double>>>> dNlistRK4(double N, std::vector<std::vector<std::vector<std::vector<double>>>> xif, double dN, double bias, double Nbias, double DN) {
+std::vector<std::vector<std::vector<std::vector<double>>>> dNlistRK4(double N, std::vector<std::vector<std::vector<std::vector<double>>>> xif, double dN) {
   std::vector<std::vector<std::vector<std::vector<double>>>> dNlistRK4 = xif;
   
   for(size_t i = 0; i < xif.size(); i++) for(size_t j = 0; j < xif[i].size(); j++) for(size_t k = 0; k < xif[i][j].size(); k++) {
