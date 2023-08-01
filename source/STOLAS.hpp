@@ -30,8 +30,11 @@ double Ncl(std::vector<double> phi, double N, double dN, double Nprec); // class
 
 template <class T>
 void EulerM(std::function<T(double, const T&, double)> dNlist, std::function<T(double, const T&, double)> dwlist, double &N, T &x, double dN); // Euler--Maruyama
+template <class T>
+void RK4M(std::function<T(double, const T&, double)> dNlistRK4, std::function<T(double, const T&, double)> dwlist, double &N, T &x, double dN);
 
 std::vector<std::vector<std::vector<std::vector<double>>>> dNlist(double N, std::vector<std::vector<std::vector<std::vector<double>>>> xif, double dN); // coeff. of dN
+std::vector<std::vector<std::vector<std::vector<double>>>> dNlistRK4(double N, std::vector<std::vector<std::vector<std::vector<double>>>> xif, double dN);
 std::vector<std::vector<std::vector<std::vector<double>>>> dwlist(double N, std::vector<std::vector<std::vector<std::vector<double>>>> xif, double dN); // coeff. of dW
 
 // random distribution
@@ -131,18 +134,44 @@ void EulerM(std::function<T(double, const T&, double)> dNlist, std::function<T(d
   N += dN;
 }
 
-std::vector<std::vector<std::vector<std::vector<double>>>> dNlist(double N, std::vector<std::vector<std::vector<std::vector<double>>>> xif, double dN){
+template <class T>
+void RK4M(std::function<T(double, const T&, double)> dNlistRK4, std::function<T(double, const T&, double)> dwlist, double &N, T &x, double dN)
+{
+  T xem = x;
+  x = dNlistRK4(N, xem, dN);
+  x += dwlist(N, xem, dN);
+  N += dN;
+}
+
+
+std::vector<std::vector<std::vector<std::vector<double>>>> dNlist(double N, std::vector<std::vector<std::vector<std::vector<double>>>> xif, double dN) {
   std::vector<std::vector<std::vector<std::vector<double>>>> dNlist = xif;
   
   for(size_t i = 0; i < xif.size(); i++) for(size_t j = 0; j < xif[i].size(); j++) for(size_t k = 0; k < xif[i][j].size(); k++) {
-    std::vector<double> phi(2);
-    phi[0] = xif[i][j][k][0];
-    phi[1] = xif[i][j][k][1];
-    dNlist[i][j][k][0] = dphidN(N, phi)[0] * dN;
-    dNlist[i][j][k][1] = dphidN(N, phi)[1] * dN;
-  }
-
+	std::vector<double> phi(2);
+	phi[0] = xif[i][j][k][0];
+	phi[1] = xif[i][j][k][1];
+	dNlist[i][j][k][0] = dphidN(N, phi)[0] * dN;
+	dNlist[i][j][k][1] = dphidN(N, phi)[1] * dN;
+      }
+  
   return dNlist;
+}
+
+std::vector<std::vector<std::vector<std::vector<double>>>> dNlistRK4(double N, std::vector<std::vector<std::vector<std::vector<double>>>> xif, double dN) {
+  std::vector<std::vector<std::vector<std::vector<double>>>> dNlistRK4 = xif;
+  
+  for(size_t i = 0; i < xif.size(); i++) for(size_t j = 0; j < xif[i].size(); j++) for(size_t k = 0; k < xif[i][j].size(); k++) {
+	std::vector<double> phi(2);
+	phi[0] = xif[i][j][k][0];
+	phi[1] = xif[i][j][k][1];
+	RK4(dphidN, N, phi, dN);
+	N -= dN;
+	dNlistRK4[i][j][k][0] = phi[0];
+	dNlistRK4[i][j][k][1] = phi[1];
+      }
+
+  return dNlistRK4;
 }
 
 std::vector<std::vector<std::vector<std::vector<double>>>> dwlist(double N, std::vector<std::vector<std::vector<std::vector<double>>>> xif, double dN) {

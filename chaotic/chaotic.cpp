@@ -86,7 +86,7 @@ int main()
     }
     numsteps++;
 
-    EulerM<std::vector<std::vector<std::vector<std::vector<double>>>>>(dNlist, dwlist, N, x, dN); // Euler-Maruyama 1step <vector<vector<vector<vector<double>>>>>
+    RK4M<std::vector<std::vector<std::vector<std::vector<double>>>>>(dNlistRK4, dwlist, N, x, dN); // Euler-Maruyama 1step <vector<vector<vector<vector<double>>>>>
   }
 
   LOOP ofs_f << x[i][j][k][0] << ' ' << x[i][j][k][1] << std::endl; // 最終的な場の値を出力
