@@ -11,6 +11,8 @@
 #include <omp.h>
 #endif
 
+#include <iostream>
+
 // ------------ USER DEFINE ----------------
 double VV(double phi); // potential V
 double Vp(double phi); // \partial_\phi V
@@ -21,7 +23,10 @@ const double sigma = 0.1; // coarse-graining param.
 const double kdx = 0.1; // ksigma Deltax / 2pi.
 // -------------------------------------------------------
 
-void RK4(std::function<std::vector<double>(double, std::vector<double>)> dphidN, double &N, std::vector<double> &phi, double dN); // update e-folds &N and &phi = {phi, pi} by time step dN following EoM dphidN in Runge--Kutta 4
+//void RK4(std::function<std::vector<double>(double, std::vector<double>)> dphidN, double &N, std::vector<double> &phi, double dN); // update e-folds &N and &phi = {phi, pi} by time step dN following EoM dphidN in Runge--Kutta 4
+template <class T>
+void RK4(std::function<T(double, T)> dxdt, double &t, T &x, double dt);
+
 std::vector<double> dphidN(double N, std::vector<double> phi); // EoM
 double ep(double phi, double pi); // epsilonH = -Hdot / H^2
 double hubble(double phi, double pi); // Hubble param.
@@ -43,6 +48,7 @@ std::mt19937 engine(seed());
 std::normal_distribution<> dist(0., 1.);
 
 
+/*
 void RK4(std::function<std::vector<double>(double, std::vector<double>)> dphidN, double &N, std::vector<double> &phi, double dN) {
   std::vector<double> kx[4]; // 4-stage slopes kx
   double a[4][4],b[4],c[4]; // Butcher
@@ -82,6 +88,55 @@ void RK4(std::function<std::vector<double>(double, std::vector<double>)> dphidN,
   
   N+=dN;
 }
+*/
+
+void init(double &x) {
+  x = 0;
+}
+
+template <class T>
+void init(std::vector<T> &v) {
+  for (T &e : v) {
+    init(e);
+  }
+}
+
+template <class T>
+void RK4(std::function<T(double, T)> dxdt, double &t, T &x, double dt) {
+  T kx[4]; // 4-stage slopes kx
+  double a[4][4],b[4],c[4]; // Butcher
+
+  // -------------- initialise kx, a, b, c --------------- //
+  for(int i=0;i<=3;i++){
+    //kx[i].assign(x.size(), 0.);
+    kx[i] = x;
+    init(kx[i]);
+    
+    for(int j=0;j<=3;j++){
+      a[i][j]=0.;
+    }
+  }
+  
+  a[1][0]=1./2;  a[2][1]=1./2;  a[3][2]=1.;
+  b[0]=1./6;     b[1]=1./3;     b[2]=1./3;    b[3]=1./6; 
+  c[0]=0;        c[1]=1./2;     c[2]=1./2;    c[3]=1;
+  // ----------------------------------------------------- //
+  
+
+  T X = x; // position at i-stage
+    
+  for(int i=0;i<=3;i++){
+    X = x; // initialise X
+    
+    for(int j=0;j<=3;j++){
+      X += dt * a[i][j] * kx[j];
+      kx[i] = dxdt(t,X);
+    }
+  }
+
+  t += dt;
+  x += dt*(b[0]*kx[0] + b[1]*kx[1] + b[2]*kx[2] + b[3]*kx[3]);
+}
 
 std::vector<double> dphidN(double N, std::vector<double> phi) {
   std::vector<double> dphidN(2);
@@ -113,7 +168,7 @@ double Ncl(std::vector<double> phi, double N, double dN, double Nprec){
     while(ep(phi[0],phi[1])<=1.0){
       prephi[0]=phi[0];
       prephi[1]=phi[1];
-      RK4(dphidN, N, phi, dN1);
+      RK4<std::vector<double>>(dphidN, N, phi, dN1);
     }
     N -= dN1;
     
@@ -165,7 +220,7 @@ std::vector<std::vector<std::vector<std::vector<double>>>> dNlistRK4(double N, s
 	std::vector<double> phi(2);
 	phi[0] = xif[i][j][k][0];
 	phi[1] = xif[i][j][k][1];
-	RK4(dphidN, N, phi, dN);
+	RK4<std::vector<double>>(dphidN, N, phi, dN);
 	N -= dN;
 	dNlistRK4[i][j][k][0] = phi[0];
 	dNlistRK4[i][j][k][1] = phi[1];
