@@ -13,7 +13,7 @@
 const double sigma = 0.1; // coarse-graining param. 
 const double kdx = 0.1; // ksigma Deltax / 2pi.
 const int NL = 8;
-const double Nf = 5;
+const double Nf = 5.;
 const double dN = 0.01;
 const int EXPSTEP = 10;
 const std::string filename = "noisedata/noisetest.dat";
@@ -49,8 +49,8 @@ int main()
   double N = 0;
   int numsteps = 0;
 
-  while (N<Nf) {
-    if (numsteps % EXPSTEP == 0 && N < Nf) {
+  while (N<=Nf) {
+    if (numsteps % EXPSTEP == 0 && N <= Nf) {
       std::cout << N << std::endl;
     }
     dwdata.push_back(dwlist(N,dN));

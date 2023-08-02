@@ -1,5 +1,5 @@
-MODEL = classtest
-SOURCE = .
+MODEL = chaotic
+SOURCE = ../source
 
 CXX := g++-13
 CXXFLAGS := -std=c++11 -O2 -fopenmp
