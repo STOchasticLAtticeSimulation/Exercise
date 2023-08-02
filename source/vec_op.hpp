@@ -1,5 +1,4 @@
 #ifndef INCLUDED_vec_op_hpp_
-
 #define INCLUDED_vec_op_hpp_
 
 #include <vector>
@@ -58,15 +57,16 @@ std::vector<Tv>& operator*=(std::vector<Tv> &v, const Tc &c) {
   return v;
 }
 
-
-void init(double &x) {
-  x = 0;
-}
-
-template <class T>
-void init(std::vector<T> &v) {
-  for (T &e : v) {
-    init(e);
+namespace vec_op {
+  void init(double &x) {
+    x = 0;
+  }
+  
+  template <class T>
+  void init(std::vector<T> &v) {
+    for (T &e : v) {
+      init(e);
+    }
   }
 }
 

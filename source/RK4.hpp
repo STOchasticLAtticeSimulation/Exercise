@@ -1,7 +1,7 @@
 #ifndef INCLUDED_RK4_
-
 #define INCLUDED_RK4_
 
+#define _USR_MATH_DEFINES
 #include <cmath>
 #include <functional>
 #include "vec_op.hpp"
@@ -13,9 +13,8 @@ void RK4(std::function<T(double, T)> dxdt, double &t, T &x, double dt) {
 
   // -------------- initialise kx, a, b, c --------------- //
   for(int i=0;i<=3;i++){
-    //kx[i].assign(x.size(), 0.);
     kx[i] = x;
-    init(kx[i]);
+    vec_op::init(kx[i]);
     
     for(int j=0;j<=3;j++){
       a[i][j]=0.;
@@ -50,9 +49,8 @@ void RK4(std::function<T(double, T, std::vector<double>)> dxdt, double &t, T &x,
 
   // -------------- initialise kx, a, b, c --------------- //
   for(int i=0;i<=3;i++){
-    //kx[i].assign(x.size(), 0.);
     kx[i] = x;
-    init(kx[i]);
+    vec_op::init(kx[i]);
     
     for(int j=0;j<=3;j++){
       a[i][j]=0.;
@@ -79,5 +77,6 @@ void RK4(std::function<T(double, T, std::vector<double>)> dxdt, double &t, T &x,
   t += dt;
   x += dt*(b[0]*kx[0] + b[1]*kx[1] + b[2]*kx[2] + b[3]*kx[3]);
 }
+
 
 #endif
