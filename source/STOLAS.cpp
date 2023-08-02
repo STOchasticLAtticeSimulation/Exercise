@@ -17,20 +17,20 @@ STOLAS::STOLAS(std::string Model, double NF, std::string noisedir, int noisefile
   
   noisefile.open(noisedir + std::string("/") + noisefilename);
   std::string str;
-  std::stringstream ss;
   double dd;
   while (std::getline(noisefile, str)) {
     std::vector<double> vv;
-    ss << str;
+    std::stringstream ss(str);
     while (!ss.eof()) {
       ss >> dd;
       vv.push_back(dd);
     }
+    vv.pop_back();
     noisedata.push_back(vv);
   }
 
   NL = cbrt(noisedata.size());
-  dN = Nf / (noisedata[0].size()-2);
+  dN = Nf / (noisedata[0].size()-1);
   std::cout << "Noise data imported. Box size is " << NL << ". Time step is " << dN << " e-folds. Simulation ends at " << Nf << " e-folds." << std::endl;
 }
 
