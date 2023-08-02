@@ -1,4 +1,4 @@
-#include "../source/STOLAS.hpp"
+#include "../source/STOLAS_old.hpp"
 #include <iostream>
 #include <fstream>
 #include <iomanip>
