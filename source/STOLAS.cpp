@@ -11,10 +11,11 @@ STOLAS::STOLAS(std::string Model, double NF, std::string noisedir, int noisefile
   model = Model;
   Nf = NF;
   phii = Phii;
-  Nfilename = Nfileprefix + std::to_string((int)Nf) + std::string("_noise_") + std::to_string(noisefileNo) + std::string(".dat");
   bias = Bias;
   Nbias = NBias;
   dNbias = DNbias;
+
+  Nfilename = Nfileprefix + std::to_string((int)Nf) + std::string(",") + std::to_string((int)(10*(Nf-(int)Nf))) + std::string("_noise_") + std::to_string(noisefileNo) + std::string(".dat");
 
   std::cout << "model : " << model << std::endl;
   
@@ -114,7 +115,7 @@ std::vector<double> STOLAS::dphidNbias(double N, std::vector<double> phi, int po
   double GaussianBias = bias * GaussianFactor;
 
   int ix = pos / (NL*NL);
-  int iy = pos / NL;
+  int iy = (pos%(NL*NL)) / NL;
   int iz = pos % NL;
 
   double r = sqrt(ix*ix + iy*iy + iz*iz);

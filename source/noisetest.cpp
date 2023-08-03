@@ -1,5 +1,6 @@
 #include <random>
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #include <cmath>
 #include <vector>
@@ -12,8 +13,8 @@
 // ------------ User may change --------------------------
 const double sigma = 0.1; // coarse-graining param. 
 const double kdx = 0.1; // ksigma Deltax / 2pi.
-const int NL = 8;
-const double Nf = 5.;
+const int NL = 16;
+const double Nf = 5.5;
 const double dN = 0.01;
 const int EXPSTEP = 10;
 const std::string filename = "noisedata/noisetest.dat";
@@ -51,12 +52,13 @@ int main()
 
   while (N<=Nf) {
     if (numsteps % EXPSTEP == 0 && N <= Nf) {
-      std::cout << N << std::endl;
+      std::cout << "\r" << std::setw(3) << N << "/" << Nf << std::flush;
     }
     dwdata.push_back(dwlist(N,dN));
     N += dN;
     numsteps++;
   }
+  std::cout << std::endl;
 
   std::ofstream ofs(filename);
   for (size_t i=0; i<dwdata[0].size(); i++) {
