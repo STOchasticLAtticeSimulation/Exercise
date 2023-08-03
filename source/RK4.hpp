@@ -7,7 +7,7 @@
 #include "vec_op.hpp"
 
 template <class T>
-void RK4(std::function<T(double, T)> dxdt, double &t, T &x, double dt) {
+void RK4(std::function<T(double, T)> &dxdt, double &t, T &x, double dt) {
   T kx[4]; // 4-stage slopes kx
   double a[4][4],b[4],c[4]; // Butcher
 
@@ -43,7 +43,7 @@ void RK4(std::function<T(double, T)> dxdt, double &t, T &x, double dt) {
 }
 
 template <class T>
-void RK4(std::function<T(double, T, std::vector<double>)> dxdt, double &t, T &x, double dt, std::vector<double> params) {
+void RK4(std::function<T(double, T, std::vector<double>)> &dxdt, double &t, T &x, double dt, std::vector<double> params) {
   T kx[4]; // 4-stage slopes kx
   double a[4][4],b[4],c[4]; // Butcher
 

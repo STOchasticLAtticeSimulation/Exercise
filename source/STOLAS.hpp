@@ -1,6 +1,8 @@
 #ifndef INCLUDED_STOLAS_
 #define INCLUDED_STOLAS_
 
+#define _USR_MATH_DEFINES
+#include <cmath>
 #include <sstream>
 #include <fstream>
 #include <iostream>
@@ -17,34 +19,38 @@ protected:
   // ------------ User may change -----------
   const double sigma = 0.1;
   const double kdx = 0.1;
-  const double Nprec = 0.01;
+  const double Nprec = 1e-4;
   // ----------------------------------------
 
   const std::string noisefilename = "noisetest.dat";
+  const std::string Nfileprefix = "Nmap_Nf_";
 
-  std::string model;
+  std::string model, Nfilename;
   int NL;
   double Nf, dN, bias, Nbias, dNbias;
   std::ifstream noisefile;
+  std::vector<double> phii;
   std::vector<std::vector<double>> noisedata;
 
 public:
   STOLAS(){}
-  STOLAS(std::string Model, double NF, std::string noisedir, int noisefileNo, double Bias, double NBias, double DNbias);
+  STOLAS(std::string Model, double NF, std::string noisedir, int noisefileNo, std::vector<double> Phii, double Bias, double NBias, double DNbias);
 
   double VV(double phi);
   double Vp(double phi);
   
-  //void dNmap();
+  void dNmap();
 
   double ep(double phi, double pi);
   double hubble(double phi, double pi);
 
   std::vector<double> dphidN(double N, std::vector<double> phi);
-  std::vector<double> dphidNbias(double N, std::vector<double> phi, std::vector<double> pos);
+  std::vector<double> dphidNbias(double N, std::vector<double> phi, int pos);
 
-  void RK4M(std::function<std::vector<double>(double, std::vector<double>)> dphidN, double dw, double &N, std::vector<double> &phi, double dN);
-  void RK4Mbias(std::function<std::vector<double>(double, std::vector<double>, std::vector<double>)> dphidNbias, double dw, double &N, std::vector<double> &phi, double dN, std::vector<double> pos);
+  void RK4(double &t, std::vector<double> &x, double dt);
+  void RK4bias(double &t, std::vector<double> &x, double dt, int pos);
+  void RK4M(double &N, std::vector<double> &phi, double dN, double dw);
+  void RK4Mbias(double &N, std::vector<double> &phi, double dN, double dw, int pos);
 };
 
 #endif

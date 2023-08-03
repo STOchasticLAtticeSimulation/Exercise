@@ -1,7 +1,8 @@
 #include "STOLAS.hpp"
-#include "RK4.hpp"
+#include "vec_op.hpp"
 
-STOLAS::STOLAS(std::string Model, double NF, std::string noisedir, int noisefileNo, double Bias, double NBias, double DNbias) {
+
+STOLAS::STOLAS(std::string Model, double NF, std::string noisedir, int noisefileNo, std::vector<double> Phii, double Bias, double NBias, double DNbias) {
 
 #ifdef _OPENMP
   std::cout << "OpenMP : Enabled (Max # of threads = " << omp_get_max_threads() << ")" << std::endl;
@@ -9,6 +10,8 @@ STOLAS::STOLAS(std::string Model, double NF, std::string noisedir, int noisefile
   
   model = Model;
   Nf = NF;
+  phii = Phii;
+  Nfilename = Nfileprefix + std::to_string((int)Nf) + std::string("_noise_") + std::to_string(noisefileNo) + std::string(".dat");
   bias = Bias;
   Nbias = NBias;
   dNbias = DNbias;
@@ -35,11 +38,46 @@ STOLAS::STOLAS(std::string Model, double NF, std::string noisedir, int noisefile
 }
 
 
-/*
 void STOLAS::dNmap() {
+  std::ofstream Nfile(Nfilename);
+  int complete = 0;
   
+#ifdef _OPENMP
+#pragma omp parallel for
+#endif
+  for (int i=0; i<NL*NL*NL; i++) {
+    double N=0;
+    std::vector<double> phi = phii;
+    for (size_t n=0; n<noisedata[i].size(); n++) {
+      RK4Mbias(N,phi,dN,noisedata[i][n],i);
+    }
+
+    double dN1 = dN;
+    std::vector<double> prephi(2);
+    while (dN1 >= Nprec) {
+      while (ep(phi[0],phi[1])<=1.) {
+	prephi[0] = phi[0];
+	prephi[1] = phi[1];
+	RK4(N,phi,dN);
+      }
+      N -= dN1;
+
+      phi[0] = prephi[0];
+      phi[1] = prephi[1];
+      dN1 *= 0.1;
+    }
+
+#ifdef _OPENMP
+#pragma omp critical
+#endif
+    {
+      Nfile << i << ' ' << N << std::endl;
+      complete++;
+      std::cout << "\r" << complete << "/" << NL*NL*NL << std::flush;
+    }
+  }
+  std::cout << std::endl;
 }
-*/
 
 
 double STOLAS::ep(double phi, double pi) {
@@ -64,8 +102,8 @@ std::vector<double> STOLAS::dphidN(double N, std::vector<double> phi) {
   return dphidN;
 }
 
-std::vector<double> STOLAS::dphidNbias(double N, std::vector<double> phi, std::vector<double> pos) {
-  std::vector<double> dphidN(2);
+std::vector<double> STOLAS::dphidNbias(double N, std::vector<double> phi, int pos) {
+  std::vector<double> dphidNbias(2);
 
   double xx = phi[0]; // phi
   double pp = phi[1]; // pi
@@ -75,9 +113,9 @@ std::vector<double> STOLAS::dphidNbias(double N, std::vector<double> phi, std::v
   double GaussianFactor = 1./dNbias /sqrt(2.*M_PI) * exp(-(N-Nbias)*(N-Nbias)/2./dNbias/dNbias);
   double GaussianBias = bias * GaussianFactor;
 
-  int ix = (int)(pos[0]+0.5) / (NL*NL);
-  int iy = (int)(pos[0]+0.5) / NL;
-  int iz = (int)(pos[0]+0.5) % NL;
+  int ix = pos / (NL*NL);
+  int iy = pos / NL;
+  int iz = pos % NL;
 
   double r = sqrt(ix*ix + iy*iy + iz*iz);
   double ksigma = 2.*M_PI*sigma*exp(N)/NL;
@@ -86,22 +124,92 @@ std::vector<double> STOLAS::dphidNbias(double N, std::vector<double> phi, std::v
     GaussianBias *= sin(ksigma*r)/ksigma/r;
   }
 
-  dphidN[0] = pp/HH + HH/2./M_PI * GaussianBias;
-  dphidN[1] = -3*pp - Vp(xx)/HH;
+  dphidNbias[0] = pp/HH + HH/2./M_PI * GaussianBias;
+  dphidNbias[1] = -3*pp - Vp(xx)/HH;
   
-  return dphidN;
+  return dphidNbias;
 }
 
-void STOLAS::RK4M(std::function<std::vector<double>(double, std::vector<double>)> dphidN, double dw, double &N, std::vector<double> &phi, double dN) {
+void STOLAS::RK4(double &t, std::vector<double> &x, double dt) {
+  std::vector<double> kx[4]; // 4-stage slopes kx
+  double a[4][4],b[4],c[4]; // Butcher
+
+  // -------------- initialise kx, a, b, c --------------- //
+  for(int i=0;i<=3;i++){
+    kx[i] = x;
+    vec_op::init(kx[i]);
+    
+    for(int j=0;j<=3;j++){
+      a[i][j]=0.;
+    }
+  }
+  
+  a[1][0]=1./2;  a[2][1]=1./2;  a[3][2]=1.;
+  b[0]=1./6;     b[1]=1./3;     b[2]=1./3;    b[3]=1./6; 
+  c[0]=0;        c[1]=1./2;     c[2]=1./2;    c[3]=1;
+  // ----------------------------------------------------- //
+  
+
+  std::vector<double> X = x; // position at i-stage
+    
+  for(int i=0;i<=3;i++){
+    X = x; // initialise X
+    
+    for(int j=0;j<=3;j++){
+      X += dt * a[i][j] * kx[j];
+      kx[i] = dphidN(t,X);
+    }
+  }
+
+  t += dt;
+  x += dt*(b[0]*kx[0] + b[1]*kx[1] + b[2]*kx[2] + b[3]*kx[3]);
+}
+
+void STOLAS::RK4bias(double &t, std::vector<double> &x, double dt, int pos) {
+  std::vector<double> kx[4]; // 4-stage slopes kx
+  double a[4][4],b[4],c[4]; // Butcher
+
+  // -------------- initialise kx, a, b, c --------------- //
+  for(int i=0;i<=3;i++){
+    kx[i] = x;
+    vec_op::init(kx[i]);
+    
+    for(int j=0;j<=3;j++){
+      a[i][j]=0.;
+    }
+  }
+  
+  a[1][0]=1./2;  a[2][1]=1./2;  a[3][2]=1.;
+  b[0]=1./6;     b[1]=1./3;     b[2]=1./3;    b[3]=1./6; 
+  c[0]=0;        c[1]=1./2;     c[2]=1./2;    c[3]=1;
+  // ----------------------------------------------------- //
+  
+
+  std::vector<double> X = x; // position at i-stage
+    
+  for(int i=0;i<=3;i++){
+    X = x; // initialise X
+    
+    for(int j=0;j<=3;j++){
+      X += dt * a[i][j] * kx[j];
+      kx[i] = dphidNbias(t,X,pos);
+    }
+  }
+
+  t += dt;
+  x += dt*(b[0]*kx[0] + b[1]*kx[1] + b[2]*kx[2] + b[3]*kx[3]);
+}
+
+void STOLAS::RK4M(double &N, std::vector<double> &phi, double dN, double dw) {
   double HH = hubble(phi[0],phi[1]);
   
-  RK4<std::vector<double>>(dphidN,N,phi,dN);
+  RK4(N,phi,dN);
   phi[0] += HH/2./M_PI * dw;
 }
 
-void STOLAS::RK4Mbias(std::function<std::vector<double>(double, std::vector<double>, std::vector<double>)> dphidNbias, double dw, double &N, std::vector<double> &phi, double dN, std::vector<double> pos) {
+void STOLAS::RK4Mbias(double &N, std::vector<double> &phi, double dN, double dw, int pos) {
   double HH = hubble(phi[0],phi[1]);
 
-  RK4<std::vector<double>>(dphidNbias,N,phi,dN,pos);
+  RK4bias(N,phi,dN,pos);
   phi[0] += HH/2./M_PI * dw;
 }
