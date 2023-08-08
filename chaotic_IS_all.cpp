@@ -36,6 +36,7 @@ const double Nf = 5.5;  // lattice 終了時刻
 const double dN = 0.01; // 時間刻み
 const double mm = 1.0e-2; // 質量
 const double NPREC = 1e-7; // Ncl の精度
+const double bias = 12;
 // ----------------------------------------- //
 
 // 変数の初期値
@@ -56,7 +57,7 @@ const vector<double> xi{phi0, pi0}; // initial value
 random_device seed;
 mt19937 engine(seed());
 normal_distribution<> dist(0., 0./*1.*/);
-normal_distribution<> dist1(1.5, 0./*1.*/);
+//normal_distribution<> dist1(1.5, 0./*1.*/);
 // useful macro
 #define LOOP for(int i = 0; i < NL; i++) for(int j = 0; j < NL; j++) for(int k = 0; k < NL; k++)
 
@@ -203,6 +204,10 @@ vector<vector<vector<vector<double>>>> dwdNlist(double N, vector<vector<vector<v
       divph[n] = int(2. * M_PI / dphi[n]);
       for (int l = 0; l < divph[n]; l++){
         double phii = l * dphi[n];
+
+	double dOmegai = sin(thetai[n]) * dtheta * dphi[n];
+	double Bias = bias * sqrt(dOmegai)/2./sqrt(M_PI) /sqrt(dN);
+	normal_distribution<> dist1(Bias,0);
         Omegalist.push_back({thetai[n], dphi[n], phii, sqrt(dN) * dist1(engine)});
       }
     }
