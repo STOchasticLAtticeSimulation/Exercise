@@ -29,7 +29,7 @@ double hubble(double phi, double pi);
 double VV(double phi);
 double Vp(double phi); // ポテンシャル VV の phi 微分
 double Ncl(vector<double> phi,double N,double Nprec); // 初期条件 phi & N から end of inf までの e-folds Ncl を精度 Nprec で求める
-double lnweight(double NCL, vector<vector<vector<vector<double>>>> dwdNlist,double bias);// 各格子点の weight を計算
+double lnweight(double NCL, function<T(double, const T&)> dwdNlist,double bias);// 各格子点の weight を計算
  
 // ------------ パラメータ ----------------- //
 const string filename = "Ncl_chaotic_biased_g_CF.dat"; // 出力ファイル名(Ncl)
@@ -197,7 +197,7 @@ vector<vector<vector<vector<double>>>> dphidNlist(double N, vector<vector<vector
   return dphidNlist;
 }
 
-double lnweight(double NCL, vector<vector<vector<vector<double>>>> dwdN,double bias){
+double lnweight(double NCL, function<T(double, const T&)> dwdNlist,double bias){
 double weight = ((pow(bias,2.0)*NCL)/2.) + bias*sqrt(NCL)*dwdNend;
 }// 各格子点の weight を計算
 
