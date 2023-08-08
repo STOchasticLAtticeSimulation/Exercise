@@ -51,7 +51,7 @@ const double NPREC = 1e-7; // Ncl の精度
 // double N = 0.;// e-foldings
 const double phi0 = 3.60547;
 const double pi0 = -2.37409e-7;
-const int NL = 9; // Number of lattice
+const int NL = 17; // Number of lattice
 const int N3 = NL * NL * NL; // for conveniensce
 const double Ninv = 1. / NL; // for conveniensce
 const double sigma = 1./10.; // coarse-grained scale parameter
@@ -64,9 +64,9 @@ const double Nbias = 3; //2.0; // Biased time
 // random distribution
 random_device seed;
 mt19937 engine(seed());
-normal_distribution<> dist(0., 1.);
-const double bias = 7.; //5.;
-normal_distribution<> dist1(bias, 1.);
+normal_distribution<> dist(0., 0.);
+const double bias = 3.; //5.;
+normal_distribution<> dist1(bias, 0.);
 
 // useful macro
 #define LOOP for(int i = 0; i < NL; i++) for(int j = 0; j < NL; j++) for(int k = 0; k < NL; k++)
