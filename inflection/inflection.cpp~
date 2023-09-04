@@ -1,0 +1,19 @@
+#include "../source/STOLAS.hpp"
+#include <iostream>
+#include <fstream>
+#include <iomanip>
+#include <sys/time.h>
+
+const double AW = 0.02;
+const double BW = 1;
+const double CW = 0.04;
+const double DW = 0;
+const double GW = 3.076278e-2;
+const double RW = 0.7071067;
+const double CALV = 1000;
+const double W0 = 12.35;
+const double CUP = 0.0382;
+
+const string filename = "Ncl_inflection.dat"; // 出力ファイル名(Ncl)
+const string filename_c = "Lattice_inflection.dat"; // 出力ファイル名(曲率ゆらぎ)
+const string filename_f = "field_inflection.dat"; // 出力ファイル名(phi, pi)
