@@ -13,22 +13,25 @@ const complex<double> II(0,1);
 
 vector<complex<double>> dft(vector<complex<double>> signal);
 vector<vector<complex<double>>> dft(vector<vector<complex<double>>> signal);
+vector<vector<vector<complex<double>>>> dft(vector<vector<vector<complex<double>>>> signal);
 vector<complex<double>> fft(vector<complex<double>> signal);
 vector<vector<complex<double>>> fft(vector<vector<complex<double>>> signal);
-
-const string filename = "fft_exp.dat";
-ofstream ofs(filename);
+vector<vector<vector<complex<double>>>> fft(vector<vector<vector<complex<double>>>> signal);
 
 int main() {
     int Num = pow(2, 8);
     double kx1 = 10;
-    double kx2 = 52;
+    double kx2 = 29;
     double ky1 = 21;
     double ky2 = 1;
-    vector<vector<complex<double>>> signal(Num, vector<complex<double>>(Num, 0));
+    double kz1 = 3;
+    double kz2 = 18;
+    vector<vector<vector<complex<double>>>> signal(Num, vector<vector<complex<double>>>(Num, vector<complex<double>>(Num, 0)));
     for (int i = 0; i < Num; i++) {
       for (int j = 0; j < Num; j++) {
-	signal[i][j] = 1./Num/Num*(exp(2*M_PI*(kx1*i+ky1*j)/Num*II) + exp(2*M_PI*(kx2*i+ky2*j)/Num*II));
+	for (int k = 0; k < Num; k++) {
+	  signal[i][j][k] = 1./Num/Num/Num*(exp(2*M_PI*(kx1*i+ky1*j+kz1*k)/Num*II) + exp(2*M_PI*(kx2*i+ky2*j+kz2*k)/Num*II));
+	}
       }
     }
     
@@ -42,7 +45,7 @@ int main() {
     // --------------------------------------
 
     // FFT
-    vector<vector<complex<double>>> spectrumf = fft(signal);
+    vector<vector<vector<complex<double>>>> spectrumf = fft(signal);
     
     // ---------- stop timer ----------
     gettimeofday(&Nv, &Nz);
@@ -56,7 +59,7 @@ int main() {
     before = (double)Nv.tv_sec + (double)Nv.tv_usec * 1.e-6;
 
     // DFT
-    vector<vector<complex<double>>> spectrumd = dft(signal);
+    vector<vector<vector<complex<double>>>> spectrumd = dft(signal);
     
     gettimeofday(&Nv, &Nz);
     after = (double)Nv.tv_sec + (double)Nv.tv_usec * 1.e-6;
@@ -65,12 +68,12 @@ int main() {
 
     for (int i = 0; i < signal.size(); i++) {
       for (int j = 0; j < signal[0].size(); j++) {
-	ofs << abs(spectrumf[i][j]) << ' ';
-	if (abs(spectrumf[i][j]) > 1e-10) {
-	  cout << i << ' ' << j << ' ' << abs(spectrumf[i][j]) << endl;
+	for (int k = 0; k < signal[0][0].size(); k++) {
+	  if (abs(spectrumf[i][j][k]) > 1e-10) {
+	    cout << i << ' ' << j << ' ' << k << ' ' << abs(spectrumf[i][j][k]) << endl;
+	  }
 	}
       }
-      ofs << endl;
     }
 
     return 0;
@@ -95,10 +98,12 @@ vector<complex<double>> dft(vector<complex<double>> signal) {
 }
 
 vector<vector<complex<double>>> dft(vector<vector<complex<double>>> signal) {
+  // dft index y
   for (vector<complex<double>> &e : signal) {
     e = dft(e);
   }
 
+  // transpose
   vector<vector<complex<double>>> tmp = signal;
   for (size_t x = 0; x < signal.size(); x++) {
     for (size_t y = 0; y < signal[0].size(); y++) {
@@ -107,13 +112,51 @@ vector<vector<complex<double>>> dft(vector<vector<complex<double>>> signal) {
   }
   signal = tmp;
 
+  // dft index x
   for (vector<complex<double>> &e : signal) {
     e = dft(e);
   }
 
+  // transpose
   for (size_t x = 0; x < signal.size(); x++) {
     for (size_t y = 0; y < signal[0].size(); y++) {
       tmp[x][y] = signal[y][x];
+    }
+  }
+
+  return tmp;
+}
+
+vector<vector<vector<complex<double>>>> dft(vector<vector<vector<complex<double>>>> signal) {
+  // dft indices y and z
+  for (vector<vector<complex<double>>> &e : signal) {
+    e = dft(e);
+  }
+
+  // (x,y,z) to (y,z,x)
+  vector<vector<vector<complex<double>>>> tmp = signal;
+  for (size_t x = 0; x < signal.size(); x++) {
+    for (size_t y = 0; y < signal[0].size(); y++) {
+      for (size_t z = 0; z < signal[0][0].size(); z++) {
+	tmp[y][z][x] = signal[x][y][z];
+      }
+    }
+  }
+  signal = tmp;
+  
+  // dft index x
+  for (vector<vector<complex<double>>> &e1 : signal) {
+    for (vector<complex<double>> &e2 : e1) {
+      e2 = dft(e2);
+    }
+  }
+
+  // (y,z,x) to (x,y,z)
+  for (size_t x = 0; x < signal.size(); x++) {
+    for (size_t y = 0; y < signal[0].size(); y++) {
+      for (size_t z = 0; z < signal[0][0].size(); z++) {
+	tmp[x][y][z] = signal[y][z][x];
+      }
     }
   }
 
@@ -147,10 +190,12 @@ vector<complex<double>> fft(vector<complex<double>> signal) {
 }
 
 vector<vector<complex<double>>> fft(vector<vector<complex<double>>> signal) {
+  // fft index y
   for (vector<complex<double>> &e : signal) {
     e = fft(e);
   }
 
+  // transpose
   vector<vector<complex<double>>> tmp = signal;
   for (size_t x = 0; x < signal.size(); x++) {
     for (size_t y = 0; y < signal[0].size(); y++) {
@@ -159,10 +204,12 @@ vector<vector<complex<double>>> fft(vector<vector<complex<double>>> signal) {
   }
   signal = tmp;
 
+  // fft index x
   for (vector<complex<double>> &e : signal) {
     e = fft(e);
   }
 
+  // transpose
   for (size_t x = 0; x < signal.size(); x++) {
     for (size_t y = 0; y < signal[0].size(); y++) {
       tmp[x][y] = signal[y][x];
@@ -171,5 +218,42 @@ vector<vector<complex<double>>> fft(vector<vector<complex<double>>> signal) {
 
   return tmp;
 }
+
+vector<vector<vector<complex<double>>>> fft(vector<vector<vector<complex<double>>>> signal) {
+  // fft indices y and z
+  for (vector<vector<complex<double>>> &e : signal) {
+    e = fft(e);
+  }
+
+  // (x,y,z) to (y,z,x)
+  vector<vector<vector<complex<double>>>> tmp = signal;
+  for (size_t x = 0; x < signal.size(); x++) {
+    for (size_t y = 0; y < signal[0].size(); y++) {
+      for (size_t z = 0; z < signal[0][0].size(); z++) {
+	tmp[y][z][x] = signal[x][y][z];
+      }
+    }
+  }
+  signal = tmp;
+  
+  // fft index x
+  for (vector<vector<complex<double>>> &e1 : signal) {
+    for (vector<complex<double>> &e2 : e1) {
+      e2 = fft(e2);
+    }
+  }
+
+  // (y,z,x) to (x,y,z)
+  for (size_t x = 0; x < signal.size(); x++) {
+    for (size_t y = 0; y < signal[0].size(); y++) {
+      for (size_t z = 0; z < signal[0][0].size(); z++) {
+	tmp[x][y][z] = signal[y][z][x];
+      }
+    }
+  }
+
+  return tmp;
+}
+
 
 
