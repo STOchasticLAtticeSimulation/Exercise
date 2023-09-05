@@ -9,19 +9,22 @@
 
 using namespace std;
 
+const complex<double> II(0,1);
+
 vector<complex<double>> dft(vector<complex<double>> signal);
 vector<complex<double>> fft(vector<complex<double>> signal);
 
-const string filename = "fft_sin.dat";
+const string filename = "fft_exp.dat";
 ofstream ofs(filename);
 
 int main() {
-    int Num = pow(2, 3);
-    double knum = 2;
+    int Num = pow(2, 5);
+    double knum1 = 10;
+    double knum2 = 21;
     vector<complex<double>> signal;
     for (int i = 0; i < Num; i++) {
-        complex<double> number(cos(2*M_PI*i/Num*knum), 0);
-        signal.push_back(number);
+      complex<double> number = 1./Num*(exp(2*M_PI*knum1/Num*i*II) /*+ exp(exp(2*M_PI*knum2/Num*i*II))*/);
+      signal.push_back(number);
     }
     
     // ---------- start timer ----------
@@ -59,7 +62,8 @@ int main() {
     for (int k = 0; k < signal.size(); ++k) {
         // cout << k << " " << (spectrumf[k]-spectrumd[k]).real() << " + " << (spectrumf[k]-spectrumd[k]).imag() << "i" << endl;
         // cout << "Frequency bin " << k << ": " << spectrumd[k].real() << " + " << spectrumd[k].imag() << "i" << endl;
-        ofs << spectrumf[k].real() << " " << spectrumf[k].imag() << endl;
+      //ofs << spectrumf[k].real() << " " << spectrumf[k].imag() << ' ' << spectrumd[k].real() << ' ' << spectrumd[k].imag() << endl;
+      ofs << k << ' ' << abs(spectrumf[k]) << endl;
     }
 
     return 0;
