@@ -12,19 +12,24 @@ using namespace std;
 const complex<double> II(0,1);
 
 vector<complex<double>> dft(vector<complex<double>> signal);
+vector<vector<complex<double>>> dft(vector<vector<complex<double>>> signal);
 vector<complex<double>> fft(vector<complex<double>> signal);
+vector<vector<complex<double>>> fft(vector<vector<complex<double>>> signal);
 
 const string filename = "fft_exp.dat";
 ofstream ofs(filename);
 
 int main() {
-    int Num = pow(2, 10);
-    double knum1 = 10;
-    double knum2 = 21;
-    vector<complex<double>> signal;
+    int Num = pow(2, 8);
+    double kx1 = 10;
+    double kx2 = 52;
+    double ky1 = 21;
+    double ky2 = 1;
+    vector<vector<complex<double>>> signal(Num, vector<complex<double>>(Num, 0));
     for (int i = 0; i < Num; i++) {
-      complex<double> number = 1./Num*(exp(2*M_PI*knum1/Num*i*II) + exp(2*M_PI*knum2/Num*i*II));
-      signal.push_back(number);
+      for (int j = 0; j < Num; j++) {
+	signal[i][j] = 1./Num/Num*(exp(2*M_PI*(kx1*i+ky1*j)/Num*II) + exp(2*M_PI*(kx2*i+ky2*j)/Num*II));
+      }
     }
     
     // ---------- start timer ----------
@@ -37,7 +42,7 @@ int main() {
     // --------------------------------------
 
     // FFT
-    vector<complex<double>> spectrumf = fft(signal);
+    vector<vector<complex<double>>> spectrumf = fft(signal);
     
     // ---------- stop timer ----------
     gettimeofday(&Nv, &Nz);
@@ -51,22 +56,21 @@ int main() {
     before = (double)Nv.tv_sec + (double)Nv.tv_usec * 1.e-6;
 
     // DFT
-    vector<complex<double>> spectrumd = dft(signal);
+    vector<vector<complex<double>>> spectrumd = dft(signal);
     
     gettimeofday(&Nv, &Nz);
     after = (double)Nv.tv_sec + (double)Nv.tv_usec * 1.e-6;
     cout << "DFT " << after - before << " sec." << endl;
 
 
-    // 離散フーリエ変換結果を複素数形式で表示
-    for (int k = 0; k < signal.size(); ++k) {
-        // cout << k << " " << (spectrumf[k]-spectrumd[k]).real() << " + " << (spectrumf[k]-spectrumd[k]).imag() << "i" << endl;
-        // cout << "Frequency bin " << k << ": " << spectrumd[k].real() << " + " << spectrumd[k].imag() << "i" << endl;
-      //ofs << spectrumf[k].real() << " " << spectrumf[k].imag() << ' ' << spectrumd[k].real() << ' ' << spectrumd[k].imag() << endl;
-      ofs << k << ' ' << abs(spectrumf[k]) << endl;
-      if (abs(spectrumf[k]) > 1e-10) {
-	cout << k << ' ' << abs(spectrumf[k]) << endl;
+    for (int i = 0; i < signal.size(); i++) {
+      for (int j = 0; j < signal[0].size(); j++) {
+	ofs << abs(spectrumf[i][j]) << ' ';
+	if (abs(spectrumf[i][j]) > 1e-10) {
+	  cout << i << ' ' << j << ' ' << abs(spectrumf[i][j]) << endl;
+	}
       }
+      ofs << endl;
     }
 
     return 0;
@@ -88,6 +92,32 @@ vector<complex<double>> dft(vector<complex<double>> signal) {
     }
 
     return spectrum;
+}
+
+vector<vector<complex<double>>> dft(vector<vector<complex<double>>> signal) {
+  for (vector<complex<double>> &e : signal) {
+    e = dft(e);
+  }
+
+  vector<vector<complex<double>>> tmp = signal;
+  for (size_t x = 0; x < signal.size(); x++) {
+    for (size_t y = 0; y < signal[0].size(); y++) {
+      tmp[x][y] = signal[y][x];
+    }
+  }
+  signal = tmp;
+
+  for (vector<complex<double>> &e : signal) {
+    e = dft(e);
+  }
+
+  for (size_t x = 0; x < signal.size(); x++) {
+    for (size_t y = 0; y < signal[0].size(); y++) {
+      tmp[x][y] = signal[y][x];
+    }
+  }
+
+  return tmp;
 }
 
 
@@ -115,3 +145,31 @@ vector<complex<double>> fft(vector<complex<double>> signal) {
 
     return spectrum;
 }
+
+vector<vector<complex<double>>> fft(vector<vector<complex<double>>> signal) {
+  for (vector<complex<double>> &e : signal) {
+    e = fft(e);
+  }
+
+  vector<vector<complex<double>>> tmp = signal;
+  for (size_t x = 0; x < signal.size(); x++) {
+    for (size_t y = 0; y < signal[0].size(); y++) {
+      tmp[x][y] = signal[y][x];
+    }
+  }
+  signal = tmp;
+
+  for (vector<complex<double>> &e : signal) {
+    e = fft(e);
+  }
+
+  for (size_t x = 0; x < signal.size(); x++) {
+    for (size_t y = 0; y < signal[0].size(); y++) {
+      tmp[x][y] = signal[y][x];
+    }
+  }
+
+  return tmp;
+}
+
+
