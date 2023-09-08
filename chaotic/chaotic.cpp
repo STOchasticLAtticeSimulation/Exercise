@@ -4,7 +4,7 @@
 const double mm = 0.01;
 
 const std::string model = "chaotic";
-const double Nf = 5.5;
+const double Nf = 2; //5.5;
 const std::string noisedir = "../source/noisedata";
 const int noisefileNo = 0.;
 const std::vector<double> phii{15.,-0.1*mm*mm};

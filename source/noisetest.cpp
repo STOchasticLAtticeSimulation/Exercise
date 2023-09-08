@@ -14,7 +14,7 @@
 const double sigma = 0.1; // coarse-graining param. 
 const double kdx = 0.1; // ksigma Deltax / 2pi.
 const int NL = 32;
-const double Nf = 6;
+const double Nf = 2; //6;
 const double dN = 0.01;
 const int EXPSTEP = 10;
 const std::string filename = "noisedata/largenoisetest.dat";
