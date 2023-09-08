@@ -20,10 +20,10 @@ protected:
   // ------------ User may change -----------
   const double sigma = 0.1;
   const double kdx = 0.1;
-  const double Nprec = 1e-4;
+  const double Nprec = 1e-7;
   // ----------------------------------------
 
-  const std::string noisefilename = "noisetest.dat";
+  const std::string noisefilename = "largenoisetest.dat";
   const std::string Nfileprefix = "Nmap_Nf_";
 
   std::string model, Nfilename;

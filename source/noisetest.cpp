@@ -14,7 +14,7 @@
 const double sigma = 0.1; // coarse-graining param. 
 const double kdx = 0.1; // ksigma Deltax / 2pi.
 const int NL = 32;
-const double Nf = 2; //6;
+const double Nf = 5.5;
 const double dN = 0.01;
 const int EXPSTEP = 10;
 const std::string filename = "noisedata/largenoisetest.dat";
@@ -56,8 +56,8 @@ int main()
   double N = 0;
   int numsteps = 0;
 
-  while (N<=Nf) {
-    if (numsteps % EXPSTEP == 0 && N <= Nf) {
+  while (N<Nf+dN/2.) {
+    if (numsteps % EXPSTEP == 0 && N < Nf+dN/2.) {
       std::cout << "\r" << std::setw(3) << N << "/" << Nf << std::flush;
     }
     dwdata.push_back(dwlist(N,dN));

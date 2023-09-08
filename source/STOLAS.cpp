@@ -41,6 +41,7 @@ STOLAS::STOLAS(std::string Model, double NF, std::string noisedir, int noisefile
 
 void STOLAS::dNmap() {
   std::ofstream Nfile(Nfilename);
+  Nfile << std::setprecision(10);
   int complete = 0;
   
 #ifdef _OPENMP
@@ -59,7 +60,7 @@ void STOLAS::dNmap() {
       while (ep(phi[0],phi[1])<=1.) {
 	prephi[0] = phi[0];
 	prephi[1] = phi[1];
-	RK4(N,phi,dN);
+	RK4(N,phi,dN1);
       }
       N -= dN1;
 
