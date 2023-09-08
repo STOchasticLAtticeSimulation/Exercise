@@ -46,6 +46,12 @@ int main()
   std::cout << "OpenMP : Enabled (Max # of threads = " << omp_get_max_threads() << ")" << std::endl;
 #endif
 
+  std::ofstream ofs(filename);
+  if (ofs.fail()) {
+    std::cout << "Data file coulnd't be opened." << std::endl;
+    return -1;
+  }
+  
   std::vector<std::vector<double>> dwdata;
   double N = 0;
   int numsteps = 0;
@@ -60,7 +66,6 @@ int main()
   }
   std::cout << std::endl;
 
-  std::ofstream ofs(filename);
   for (size_t i=0; i<dwdata[0].size(); i++) {
     for (size_t n=0; n<dwdata.size(); n++) {
       ofs << dwdata[n][i] << ' ';
