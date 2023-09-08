@@ -13,11 +13,11 @@
 // ------------ User may change --------------------------
 const double sigma = 0.1; // coarse-graining param. 
 const double kdx = 0.1; // ksigma Deltax / 2pi.
-const int NL = 16;
-const double Nf = 5.5;
+const int NL = 32;
+const double Nf = 6;
 const double dN = 0.01;
 const int EXPSTEP = 10;
-const std::string filename = "noisedata/noisetest.dat";
+const std::string filename = "noisedata/largenoisetest.dat";
 // -------------------------------------------------------
 
 std::vector<double> dwlist(double N, double dN); 
