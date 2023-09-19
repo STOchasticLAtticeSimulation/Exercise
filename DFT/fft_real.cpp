@@ -46,7 +46,7 @@ int main() {
       }
     }
 
-    std::cout << count << std::endl;
+    std::cout << Num*Num*Num << ' ' << count << std::endl;
 
 
     /*
@@ -109,7 +109,23 @@ bool complexpoint(int nx, int ny, int nz, int Num) {
     nxt = nx-Num;
   }
 
-  return true;
+  if (ny<=Num/2) {
+    nyt = ny;
+  } else {
+    nyt = ny-Num;
+  }
+
+  if (nz<=Num/2) {
+    nzt = nz;
+  } else {
+    nzt = nz-Num;
+  }
+
+  return (1<=nxt && nxt!=Num/2 && nyt!=Num/2 && nzt!=Num/2) ||
+    (nxt==Num/2 && nyt!=Num/2 && nzt!=Num/2) || (nxt!=Num/2 && nyt==Num/2 && nzt!=Num/2) || (nxt!=Num/2 && nyt!=Num/2 && nzt==Num/2) ||
+    (nxt==0 && nyt!=Num/2 && 1<=nzt && nzt!=Num/2) ||
+    (nxt==Num/2 && nyt==Num/2 && 1<=nzt && nzt!=Num/2) || (nxt==Num/2 && 1<=nyt && nyt!=Num/2 && nzt==Num/2) || (1<=nxt && nxt!=Num/2 && nyt!=Num/2 && nzt!=Num/2) ||
+    ((nxt==0 || nxt==Num/2) && 1<=nyt && nyt!=Num/2 && (nzt==0 || nzt==Num/2));
 }
 
 
