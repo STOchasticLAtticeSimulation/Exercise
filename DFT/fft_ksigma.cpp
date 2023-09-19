@@ -244,7 +244,7 @@ bool inksigma(int nx, int ny, int nz, int Num, double ksigma, double dk) {
     nzt = nz-Num;
   }
 
-  return abs(2*M_PI+sqrt(nxt*nxt + nyt*nyt + nzt*nzt)/NL - ksigma) < dk/2.;
+  return abs(2*M_PI*sqrt(nxt*nxt + nyt*nyt + nzt*nzt)/NL - ksigma) < dk/2.;
 }
 
 
