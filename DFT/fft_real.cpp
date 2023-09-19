@@ -23,33 +23,59 @@ bool realpoint(int nx, int ny, int nz, int Num); // judge real point
 bool complexpoint(int nx, int ny, int nz, int Num); // judge independent complex point
 
 // random distribution
-std::random_device seed;
-std::mt19937 engine(seed());
-std::normal_distribution<> dist(0., 1.);
+random_device seed;
+mt19937 engine(seed());
+normal_distribution<> dist(0., 1.);
+
+const string filename = "fft_real.dat";
+ofstream ofs(filename);
+
 
 int main() {
     int Num = pow(2, 5);
     vector<vector<vector<complex<double>>>> signal(Num, vector<vector<complex<double>>>(Num, vector<complex<double>>(Num, 0)));
-    int count = 0;
-    
     for (int i = 0; i < Num; i++) {
       for (int j = 0; j < Num; j++) {
 	for (int k = 0; k < Num; k++) {
 	  if (realpoint(i,j,k,Num)) {
 	    signal[i][j][k] = dist(engine);
-	    count++;
 	  } else if (complexpoint(i,j,k,Num)) {
 	    signal[i][j][k] = (dist(engine) + II*dist(engine))/sqrt(2);
-	    count += 2;
 	  }
 	}
       }
     }
 
-    std::cout << Num*Num*Num << ' ' << count << std::endl;
+    // reflection
+    int ip, jp, kp; // reflection index
+    for (int i = 0; i < Num; i++) {
+      for (int j = 0; j < Num; j++) {
+	for (int k = 0; k < Num; k++) {
+	  if (!(realpoint(i,j,k,Num)||complexpoint(i,j,k,Num))) {
+	    if (i==0) {
+	      ip = 0;
+	    } else {
+	      ip = Num-i;
+	    }
 
+	    if (j==0) {
+	      jp = 0;
+	    } else {
+	      jp = Num-j;
+	    }
 
-    /*
+	    if (k==0) {
+	      kp = 0;
+	    } else {
+	      kp = Num-k;
+	    }
+
+	    signal[i][j][k] = conj(signal[ip][jp][kp]);
+	  }
+	}
+      }
+    }
+
       
     // ---------- start timer ----------
     struct timeval Nv;
@@ -70,7 +96,8 @@ int main() {
     // -------------------------------------
    
 
-    
+
+    /*
     gettimeofday(&Nv, &Nz);
     before = (double)Nv.tv_sec + (double)Nv.tv_usec * 1.e-6;
 
@@ -80,20 +107,22 @@ int main() {
     gettimeofday(&Nv, &Nz);
     after = (double)Nv.tv_sec + (double)Nv.tv_usec * 1.e-6;
     cout << "DFT " << after - before << " sec." << endl;
+    */
 
 
     for (int i = 0; i < signal.size(); i++) {
       for (int j = 0; j < signal[0].size(); j++) {
 	for (int k = 0; k < signal[0][0].size(); k++) {
-	  if (abs(spectrumf[i][j][k]) > 1e-10) {
-	    cout << i << ' ' << j << ' ' << k << ' ' << abs(spectrumf[i][j][k]) << endl;
+	  ofs << i << ' ' << j << ' ' << k << ' ' << spectrumf[i][j][k].real() << ' ' << spectrumf[i][j][k].imag() << endl;
+
+	  if (abs(spectrumf[i][k][k].imag()) > 1e-10) {
+	    cout << i << ' ' << j << ' ' << k << ' ' << spectrumf[i][j][k].real() << ' ' << spectrumf[i][j][k].imag() << endl;
 	  }
 	}
       }
     }
 
     return 0;
-    */
 }
 
 
@@ -122,10 +151,11 @@ bool complexpoint(int nx, int ny, int nz, int Num) {
   }
 
   return (1<=nxt && nxt!=Num/2 && nyt!=Num/2 && nzt!=Num/2) ||
-    (nxt==Num/2 && nyt!=Num/2 && nzt!=Num/2) || (nxt!=Num/2 && nyt==Num/2 && nzt!=Num/2) || (nxt!=Num/2 && nyt!=Num/2 && nzt==Num/2) ||
+    (nxt==Num/2 && nyt!=Num/2 && 1<=nzt && nzt!=Num/2) || (nxt!=Num/2 && 1<=nyt && nyt!=Num/2 && nzt==Num/2) || (1<=nxt && nxt!=Num/2 && nyt==Num/2 && nzt!=Num/2) ||
     (nxt==0 && nyt!=Num/2 && 1<=nzt && nzt!=Num/2) ||
-    (nxt==Num/2 && nyt==Num/2 && 1<=nzt && nzt!=Num/2) || (nxt==Num/2 && 1<=nyt && nyt!=Num/2 && nzt==Num/2) || (1<=nxt && nxt!=Num/2 && nyt!=Num/2 && nzt!=Num/2) ||
-    ((nxt==0 || nxt==Num/2) && 1<=nyt && nyt!=Num/2 && (nzt==0 || nzt==Num/2));
+    (nxt==Num/2 && nyt==Num/2 && 1<=nzt && nzt!=Num/2) || (nxt==Num/2 && 1<=nyt && nyt!=Num/2 && nzt==Num/2) || (1<=nxt && nxt!=Num/2 && nyt==Num/2 && nzt==Num/2) ||
+    (nxt==0 && 1<=nyt && nyt!=Num/1 && nzt==0) ||
+    (nxt==Num/2 && 1<=nyt && nyt!=Num/2 && nzt==0) || (1<=nxt && nxt!=Num/2 && nyt==0 && nzt==Num/2) || (nxt==0 && nyt==Num/2 && 1<=nzt && nzt!=Num/2);
 }
 
 
