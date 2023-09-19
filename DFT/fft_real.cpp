@@ -6,6 +6,7 @@
 #include <complex>
 #include <vector>
 #include <sys/time.h>
+#include <random>
 
 using namespace std;
 
@@ -18,23 +19,38 @@ vector<complex<double>> fft(vector<complex<double>> signal);
 vector<vector<complex<double>>> fft(vector<vector<complex<double>>> signal);
 vector<vector<vector<complex<double>>>> fft(vector<vector<vector<complex<double>>>> signal);
 
+bool realpoint(int nx, int ny, int nz, int Num); // judge real point
+bool complexpoint(int nx, int ny, int nz, int Num); // judge independent complex point
+
+// random distribution
+std::random_device seed;
+std::mt19937 engine(seed());
+std::normal_distribution<> dist(0., 1.);
+
 int main() {
-    int Num = pow(2, 8);
-    double kx1 = 10;
-    double kx2 = 29;
-    double ky1 = 21;
-    double ky2 = 1;
-    double kz1 = 3;
-    double kz2 = 18;
+    int Num = pow(2, 5);
     vector<vector<vector<complex<double>>>> signal(Num, vector<vector<complex<double>>>(Num, vector<complex<double>>(Num, 0)));
+    int count = 0;
+    
     for (int i = 0; i < Num; i++) {
       for (int j = 0; j < Num; j++) {
 	for (int k = 0; k < Num; k++) {
-	  signal[i][j][k] = 1./Num/Num/Num*(exp(2*M_PI*(kx1*i+ky1*j+kz1*k)/Num*II) + exp(2*M_PI*(kx2*i+ky2*j+kz2*k)/Num*II));
+	  if (realpoint(i,j,k,Num)) {
+	    signal[i][j][k] = dist(engine);
+	    count++;
+	  } else if (complexpoint(i,j,k,Num)) {
+	    signal[i][j][k] = (dist(engine) + II*dist(engine))/sqrt(2);
+	    count += 2;
+	  }
 	}
       }
     }
-    
+
+    std::cout << count << std::endl;
+
+
+    /*
+      
     // ---------- start timer ----------
     struct timeval Nv;
     struct timezone Nz;
@@ -77,6 +93,23 @@ int main() {
     }
 
     return 0;
+    */
+}
+
+
+bool realpoint(int nx, int ny, int nz, int Num) {
+  return (nx==0||nx==Num/2) && (ny==0||ny==Num/2) && (nz==0||nz==Num/2);
+}
+
+bool complexpoint(int nx, int ny, int nz, int Num) {
+  int nxt, nyt, nzt; // shifted index
+  if (nx<=Num/2) {
+    nxt = nx;
+  } else {
+    nxt = nx-Num;
+  }
+
+  return true;
 }
 
 
