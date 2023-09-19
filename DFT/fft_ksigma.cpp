@@ -34,7 +34,7 @@ const string noisefile = "fft_noise.dat";
 const string powerfile = "fft_power.dat";
 ofstream sourceofs(sourcefile), noiseofs(noisefile), powerofs(powerfile);
 
-const double nsigma = 20;
+const double nsigma = 2;
 const int NL = pow(2,5);
 
 // useful macro
@@ -161,7 +161,7 @@ int main() {
     
     vector<vector<vector<complex<double>>>> spectrumc = spectrumf;
     LOOP{
-      spectrumc[i][j][k] = conj(spectrumc[i][j][k])/pow(NL,3.);
+      spectrumc[i][j][k] = conj(spectrumf[i][j][k])/pow(NL,3.);
     }
         
     vector<vector<vector<complex<double>>>> noisek = fft(spectrumc);
