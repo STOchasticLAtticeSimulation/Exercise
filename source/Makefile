@@ -1,10 +1,10 @@
 CXX := g++
 
-CXXFLAGS := -std=c++11 -O2 #-I/usr/local/opt/libomp/include -Xpreprocessor -fopenmp -lomp
+CXXFLAGS := -I/usr/local/opt/libomp/include -Xpreprocessor -fopenmp -std=c++11 -O2
 LDFLAGS:= -L/usr/local/opt/libomp/lib
 
 noisemap: fft.hpp
-	$(CXX) $(CXXFLAGS) $(LDFLAGS) -o noisemap noisemap.cpp
+	$(CXX) $(LDFLAGS) $(CXXFLAGS) -o noisemap noisemap.cpp
 
 clean:
 	$(RM) noisemap
