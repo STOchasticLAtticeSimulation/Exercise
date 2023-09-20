@@ -33,7 +33,7 @@ const string noisefile = "fft_noise.dat";
 const string powerfile = "fft_power.dat";
 ofstream noiseofs(noisefile), powerofs(powerfile);
 
-const double nsigma = 2;
+const double nsigma = 5;
 const int NL = pow(2,5);
 
 // useful macro
@@ -107,13 +107,8 @@ int main() {
   signal /= sqrt(count);
   
   
-    
-  
   // FFT
   vector<vector<vector<complex<double>>>> spectrumf = fft(signal);
-    
-  
-   
   
   
   /*
@@ -137,8 +132,10 @@ int main() {
   LOOP{
     spectrumc[i][j][k] = conj(spectrumf[i][j][k])/pow(NL,3.);
   }
+
   
   vector<vector<vector<complex<double>>>> noisek = fft(spectrumc);
+  int it, jt, kt; // shifted index
   LOOP{
     if (i<=NL/2) {
       it = i;
@@ -230,19 +227,19 @@ bool inksigma(int nx, int ny, int nz, int Num, double ksigma, double dk) {
 
 // DFT
 vector<complex<double>> dft(vector<complex<double>> signal) {
-    int N = signal.size();
-    vector<complex<double>> spectrum(N);
-
-    for (int k = 0; k < N; k++) {
-        complex<double> sum(0.0, 0.0);
-        for (int n = 0; n < N; ++n) {
-            double angle = -2*M_PI*k*n/N;
-            sum += signal[n] * polar(1.0, angle);
-        }
-        spectrum[k] = sum;
+  int N = signal.size();
+  vector<complex<double>> spectrum(N);
+  
+  for (int k = 0; k < N; k++) {
+    complex<double> sum(0.0, 0.0);
+    for (int n = 0; n < N; ++n) {
+      double angle = -2*M_PI*k*n/N;
+      sum += signal[n] * polar(1.0, angle);
     }
-
-    return spectrum;
+    spectrum[k] = sum;
+  }
+  
+  return spectrum;
 }
 
 vector<vector<complex<double>>> dft(vector<vector<complex<double>>> signal) {
@@ -314,27 +311,27 @@ vector<vector<vector<complex<double>>>> dft(vector<vector<vector<complex<double>
 
 // Cooley-Tukey FFT
 vector<complex<double>> fft(vector<complex<double>> signal) {
-    int N = signal.size();
-    if (N<2) return signal; // サイズが N=2 になるまで分割
-
-    vector<complex<double>> even(N/2);
-    vector<complex<double>> odd(N/2);
-    for (int i=0; i<N/2; i++) {
-        even[i] = signal[2*i];
-        odd[i] = signal[2*i+1];
-    }
-
-    even = fft(even);
-    odd = fft(odd);
-
-    vector<complex<double>> spectrum(N);
-    for (int k=0; k<N/2; k++) {
-        complex<double> oddW = polar(1.0, -2*M_PI*k/N) * odd[k];
-        spectrum[k] = even[k] + oddW;
-        spectrum[k+N/2] = even[k] - oddW;
-    }
-
-    return spectrum;
+  int N = signal.size();
+  if (N<2) return signal; // サイズが N=2 になるまで分割
+  
+  vector<complex<double>> even(N/2);
+  vector<complex<double>> odd(N/2);
+  for (int i=0; i<N/2; i++) {
+    even[i] = signal[2*i];
+    odd[i] = signal[2*i+1];
+  }
+  
+  even = fft(even);
+  odd = fft(odd);
+  
+  vector<complex<double>> spectrum(N);
+  for (int k=0; k<N/2; k++) {
+    complex<double> oddW = polar(1.0, -2*M_PI*k/N) * odd[k];
+    spectrum[k] = even[k] + oddW;
+    spectrum[k+N/2] = even[k] - oddW;
+  }
+  
+  return spectrum;
 }
 
 vector<vector<complex<double>>> fft(vector<vector<complex<double>>> signal) {
