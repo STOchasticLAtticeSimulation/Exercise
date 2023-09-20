@@ -33,8 +33,8 @@ const string noisefile = "fft_noise.dat";
 const string powerfile = "fft_power.dat";
 ofstream noiseofs(noisefile), powerofs(powerfile);
 
-const double nsigma = 5;
-const int NL = pow(2,5);
+const double nsigma = 10;
+const int NL = pow(2,6);
 
 // useful macro
 #define LOOP for(int i = 0; i < NL; i++) for(int j = 0; j < NL; j++) for(int k = 0; k < NL; k++)
@@ -221,7 +221,7 @@ bool inksigma(int nx, int ny, int nz, int Num, double ksigma, double dk) {
     nzt = nz-Num;
   }
 
-  return abs(2*M_PI*sqrt(nxt*nxt + nyt*nyt + nzt*nzt)/Num - ksigma) < dk/2.;
+  return abs(2*M_PI*sqrt(nxt*nxt + nyt*nyt + nzt*nzt)/Num - ksigma) <= dk/2.;
 }
 
 
