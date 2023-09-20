@@ -8,17 +8,20 @@
 #include <sys/time.h>
 #include <random>
 #include "../source/vec_op.hpp"
+#include "../source/fft.hpp"
 
 using namespace std;
 
 const complex<double> II(0,1);
 
+/*
 vector<complex<double>> dft(vector<complex<double>> signal);
 vector<vector<complex<double>>> dft(vector<vector<complex<double>>> signal);
 vector<vector<vector<complex<double>>>> dft(vector<vector<vector<complex<double>>>> signal);
 vector<complex<double>> fft(vector<complex<double>> signal);
 vector<vector<complex<double>>> fft(vector<vector<complex<double>>> signal);
 vector<vector<vector<complex<double>>>> fft(vector<vector<vector<complex<double>>>> signal);
+*/
 
 bool realpoint(int nx, int ny, int nz, int Num); // judge real point
 bool complexpoint(int nx, int ny, int nz, int Num); // judge independent complex point
@@ -225,6 +228,7 @@ bool inksigma(int nx, int ny, int nz, int Num, double ksigma, double dk) {
 }
 
 
+/*
 // DFT
 vector<complex<double>> dft(vector<complex<double>> signal) {
   int N = signal.size();
@@ -399,6 +403,6 @@ vector<vector<vector<complex<double>>>> fft(vector<vector<vector<complex<double>
 
   return tmp;
 }
-
+*/
 
 

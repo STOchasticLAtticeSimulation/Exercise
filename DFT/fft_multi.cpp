@@ -19,64 +19,64 @@ vector<vector<complex<double>>> fft(vector<vector<complex<double>>> signal);
 vector<vector<vector<complex<double>>>> fft(vector<vector<vector<complex<double>>>> signal);
 
 int main() {
-    int Num = pow(2, 8);
-    double kx1 = 10;
-    double kx2 = 29;
-    double ky1 = 21;
-    double ky2 = 1;
-    double kz1 = 3;
-    double kz2 = 18;
-    vector<vector<vector<complex<double>>>> signal(Num, vector<vector<complex<double>>>(Num, vector<complex<double>>(Num, 0)));
-    for (int i = 0; i < Num; i++) {
-      for (int j = 0; j < Num; j++) {
-	for (int k = 0; k < Num; k++) {
-	  signal[i][j][k] = 1./Num/Num/Num*(exp(2*M_PI*(kx1*i+ky1*j+kz1*k)/Num*II) + exp(2*M_PI*(kx2*i+ky2*j+kz2*k)/Num*II));
+  int Num = pow(2, 8);
+  double kx1 = 10;
+  double kx2 = 29;
+  double ky1 = 21;
+  double ky2 = 1;
+  double kz1 = 3;
+  double kz2 = 18;
+  vector<vector<vector<complex<double>>>> signal(Num, vector<vector<complex<double>>>(Num, vector<complex<double>>(Num, 0)));
+  for (int i = 0; i < Num; i++) {
+    for (int j = 0; j < Num; j++) {
+      for (int k = 0; k < Num; k++) {
+	signal[i][j][k] = 1./Num/Num/Num*(exp(2*M_PI*(kx1*i+ky1*j+kz1*k)/Num*II) + exp(2*M_PI*(kx2*i+ky2*j+kz2*k)/Num*II));
+      }
+    }
+  }
+  
+  // ---------- start timer ----------
+  struct timeval Nv;
+  struct timezone Nz;
+  double before, after;
+  
+  gettimeofday(&Nv, &Nz);
+  before = (double)Nv.tv_sec + (double)Nv.tv_usec * 1.e-6;
+  // --------------------------------------
+  
+  // FFT
+  vector<vector<vector<complex<double>>>> spectrumf = fft(signal);
+  
+  // ---------- stop timer ----------
+  gettimeofday(&Nv, &Nz);
+  after = (double)Nv.tv_sec + (double)Nv.tv_usec * 1.e-6;
+  cout << "FFT " << after - before << " sec." << endl;
+  // -------------------------------------
+  
+  
+  
+  gettimeofday(&Nv, &Nz);
+  before = (double)Nv.tv_sec + (double)Nv.tv_usec * 1.e-6;
+  
+  // DFT
+  vector<vector<vector<complex<double>>>> spectrumd = dft(signal);
+  
+  gettimeofday(&Nv, &Nz);
+  after = (double)Nv.tv_sec + (double)Nv.tv_usec * 1.e-6;
+  cout << "DFT " << after - before << " sec." << endl;
+  
+  
+  for (int i = 0; i < signal.size(); i++) {
+    for (int j = 0; j < signal[0].size(); j++) {
+      for (int k = 0; k < signal[0][0].size(); k++) {
+	if (abs(spectrumf[i][j][k]) > 1e-10) {
+	  cout << i << ' ' << j << ' ' << k << ' ' << abs(spectrumf[i][j][k]) << endl;
 	}
       }
     }
-    
-    // ---------- start timer ----------
-    struct timeval Nv;
-    struct timezone Nz;
-    double before, after;
-    
-    gettimeofday(&Nv, &Nz);
-    before = (double)Nv.tv_sec + (double)Nv.tv_usec * 1.e-6;
-    // --------------------------------------
-
-    // FFT
-    vector<vector<vector<complex<double>>>> spectrumf = fft(signal);
-    
-    // ---------- stop timer ----------
-    gettimeofday(&Nv, &Nz);
-    after = (double)Nv.tv_sec + (double)Nv.tv_usec * 1.e-6;
-    cout << "FFT " << after - before << " sec." << endl;
-    // -------------------------------------
-   
-
-    
-    gettimeofday(&Nv, &Nz);
-    before = (double)Nv.tv_sec + (double)Nv.tv_usec * 1.e-6;
-
-    // DFT
-    vector<vector<vector<complex<double>>>> spectrumd = dft(signal);
-    
-    gettimeofday(&Nv, &Nz);
-    after = (double)Nv.tv_sec + (double)Nv.tv_usec * 1.e-6;
-    cout << "DFT " << after - before << " sec." << endl;
-
-
-    for (int i = 0; i < signal.size(); i++) {
-      for (int j = 0; j < signal[0].size(); j++) {
-	for (int k = 0; k < signal[0][0].size(); k++) {
-	  if (abs(spectrumf[i][j][k]) > 1e-10) {
-	    cout << i << ' ' << j << ' ' << k << ' ' << abs(spectrumf[i][j][k]) << endl;
-	  }
-	}
-      }
-    }
-
-    return 0;
+  }
+  
+  return 0;
 }
 
 
