@@ -29,10 +29,9 @@ random_device seed;
 mt19937 engine(seed());
 normal_distribution<> dist(0., 1.);
 
-const string sourcefile = "fft_source.dat";
 const string noisefile = "fft_noise.dat";
 const string powerfile = "fft_power.dat";
-ofstream sourceofs(sourcefile), noiseofs(noisefile), powerofs(powerfile);
+ofstream noiseofs(noisefile), powerofs(powerfile);
 
 const double nsigma = 2;
 const int NL = pow(2,5);
@@ -42,153 +41,134 @@ const int NL = pow(2,5);
 
 
 int main() {
-    double ksigma = 2*M_PI*nsigma/NL;
-    double dk =2*M_PI/NL;
-    
-    vector<vector<vector<complex<double>>>> signal(NL, vector<vector<complex<double>>>(NL, vector<complex<double>>(NL, 0)));
-    int count = 0;
 
-    LOOP{
-      if (inksigma(i,j,k,NL,ksigma,dk)) {
-	if (realpoint(i,j,k,NL)) {
-	  signal[i][j][k] = dist(engine);
-	  count++;
-	} else if (complexpoint(i,j,k,NL)) {
-	  signal[i][j][k] = (dist(engine) + II*dist(engine))/sqrt(2);
-	  count++;
-	} else {
-	  signal[i][j][k] = 0;
-	}
+  // ---------- start timer ----------
+  struct timeval Nv;
+  struct timezone Nz;
+  double before, after;
+  
+  gettimeofday(&Nv, &Nz);
+  before = (double)Nv.tv_sec + (double)Nv.tv_usec * 1.e-6;
+  // --------------------------------------
+  
+  double ksigma = 2*M_PI*nsigma/NL;
+  double dk = 2*M_PI/NL;
+  
+  vector<vector<vector<complex<double>>>> signal(NL, vector<vector<complex<double>>>(NL, vector<complex<double>>(NL, 0)));
+  int count = 0;
+  
+  LOOP{
+    if (inksigma(i,j,k,NL,ksigma,dk)) {
+      if (realpoint(i,j,k,NL)) {
+	signal[i][j][k] = dist(engine);
+	count++;
+      } else if (complexpoint(i,j,k,NL)) {
+	signal[i][j][k] = (dist(engine) + II*dist(engine))/sqrt(2);
+	count++;
       } else {
 	signal[i][j][k] = 0;
       }
+    } else {
+      signal[i][j][k] = 0;
     }
-    
-
-    // reflection
-    int ip, jp, kp; // reflection index
-    LOOP{
-      if (inksigma(i,j,k,NL,ksigma,dk)) {
-	if (!(realpoint(i,j,k,NL)||complexpoint(i,j,k,NL))) {
-	  if (i==0) {
-	    ip = 0;
-	  } else {
-	    ip = NL-i;
-	  }
-	  
-	  if (j==0) {
-	    jp = 0;
-	  } else {
-	    jp = NL-j;
-	  }
-	  
-	  if (k==0) {
-	    kp = 0;
-	  } else {
-	    kp = NL-k;
-	  }
-	  
-	  signal[i][j][k] = conj(signal[ip][jp][kp]);
-	  count++;
+  }
+  
+  
+  // reflection
+  int ip, jp, kp; // reflection index
+  LOOP{
+    if (inksigma(i,j,k,NL,ksigma,dk)) {
+      if (!(realpoint(i,j,k,NL)||complexpoint(i,j,k,NL))) {
+	if (i==0) {
+	  ip = 0;
+	} else {
+	  ip = NL-i;
 	}
+	
+	if (j==0) {
+	  jp = 0;
+	} else {
+	  jp = NL-j;
+	}
+	
+	if (k==0) {
+	  kp = 0;
+	} else {
+	  kp = NL-k;
+	}
+	
+	signal[i][j][k] = conj(signal[ip][jp][kp]);
+	count++;
       }
     }
-
-    cout << count << endl;
-    signal /= sqrt(count);
-
-
-    int it, jt, kt; // shifted index
-    LOOP{
-      if (i<=NL/2) {
-	it = i;
-      } else {
-	it = i-NL;
-      }
-      
-      if (j<=NL/2) {
-	jt = j;
-      } else {
-	jt = j-NL;
-      }
-      
-      if (k<=NL/2) {
-	kt = k;
-      } else {
-	kt = k-NL;
-      }
-      
-      sourceofs << 2*M_PI*sqrt(it*it + jt*jt + kt*kt)/NL << ' ' << pow(abs(signal[i][j][k]),2) << endl;
-    }
+  }
+  
+  cout << count << endl;
+  signal /= sqrt(count);
+  
+  
     
-      
-    // ---------- start timer ----------
-    struct timeval Nv;
-    struct timezone Nz;
-    double before, after;
+  
+  // FFT
+  vector<vector<vector<complex<double>>>> spectrumf = fft(signal);
     
-    gettimeofday(&Nv, &Nz);
-    before = (double)Nv.tv_sec + (double)Nv.tv_usec * 1.e-6;
-    // --------------------------------------
-
-    // FFT
-    vector<vector<vector<complex<double>>>> spectrumf = fft(signal);
-    
-    // ---------- stop timer ----------
-    gettimeofday(&Nv, &Nz);
-    after = (double)Nv.tv_sec + (double)Nv.tv_usec * 1.e-6;
-    cout << "FFT " << after - before << " sec." << endl;
-    // -------------------------------------
+  
    
-
-
-    /*
+  
+  
+  /*
     gettimeofday(&Nv, &Nz);
     before = (double)Nv.tv_sec + (double)Nv.tv_usec * 1.e-6;
-
+    
     // DFT
     vector<vector<vector<complex<double>>>> spectrumd = dft(signal);
     
     gettimeofday(&Nv, &Nz);
     after = (double)Nv.tv_sec + (double)Nv.tv_usec * 1.e-6;
     cout << "DFT " << after - before << " sec." << endl;
-    */
-
-
-    LOOP{
-      noiseofs << spectrumf[i][j][k].real() << endl;
+  */
+  
+  
+  LOOP{
+    noiseofs << spectrumf[i][j][k].real() << endl;
+  }
+  
+  vector<vector<vector<complex<double>>>> spectrumc = spectrumf;
+  LOOP{
+    spectrumc[i][j][k] = conj(spectrumf[i][j][k])/pow(NL,3.);
+  }
+  
+  vector<vector<vector<complex<double>>>> noisek = fft(spectrumc);
+  LOOP{
+    if (i<=NL/2) {
+      it = i;
+    } else {
+      it = i-NL;
     }
     
-    vector<vector<vector<complex<double>>>> spectrumc = spectrumf;
-    LOOP{
-      spectrumc[i][j][k] = conj(spectrumf[i][j][k])/pow(NL,3.);
+    if (j<=NL/2) {
+      jt = j;
+    } else {
+      jt = j-NL;
     }
-        
-    vector<vector<vector<complex<double>>>> noisek = fft(spectrumc);
-    LOOP{
-      if (i<=NL/2) {
-	it = i;
-      } else {
-	it = i-NL;
-      }
-      
-      if (j<=NL/2) {
-	jt = j;
-      } else {
-	jt = j-NL;
-      }
-      
-      if (k<=NL/2) {
-	kt = k;
-      } else {
-	kt = k-NL;
-      }
-      
-      powerofs << 2*M_PI*sqrt(it*it + jt*jt + kt*kt)/NL << ' ' << pow(abs(noisek[i][j][k]),2) << endl;
-    }
-        
     
-    return 0;
+    if (k<=NL/2) {
+      kt = k;
+    } else {
+      kt = k-NL;
+    }
+    
+    powerofs << 2*M_PI*sqrt(it*it + jt*jt + kt*kt)/NL << ' ' << pow(abs(noisek[i][j][k]),2) << endl;
+  }
+  
+  
+  // ---------- stop timer ----------
+  gettimeofday(&Nv, &Nz);
+  after = (double)Nv.tv_sec + (double)Nv.tv_usec * 1.e-6;
+  cout << "FFT " << after - before << " sec." << endl;
+  // -------------------------------------
+  
+  return 0;
 }
 
 
