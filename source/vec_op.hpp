@@ -57,6 +57,21 @@ std::vector<Tv>& operator*=(std::vector<Tv> &v, const Tc &c) {
   return v;
 }
 
+template <class Tv, class Tc>
+std::vector<Tv> operator/(const std::vector<Tv> & v, const Tc &c) {
+  std::vector<Tv> ans = v;
+  for (Tv &e : ans)
+    e /= c;
+  return ans;
+}
+
+template <class Tv, class Tc>
+std::vector<Tv>& operator/=(std::vector<Tv> &v, const Tc &c) {
+  for (Tv &e : v)
+    e /= c;
+  return v;
+}
+
 namespace vec_op {
   void init(double &x) {
     x = 0;
