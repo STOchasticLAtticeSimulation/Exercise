@@ -1,14 +1,14 @@
 #include "../source/STOLAS.hpp"
 #include <sys/time.h>
 
-const double mm = 1e-5; //0.01;
+const double mm = 0.01;
 
 const std::string model = "chaotic";
-const double Nf = 5.51;
+const double Nf = 5.5; //5.51;
 const std::string noisedir = "../source/noisedata";
-const int noisefileNo = 0.;
+const int noisefileNo = 1;
 const std::vector<double> phii{15.,-0.1*mm*mm};
-const double bias = 0.; //10.;
+const double bias = 10.;
 const double Nbias = 2;
 const double dNbias = 0.01;
 

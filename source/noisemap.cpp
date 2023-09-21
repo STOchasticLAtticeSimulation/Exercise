@@ -22,7 +22,12 @@ const double dN = 0.01; // e-folds step
 const std::string filename = "noisedata/noisemap_";
 // -------------------------------------------------
 
+const complex<double> II(0,1);
+
 std::vector<double> dwlist(double N);
+bool realpoint(int nx, int ny, int nz, int Num); // judge real point
+bool complexpoint(int nx, int ny, int nz, int Num); // judge independent complex point
+bool innsigma(int nx, int ny, int nz, int Num, double nsigma, double dn); // judge if point is in nsigma sphere shell
 
 // random distribution
 std::random_device seed;
@@ -77,11 +82,116 @@ int main(int argc, char* argv[])
     }
   }
   std::cout << std::endl;
+
+
+  // ---------- stop timer ----------
+  gettimeofday(&Nv, &Nz);
+  after = (double)Nv.tv_sec + (double)Nv.tv_usec * 1.e-6;
+  std::cout << after - before << " sec." << std::endl;
+  // -------------------------------------
 }
 
 
 std::vector<double> dwlist(double N) {
-  std::this_thread::sleep_for(std::chrono::milliseconds(10));
-  return std::vector<double>{1,2};
+  std::vector<std::vector<std::vector<std::complex<doubl>>>> dwk(NL, std::vector<std::vector<std::complex<double>>>(NL, std::vector<std::complex<double>>(NL, 0)));
+  int count = 0;
+  double nsigma = sigma*exp(N);
+  
+  LOOP{
+    if (innsigma(i,j,k,NL,nsigma,dn)) {
+      if (realpoint(i,j,k,NL)) {
+	dwk[i][j][k] = dist(engine);
+	count++;
+      } else if (complexpoint(i,j,k,NL)) {
+	dwk[i][j][k] = (dist(engine) + II*dist(engine))/sqrt(2);
+      }
+    }
+  }
+
+  // reflection
+  int ip, jp, kp; // reflected index
+  LOOP{
+    if (innsigma(i,j,k,NL,nsigma,dn)) {
+      if (!(realpoint(i,j,k,NL)||complexpoint(i,j,k,NL))) {
+	if (i==0) {
+	  ip = 0;
+	} else {
+	  ip = NL-i;
+	}
+	
+	if (j==0) {
+	  jp = 0;
+	} else {
+	  jp = NL-j;
+	}
+	
+	if (k==0) {
+	  kp = 0;
+	} else {
+	  kp = NL-k;
+	}
+	
+	dwk[i][j][k] = conj(dwk[ip][jp][kp]);
+	count++;
+      }
+    }
+  }
+
+  return fft(dwk);
+}
+
+bool realpoint(int nx, int ny, int nz, int Num) {
+  return (nx==0||nx==Num/2) && (ny==0||ny==Num/2) && (nz==0||nz==Num/2);
+}
+
+bool complexpoint(int nx, int ny, int nz, int Num) {
+  int nxt, nyt, nzt; // shifted index
+  if (nx<=Num/2) {
+    nxt = nx;
+  } else {
+    nxt = nx-Num;
+  }
+
+  if (ny<=Num/2) {
+    nyt = ny;
+  } else {
+    nyt = ny-Num;
+  }
+
+  if (nz<=Num/2) {
+    nzt = nz;
+  } else {
+    nzt = nz-Num;
+  }
+
+  return (1<=nxt && nxt!=Num/2 && nyt!=Num/2 && nzt!=Num/2) ||
+    (nxt==Num/2 && nyt!=Num/2 && 1<=nzt && nzt!=Num/2) || (nxt!=Num/2 && 1<=nyt && nyt!=Num/2 && nzt==Num/2) || (1<=nxt && nxt!=Num/2 && nyt==Num/2 && nzt!=Num/2) ||
+    (nxt==0 && nyt!=Num/2 && 1<=nzt && nzt!=Num/2) ||
+    (nxt==Num/2 && nyt==Num/2 && 1<=nzt && nzt!=Num/2) || (nxt==Num/2 && 1<=nyt && nyt!=Num/2 && nzt==Num/2) || (1<=nxt && nxt!=Num/2 && nyt==Num/2 && nzt==Num/2) ||
+    (nxt==0 && 1<=nyt && nyt!=Num/1 && nzt==0) ||
+    (nxt==Num/2 && 1<=nyt && nyt!=Num/2 && nzt==0) || (1<=nxt && nxt!=Num/2 && nyt==0 && nzt==Num/2) || (nxt==0 && nyt==Num/2 && 1<=nzt && nzt!=Num/2);
+}
+
+bool innsigma(int nx, int ny, int nz, int Num, double nsigma, double dn) {
+  int nxt, nyt, nzt; // shifted index
+  if (nx<=Num/2) {
+    nxt = nx;
+  } else {
+    nxt = nx-Num;
+  }
+
+  if (ny<=Num/2) {
+    nyt = ny;
+  } else {
+    nyt = ny-Num;
+  }
+
+  if (nz<=Num/2) {
+    nzt = nz;
+  } else {
+    nzt = nz-Num;
+  }
+
+  return abs(sqrt(nxt*nxt + nyt*nyt + nzt*nzt) - nsigma) <= dn/2.;
 }
 
