@@ -25,14 +25,15 @@ protected:
 
   const std::string noisefilename = "noisemap_"; //"largenoisetest.dat";
   const std::string Nfileprefix = "Nmap_";
-  const std::string zetatfileprefix = "zetat_";
+  const std::string Hfileprefix = "H_";
+  const std::string pifileprefix = "pi_";
   bool noisefilefail;
 
   std::string model;
   int NL;
   double dN, bias, Nbias, dNbias;
   std::ifstream noisefile;
-  std::ofstream Nfile, zetatfile;
+  std::ofstream Nfile, Hfile, pifile;
   std::vector<double> phii;
   std::vector<std::vector<double>> noisedata;
 
@@ -42,7 +43,8 @@ public:
 
   bool checknoisefile();
   bool Nfilefail();
-  bool zetatfilefail();
+  bool Hfilefail();
+  bool pifilefail();
   
   double VV(double phi);
   double Vp(double phi);

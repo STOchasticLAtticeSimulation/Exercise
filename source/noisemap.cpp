@@ -18,7 +18,7 @@
 // -------------- User may change ------------------
 const double sigma = 0.1; // ksigma = 2pi sigma exp(N) / L, nsigma = sigma exp(N)
 const double dn = 1; // thickness of nsigma sphere shell
-const int NL = pow(2,5); // box size L
+const int NL = pow(2,6); // box size L
 const double dN = 0.01; // e-folds step
 const std::string filename = "noisedata/noisemap_";
 // -------------------------------------------------
@@ -66,6 +66,8 @@ int main(int argc, char* argv[])
   std::cout << "OpenMP : Enabled (Max # of threads = " << omp_get_max_threads() << ")" << std::endl;
 #endif
 
+  std::cout << "Box size : " << NL << std::endl;
+  
   int totalstep = ceil(log((NL/2-1)/sigma)/dN), count = 0;
   std::vector<std::vector<double>> noisedata(totalstep, std::vector<double>(NL*NL*NL,0));
   
@@ -79,7 +81,7 @@ int main(int argc, char* argv[])
 #endif
     {
       count++;
-      std::cout << "\rNoiseGenerating: " << std::setw(3) << 100*count/totalstep << "%" << std::flush;
+      std::cout << "\rNoiseGenerating : " << std::setw(3) << 100*count/totalstep << "%" << std::flush;
     }
   }
   std::cout << std::endl;
@@ -89,9 +91,9 @@ int main(int argc, char* argv[])
       ofs << noisedata[n][i] << ' ';
     }
     ofs << std::endl;
-    std::cout << "\rExporting: " << std::setw(3) << 100*i/noisedata[0].size() << "%" << std::flush;
+    std::cout << "\rExporting : " << std::setw(3) << 100*i/noisedata[0].size() << "%" << std::flush;
   }
-  std::cout << "\rExporting: 100%" << std::endl;
+  std::cout << "\rExporting : 100%" << std::endl;
 
   // ---------- stop timer ----------
   gettimeofday(&Nv, &Nz);

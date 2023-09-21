@@ -37,7 +37,8 @@ STOLAS::STOLAS(std::string Model, double DN, std::string noisedir, int noisefile
     NL = cbrt(noisedata.size());
     std::cout << "Noise data imported. Box size is " << NL << "." << std::endl;
     Nfile.open(Nfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
-    zetatfile.open(zetatfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
+    Hfile.open(Hfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
+    pifile.open(pifileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
   }
 }
 
@@ -50,15 +51,22 @@ bool STOLAS::Nfilefail() {
   return Nfile.fail();
 }
 
-bool STOLAS::zetatfilefail() {
-  return zetatfile.fail();
+bool STOLAS::Hfilefail() {
+  return Hfile.fail();
+}
+
+bool STOLAS::pifilefail() {
+  return pifile.fail();
 }
 
 void STOLAS::dNmap() {
   Nfile << std::setprecision(10);
+  Hfile << std::setprecision(14);
+  pifile << std::setprecision(14);
   int complete = 0;
 
-  std::vector<std::vector<double>> zetatdata(noisedata[0].size(), std::vector<double>(NL*NL*NL,0));
+  std::vector<std::vector<double>> Hdata(noisedata[0].size(), std::vector<double>(NL*NL*NL,0));
+  std::vector<std::vector<double>> pidata(noisedata[0].size(), std::vector<double>(NL*NL*NL,0));
   
 #ifdef _OPENMP
 #pragma omp parallel for
@@ -67,6 +75,8 @@ void STOLAS::dNmap() {
     double N=0;
     std::vector<double> phi = phii;
     for (size_t n=0; n<noisedata[i].size(); n++) {
+      Hdata[n][i] = pow(hubble(phi[0],phi[1]),2);
+      pidata[n][i] = phi[1]*phi[1];
       RK4Mbias(N,phi,dN,noisedata[i][n],i);
     }
 
@@ -91,10 +101,21 @@ void STOLAS::dNmap() {
     {
       Nfile << i << ' ' << N << std::endl;
       complete++;
-      std::cout << "\r" << complete << "/" << NL*NL*NL << std::flush;
+      std::cout << "\rLatticeSimulation : " << std::setw(3) << 100*complete/NL/NL/NL << "%" << std::flush;
     }
   }
   std::cout << std::endl;
+
+  for (size_t n=0; n<Hdata.size(); n++) {
+    for (size_t i=0; i<Hdata[n].size(); i++) {
+      Hfile << Hdata[n][i] << ' ';
+      pifile << pidata[n][i] << ' ';
+    }
+    Hfile << std::endl;
+    pifile << std::endl;
+    std::cout << "\rAnimeDataExporting : " << std::setw(3) << 100*n/Hdata.size() << "%" << std::flush;
+  }
+  std::cout << "\rAnimeDataExporting : 100%" << std::endl;
 }
 
 
