@@ -12,11 +12,11 @@ const double W0 = 12.35;
 const double CUP = 0.0382;
 
 const std::string model = "inflection";
-const double Nf = 5.51;
+const double Nf = 5.5; //5.51;
 const std::string noisedir = "../source/noisedata";
-const int noisefileNo = 0.;
+const int noisefileNo = 1;
 const std::vector<double> phii{3.60547,-2.37409e-7};
-const double bias = 0.; //10.;
+const double bias = 7.5;
 const double Nbias = 2;
 const double dNbias = 0.01;
 

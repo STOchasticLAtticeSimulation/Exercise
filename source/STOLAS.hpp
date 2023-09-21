@@ -23,7 +23,7 @@ protected:
   const double Nprec = 1e-7;
   // ----------------------------------------
 
-  const std::string noisefilename = "largenoisetest.dat";
+  const std::string noisefilename = "nonoise.dat"; //"largenoisetest.dat";
   const std::string Nfileprefix = "Nmap_Nf_";
 
   std::string model, Nfilename;
