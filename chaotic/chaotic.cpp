@@ -4,11 +4,10 @@
 const double mm = 0.01;
 
 const std::string model = "chaotic";
-const double Nf = 5.5; //5.51;
+const double dN = 0.01;
 const std::string noisedir = "../source/noisedata";
-const int noisefileNo = 1;
 const std::vector<double> phii{15.,-0.1*mm*mm};
-const double bias = 10.;
+const double bias = 0; //10.;
 const double Nbias = 2;
 const double dNbias = 0.01;
 
@@ -22,8 +21,13 @@ double STOLAS::Vp(double phi) {
 }
 
 
-int main()
+int main(int argc, char* argv[])
 {
+  if (argc!=2) {
+    std::cout << "Specify the noise file number correctly." << std::endl;
+    return -1;
+  }
+  
   // ---------- start timer ----------
   struct timeval Nv;
   struct timezone Nz;
@@ -32,8 +36,20 @@ int main()
   gettimeofday(&Nv, &Nz);
   before = (double)Nv.tv_sec + (double)Nv.tv_usec * 1.e-6;
   // --------------------------------------
+
+  int noisefileNo = atoi(argv[1]);
   
-  STOLAS stolas(model,Nf,noisedir,noisefileNo,phii,bias,Nbias,dNbias);
+  STOLAS stolas(model,dN,noisedir,noisefileNo,phii,bias,Nbias,dNbias);
+
+  if (!stolas.checknoisefile()) {
+    std::cout << "The noise file couldn't be opened." << std::endl;
+    return -1;
+  }
+
+  if (stolas.Nfilefail()) {
+    std::cout << "The export file couldn't be opened." << std::endl;
+    return -1;
+  }
 
   stolas.dNmap();
 

@@ -2,47 +2,63 @@
 #include "vec_op.hpp"
 
 
-STOLAS::STOLAS(std::string Model, double NF, std::string noisedir, int noisefileNo, std::vector<double> Phii, double Bias, double NBias, double DNbias) {
+STOLAS::STOLAS(std::string Model, double DN, std::string noisedir, int noisefileNo, std::vector<double> Phii, double Bias, double NBias, double DNbias) {
 
 #ifdef _OPENMP
   std::cout << "OpenMP : Enabled (Max # of threads = " << omp_get_max_threads() << ")" << std::endl;
 #endif
   
   model = Model;
-  Nf = NF;
+  dN = DN;
   phii = Phii;
   bias = Bias;
   Nbias = NBias;
   dNbias = DNbias;
 
-  Nfilename = Nfileprefix + std::to_string((int)Nf) + std::string(",") + std::to_string((int)(10*(Nf-(int)Nf))) + std::string("_noise_") + std::to_string(noisefileNo) + std::string(".dat");
-
-  std::cout << "model : " << model << std::endl;
+  noisefile.open(noisedir + std::string("/") + noisefilename + std::to_string(noisefileNo) + std::string(".dat"));
+  noisefilefail = noisefile.fail();
   
-  noisefile.open(noisedir + std::string("/") + noisefilename);
-  std::string str;
-  double dd;
-  while (std::getline(noisefile, str)) {
-    std::vector<double> vv;
-    std::stringstream ss(str);
-    while (!ss.eof()) {
-      ss >> dd;
-      vv.push_back(dd);
+  if (!noisefile.fail() && !Nfile.fail()) {
+    std::cout << "model : " << model << std::endl;
+    
+    std::string str;
+    double dd;
+    while (std::getline(noisefile, str)) {
+      std::vector<double> vv;
+      std::stringstream ss(str);
+      while (!ss.eof()) {
+	ss >> dd;
+	vv.push_back(dd);
+      }
+      vv.pop_back();
+      noisedata.push_back(vv);
     }
-    vv.pop_back();
-    noisedata.push_back(vv);
-  }
 
-  NL = cbrt(noisedata.size());
-  dN = Nf / (noisedata[0].size()-1);
-  std::cout << "Noise data imported. Box size is " << NL << ". Time step is " << dN << " e-folds. Simulation ends at " << Nf << " e-folds." << std::endl;
+    NL = cbrt(noisedata.size());
+    std::cout << "Noise data imported. Box size is " << NL << "." << std::endl;
+    Nfile.open(Nfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
+    zetatfile.open(zetatfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
+  }
 }
 
 
+bool STOLAS::checknoisefile() {
+  return !noisefilefail;
+}
+
+bool STOLAS::Nfilefail() {
+  return Nfile.fail();
+}
+
+bool STOLAS::zetatfilefail() {
+  return zetatfile.fail();
+}
+
 void STOLAS::dNmap() {
-  std::ofstream Nfile(Nfilename);
   Nfile << std::setprecision(10);
   int complete = 0;
+
+  std::vector<std::vector<double>> zetatdata(noisedata[0].size(), std::vector<double>(NL*NL*NL,0));
   
 #ifdef _OPENMP
 #pragma omp parallel for

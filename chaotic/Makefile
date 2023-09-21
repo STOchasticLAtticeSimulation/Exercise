@@ -1,11 +1,11 @@
 MODEL = chaotic
 SOURCE = ../source
 
-CXX := g++-13
-#CXX := g++
+#CXX := g++-13
+CXX := g++
 
-CXXFLAGS := -std=c++11 -O2 -fopenmp
-#CXXFLAGS := -std=c++11 -O2 -Xpreprcessor -fopenmp -lomp
+#CXXFLAGS := -std=c++11 -O2 -fopenmp
+CXXFLAGS := -std=c++11 -O2 -Xpreprocessor -fopenmp -lomp
 
 $(MODEL): $(MODEL).o $(SOURCE)/STOLAS.o
 	$(CXX) $(CXXFLAGS) -o $(MODEL) $(MODEL).o $(SOURCE)/STOLAS.o
