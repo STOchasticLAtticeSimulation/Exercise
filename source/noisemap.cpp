@@ -22,7 +22,7 @@ const double dN = 0.01; // e-folds step
 const std::string filename = "noisedata/noisemap_";
 // -------------------------------------------------
 
-const complex<double> II(0,1);
+const std::complex<double> II(0,1);
 
 std::vector<double> dwlist(double N);
 bool realpoint(int nx, int ny, int nz, int Num); // judge real point
@@ -83,6 +83,12 @@ int main(int argc, char* argv[])
   }
   std::cout << std::endl;
 
+  for (size_t i=0; i<noisedata[0].size(); i++) {
+    for (size_t n=0; n<noisedata.size(); n++) {
+      ofs << noisedata[n][i] << ' ';
+    }
+    ofs << std::endl;
+  }
 
   // ---------- stop timer ----------
   gettimeofday(&Nv, &Nz);
@@ -93,7 +99,7 @@ int main(int argc, char* argv[])
 
 
 std::vector<double> dwlist(double N) {
-  std::vector<std::vector<std::vector<std::complex<doubl>>>> dwk(NL, std::vector<std::vector<std::complex<double>>>(NL, std::vector<std::complex<double>>(NL, 0)));
+  std::vector<std::vector<std::vector<std::complex<double>>>> dwk(NL, std::vector<std::vector<std::complex<double>>>(NL, std::vector<std::complex<double>>(NL, 0)));
   int count = 0;
   double nsigma = sigma*exp(N);
   
@@ -137,7 +143,13 @@ std::vector<double> dwlist(double N) {
     }
   }
 
-  return fft(dwk);
+  std::vector<std::vector<std::vector<std::complex<double>>>> dwlattice = fft(dwk);
+  std::vector<double> dwlist;
+  LOOP{
+    dwlist.push_back(dwlattice[i][j][k].real());
+  }
+
+  return dwlist;
 }
 
 bool realpoint(int nx, int ny, int nz, int Num) {
