@@ -243,12 +243,12 @@ void STOLAS::RK4M(double &N, std::vector<double> &phi, double dN, double dw) {
   double HH = hubble(phi[0],phi[1]);
   
   RK4(N,phi,dN);
-  phi[0] += HH/2./M_PI * dw;
+  phi[0] += HH/2./M_PI * dw * sqrt(dN);
 }
 
 void STOLAS::RK4Mbias(double &N, std::vector<double> &phi, double dN, double dw, int pos) {
   double HH = hubble(phi[0],phi[1]);
 
   RK4bias(N,phi,dN,pos);
-  phi[0] += HH/2./M_PI * dw;
+  phi[0] += HH/2./M_PI * dw * sqrt(dN);
 }
