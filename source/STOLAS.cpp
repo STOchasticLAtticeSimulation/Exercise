@@ -2,47 +2,71 @@
 #include "vec_op.hpp"
 
 
-STOLAS::STOLAS(std::string Model, double NF, std::string noisedir, int noisefileNo, std::vector<double> Phii, double Bias, double NBias, double DNbias) {
+STOLAS::STOLAS(std::string Model, double DN, std::string noisedir, int noisefileNo, std::vector<double> Phii, double Bias, double NBias, double DNbias) {
 
 #ifdef _OPENMP
   std::cout << "OpenMP : Enabled (Max # of threads = " << omp_get_max_threads() << ")" << std::endl;
 #endif
   
   model = Model;
-  Nf = NF;
+  dN = DN;
   phii = Phii;
   bias = Bias;
   Nbias = NBias;
   dNbias = DNbias;
 
-  Nfilename = Nfileprefix + std::to_string((int)Nf) + std::string(",") + std::to_string((int)(10*(Nf-(int)Nf))) + std::string("_noise_") + std::to_string(noisefileNo) + std::string(".dat");
-
-  std::cout << "model : " << model << std::endl;
+  noisefile.open(noisedir + std::string("/") + noisefilename + std::to_string(noisefileNo) + std::string(".dat"));
+  noisefilefail = noisefile.fail();
   
-  noisefile.open(noisedir + std::string("/") + noisefilename);
-  std::string str;
-  double dd;
-  while (std::getline(noisefile, str)) {
-    std::vector<double> vv;
-    std::stringstream ss(str);
-    while (!ss.eof()) {
-      ss >> dd;
-      vv.push_back(dd);
+  if (!noisefile.fail() && !Nfile.fail()) {
+    std::cout << "model : " << model << std::endl;
+    
+    std::string str;
+    double dd;
+    while (std::getline(noisefile, str)) {
+      std::vector<double> vv;
+      std::stringstream ss(str);
+      while (!ss.eof()) {
+	ss >> dd;
+	vv.push_back(dd);
+      }
+      vv.pop_back();
+      noisedata.push_back(vv);
     }
-    vv.pop_back();
-    noisedata.push_back(vv);
-  }
 
-  NL = cbrt(noisedata.size());
-  dN = Nf / (noisedata[0].size()-1);
-  std::cout << "Noise data imported. Box size is " << NL << ". Time step is " << dN << " e-folds. Simulation ends at " << Nf << " e-folds." << std::endl;
+    NL = cbrt(noisedata.size());
+    std::cout << "Noise data imported. Box size is " << NL << "." << std::endl;
+    Nfile.open(Nfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
+    Hfile.open(Hfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
+    pifile.open(pifileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
+  }
 }
 
 
+bool STOLAS::checknoisefile() {
+  return !noisefilefail;
+}
+
+bool STOLAS::Nfilefail() {
+  return Nfile.fail();
+}
+
+bool STOLAS::Hfilefail() {
+  return Hfile.fail();
+}
+
+bool STOLAS::pifilefail() {
+  return pifile.fail();
+}
+
 void STOLAS::dNmap() {
-  std::ofstream Nfile(Nfilename);
   Nfile << std::setprecision(10);
+  Hfile << std::setprecision(14);
+  pifile << std::setprecision(14);
   int complete = 0;
+
+  std::vector<std::vector<double>> Hdata(noisedata[0].size(), std::vector<double>(NL*NL*NL,0));
+  std::vector<std::vector<double>> pidata(noisedata[0].size(), std::vector<double>(NL*NL*NL,0));
   
 #ifdef _OPENMP
 #pragma omp parallel for
@@ -51,6 +75,8 @@ void STOLAS::dNmap() {
     double N=0;
     std::vector<double> phi = phii;
     for (size_t n=0; n<noisedata[i].size(); n++) {
+      Hdata[n][i] = pow(hubble(phi[0],phi[1]),2);
+      pidata[n][i] = phi[1]*phi[1];
       RK4Mbias(N,phi,dN,noisedata[i][n],i);
     }
 
@@ -75,10 +101,21 @@ void STOLAS::dNmap() {
     {
       Nfile << i << ' ' << N << std::endl;
       complete++;
-      std::cout << "\r" << complete << "/" << NL*NL*NL << std::flush;
+      std::cout << "\rLatticeSimulation : " << std::setw(3) << 100*complete/NL/NL/NL << "%" << std::flush;
     }
   }
   std::cout << std::endl;
+
+  for (size_t n=0; n<Hdata.size(); n++) {
+    for (size_t i=0; i<Hdata[n].size(); i++) {
+      Hfile << Hdata[n][i] << ' ';
+      pifile << pidata[n][i] << ' ';
+    }
+    Hfile << std::endl;
+    pifile << std::endl;
+    std::cout << "\rAnimeDataExporting : " << std::setw(3) << 100*n/Hdata.size() << "%" << std::flush;
+  }
+  std::cout << "\rAnimeDataExporting : 100%" << std::endl;
 }
 
 
@@ -206,12 +243,12 @@ void STOLAS::RK4M(double &N, std::vector<double> &phi, double dN, double dw) {
   double HH = hubble(phi[0],phi[1]);
   
   RK4(N,phi,dN);
-  phi[0] += HH/2./M_PI * dw;
+  phi[0] += HH/2./M_PI * dw * sqrt(dN);
 }
 
 void STOLAS::RK4Mbias(double &N, std::vector<double> &phi, double dN, double dw, int pos) {
   double HH = hubble(phi[0],phi[1]);
 
   RK4bias(N,phi,dN,pos);
-  phi[0] += HH/2./M_PI * dw;
+  phi[0] += HH/2./M_PI * dw * sqrt(dN);
 }

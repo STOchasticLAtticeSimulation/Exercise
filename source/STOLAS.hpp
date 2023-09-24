@@ -23,20 +23,29 @@ protected:
   const double Nprec = 1e-7;
   // ----------------------------------------
 
-  const std::string noisefilename = "nonoise.dat"; //"largenoisetest.dat";
-  const std::string Nfileprefix = "Nmap_Nf_";
+  const std::string noisefilename = "noisemap_"; //"largenoisetest.dat";
+  const std::string Nfileprefix = "Nmap_";
+  const std::string Hfileprefix = "H_";
+  const std::string pifileprefix = "pi_";
+  bool noisefilefail;
 
-  std::string model, Nfilename;
+  std::string model;
   int NL;
-  double Nf, dN, bias, Nbias, dNbias;
+  double dN, bias, Nbias, dNbias;
   std::ifstream noisefile;
+  std::ofstream Nfile, Hfile, pifile;
   std::vector<double> phii;
   std::vector<std::vector<double>> noisedata;
 
 public:
   STOLAS(){}
-  STOLAS(std::string Model, double NF, std::string noisedir, int noisefileNo, std::vector<double> Phii, double Bias, double NBias, double DNbias);
+  STOLAS(std::string Model, double DN, std::string noisedir, int noisefileNo, std::vector<double> Phii, double Bias, double NBias, double DNbias);
 
+  bool checknoisefile();
+  bool Nfilefail();
+  bool Hfilefail();
+  bool pifilefail();
+  
   double VV(double phi);
   double Vp(double phi);
   

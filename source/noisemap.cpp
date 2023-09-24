@@ -48,7 +48,7 @@ int main(int argc, char* argv[])
 
   std::ofstream ofs(filename + std::string(argv[1]) + std::string(".dat"));
   if (ofs.fail()) {
-    std::cout << "The noise file couldn't be opend." << std::endl;
+    std::cout << "The noise file couldn't be opened." << std::endl;
     return -1;
   }
 
@@ -66,6 +66,8 @@ int main(int argc, char* argv[])
   std::cout << "OpenMP : Enabled (Max # of threads = " << omp_get_max_threads() << ")" << std::endl;
 #endif
 
+  std::cout << "Box size : " << NL << std::endl;
+  
   int totalstep = ceil(log((NL/2-1)/sigma)/dN), count = 0;
   std::vector<std::vector<double>> noisedata(totalstep, std::vector<double>(NL*NL*NL,0));
   
@@ -79,7 +81,7 @@ int main(int argc, char* argv[])
 #endif
     {
       count++;
-      std::cout << "\rNoiseGenerating: " << std::setw(3) << 100*count/totalstep << "%" << std::flush;
+      std::cout << "\rNoiseGenerating : " << std::setw(3) << 100*count/totalstep << "%" << std::flush;
     }
   }
   std::cout << std::endl;
@@ -89,9 +91,9 @@ int main(int argc, char* argv[])
       ofs << noisedata[n][i] << ' ';
     }
     ofs << std::endl;
-    std::cout << "\rExporting: " << std::setw(3) << 100*i/noisedata[0].size() << "%" << std::flush;
+    std::cout << "\rExporting : " << std::setw(3) << 100*i/noisedata[0].size() << "%" << std::flush;
   }
-  std::cout << "\rExporting: 100%" << std::endl;
+  std::cout << "\rExporting : 100%" << std::endl;
 
   // ---------- stop timer ----------
   gettimeofday(&Nv, &Nz);
