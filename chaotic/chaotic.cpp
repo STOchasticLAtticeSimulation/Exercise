@@ -1,7 +1,7 @@
 #include "../source/STOLAS.hpp"
 #include <sys/time.h>
 
-const double mm = 0.01;
+const double mm = 1e-5; //0.01;
 
 const std::string model = "chaotic";
 const double dN = 0.01;
