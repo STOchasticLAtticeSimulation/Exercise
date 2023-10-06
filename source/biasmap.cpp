@@ -112,7 +112,7 @@ std::vector<double> biaslist(double N) {
   if (count==0) {
     return biaslist;
   }
-  bk /= sqrt(count);
+  bk /= count;
 
   std::vector<std::vector<std::vector<std::complex<double>>>> biaslattice = fft(bk);
   LOOP{
