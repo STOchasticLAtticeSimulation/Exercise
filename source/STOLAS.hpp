@@ -23,25 +23,27 @@ protected:
   const double Nprec = 1e-7;
   // ----------------------------------------
 
-  const std::string noisefilename = "noisemap_"; //"largenoisetest.dat";
+  const std::string noisefilename = "noisedata/noisemap_"; //"largenoisetest.dat";
+  const std::string biasfilename = "biasdata/biasmap.dat";
   const std::string Nfileprefix = "Nmap_";
   const std::string Hfileprefix = "H_";
   const std::string pifileprefix = "pi_";
-  bool noisefilefail;
+  bool noisefilefail, biasfilefail;
 
   std::string model;
   int NL;
   double dN, bias, Nbias, dNbias;
-  std::ifstream noisefile;
+  std::ifstream noisefile, biasfile;
   std::ofstream Nfile, Hfile, pifile;
   std::vector<double> phii;
-  std::vector<std::vector<double>> noisedata;
+  std::vector<std::vector<double>> noisedata, biasdata;
 
 public:
   STOLAS(){}
-  STOLAS(std::string Model, double DN, std::string noisedir, int noisefileNo, std::vector<double> Phii, double Bias, double NBias, double DNbias);
+  STOLAS(std::string Model, double DN, std::string sourcedir, int noisefileNo, std::vector<double> Phii, double Bias, double NBias, double DNbias);
 
   bool checknoisefile();
+  bool checkbiasfile();
   bool Nfilefail();
   bool Hfilefail();
   bool pifilefail();
@@ -55,12 +57,13 @@ public:
   double hubble(double phi, double pi);
 
   std::vector<double> dphidN(double N, std::vector<double> phi);
-  std::vector<double> dphidNbias(double N, std::vector<double> phi, int pos);
+  //std::vector<double> dphidNbias(double N, std::vector<double> phi, int pos);
 
   void RK4(double &t, std::vector<double> &x, double dt);
-  void RK4bias(double &t, std::vector<double> &x, double dt, int pos);
-  void RK4M(double &N, std::vector<double> &phi, double dN, double dw);
-  void RK4Mbias(double &N, std::vector<double> &phi, double dN, double dw, int pos);
+  //void RK4bias(double &t, std::vector<double> &x, double dt, int pos);
+  //void RK4M(double &N, std::vector<double> &phi, double dN, double dw);
+  void RK4Mbias(double &N, std::vector<double> &phi, double dN, double dw, double Bias //int pos
+		);
 };
 
 #endif

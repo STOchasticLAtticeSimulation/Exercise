@@ -2,7 +2,7 @@
 #include "vec_op.hpp"
 
 
-STOLAS::STOLAS(std::string Model, double DN, std::string noisedir, int noisefileNo, std::vector<double> Phii, double Bias, double NBias, double DNbias) {
+STOLAS::STOLAS(std::string Model, double DN, std::string sourcedir, int noisefileNo, std::vector<double> Phii, double Bias, double NBias, double DNbias) {
 
 #ifdef _OPENMP
   std::cout << "OpenMP : Enabled (Max # of threads = " << omp_get_max_threads() << ")" << std::endl;
@@ -15,10 +15,12 @@ STOLAS::STOLAS(std::string Model, double DN, std::string noisedir, int noisefile
   Nbias = NBias;
   dNbias = DNbias;
 
-  noisefile.open(noisedir + std::string("/") + noisefilename + std::to_string(noisefileNo) + std::string(".dat"));
+  noisefile.open(sourcedir + std::string("/") + noisefilename + std::to_string(noisefileNo) + std::string(".dat"));
   noisefilefail = noisefile.fail();
+  biasfile.open(sourcedir + std::string("/") + biasfilename);
+  biasfilefail = biasfile.fail();
   
-  if (!noisefile.fail() && !Nfile.fail()) {
+  if (!noisefile.fail() && !biasfile.fail() && !Nfile.fail()) {
     std::cout << "model : " << model << std::endl;
     
     std::string str;
@@ -34,8 +36,19 @@ STOLAS::STOLAS(std::string Model, double DN, std::string noisedir, int noisefile
       noisedata.push_back(vv);
     }
 
+    while (std::getline(biasfile, str)) {
+      std::vector<double> vv;
+      std::stringstream ss(str);
+      while (!ss.eof()) {
+	ss >> dd;
+	vv.push_back(dd);
+      }
+      vv.pop_back();
+      biasdata.push_back(vv);
+    }
+
     NL = cbrt(noisedata.size());
-    std::cout << "Noise data imported. Box size is " << NL << "." << std::endl;
+    std::cout << "Noise/Bias data imported. Box size is " << NL << "." << std::endl;
     Nfile.open(Nfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
     Hfile.open(Hfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
     pifile.open(pifileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
@@ -45,6 +58,10 @@ STOLAS::STOLAS(std::string Model, double DN, std::string noisedir, int noisefile
 
 bool STOLAS::checknoisefile() {
   return !noisefilefail;
+}
+
+bool STOLAS::checkbiasfile() {
+  return !biasfilefail;
 }
 
 bool STOLAS::Nfilefail() {
@@ -77,7 +94,8 @@ void STOLAS::dNmap() {
     for (size_t n=0; n<noisedata[i].size(); n++) {
       Hdata[n][i] = pow(hubble(phi[0],phi[1]),2);
       pidata[n][i] = phi[1]*phi[1];
-      RK4Mbias(N,phi,dN,noisedata[i][n],i);
+      //RK4Mbias(N,phi,dN,noisedata[i][n],i);
+      RK4Mbias(N,phi,dN,noisedata[i][n],biasdata[i][n]);
     }
 
     double dN1 = dN;
@@ -141,6 +159,7 @@ std::vector<double> STOLAS::dphidN(double N, std::vector<double> phi) {
   return dphidN;
 }
 
+/*
 std::vector<double> STOLAS::dphidNbias(double N, std::vector<double> phi, int pos) {
   std::vector<double> dphidNbias(2);
 
@@ -168,6 +187,7 @@ std::vector<double> STOLAS::dphidNbias(double N, std::vector<double> phi, int po
   
   return dphidNbias;
 }
+*/
 
 void STOLAS::RK4(double &t, std::vector<double> &x, double dt) {
   std::vector<double> kx[4]; // 4-stage slopes kx
@@ -204,6 +224,7 @@ void STOLAS::RK4(double &t, std::vector<double> &x, double dt) {
   x += dt*(b[0]*kx[0] + b[1]*kx[1] + b[2]*kx[2] + b[3]*kx[3]);
 }
 
+/*
 void STOLAS::RK4bias(double &t, std::vector<double> &x, double dt, int pos) {
   std::vector<double> kx[4]; // 4-stage slopes kx
   double a[4][4],b[4],c[4]; // Butcher
@@ -245,10 +266,16 @@ void STOLAS::RK4M(double &N, std::vector<double> &phi, double dN, double dw) {
   RK4(N,phi,dN);
   phi[0] += HH/2./M_PI * dw * sqrt(dN);
 }
+*/
 
-void STOLAS::RK4Mbias(double &N, std::vector<double> &phi, double dN, double dw, int pos) {
+void STOLAS::RK4Mbias(double &N, std::vector<double> &phi, double dN, double dw, double Bias //int pos
+		      ) {
   double HH = hubble(phi[0],phi[1]);
 
-  RK4bias(N,phi,dN,pos);
+  //RK4bias(N,phi,dN,pos);
+  RK4(N,phi,dN);
   phi[0] += HH/2./M_PI * dw * sqrt(dN);
+
+  double GaussianFactor = 1./dNbias/sqrt(2*M_PI) * exp(-(N-Nbias)*(N-Nbias)/2./dNbias/dNbias);
+  phi[0] += HH/2./M_PI * bias * Bias * GaussianFactor * dN;
 }

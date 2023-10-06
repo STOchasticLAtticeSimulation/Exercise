@@ -1,14 +1,14 @@
 #include "../source/STOLAS.hpp"
 #include <sys/time.h>
 
-const double mm = 1e-5; //0.01;
+const double mm = 0.01;
 
 const std::string model = "chaotic";
 const double dN = 0.01;
-const std::string noisedir = "../source/noisedata";
+const std::string sourcedir = "../source";
 const std::vector<double> phii{15.,-0.1*mm*mm};
-const double bias = 0; //10.;
-const double Nbias = 2;
+const double bias = 10.;
+const double Nbias = 3;
 const double dNbias = 0.01;
 
 
@@ -39,10 +39,15 @@ int main(int argc, char* argv[])
 
   int noisefileNo = atoi(argv[1]);
   
-  STOLAS stolas(model,dN,noisedir,noisefileNo,phii,bias,Nbias,dNbias);
+  STOLAS stolas(model,dN,sourcedir,noisefileNo,phii,bias,Nbias,dNbias);
 
   if (!stolas.checknoisefile()) {
     std::cout << "The noise file couldn't be opened." << std::endl;
+    return -1;
+  }
+
+  if (!stolas.checkbiasfile()) {
+    std::cout << "The bias file couldn't be opened." << std::endl;
     return -1;
   }
 
