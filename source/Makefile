@@ -1,5 +1,5 @@
 #MODEL = noisemap
-MODEL = biasmap
+MODEL = noisemap
 
 #CXX := g++-13
 CXX := g++

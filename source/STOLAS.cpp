@@ -134,6 +134,16 @@ void STOLAS::dNmap() {
     std::cout << "\rAnimeDataExporting : " << std::setw(3) << 100*n/Hdata.size() << "%" << std::flush;
   }
   std::cout << "\rAnimeDataExporting : 100%" << std::endl;
+
+  //calculation of weight
+  double logw=0.;
+  for(size_t n=0; n<noisedata[0].size(); n++){
+    double N=n*dN;
+    double Bias=bias *1./dNbias/sqrt(2*M_PI) * exp(-(N-Nbias)*(N-Nbias)/2./dNbias/dNbias);
+    logw+=-Bias*noisedata[0][n]*sqrt(dN)-(Bias*Bias*dN)/2;
+  }
+  std::cout << logw << std::endl;
+
 }
 
 
