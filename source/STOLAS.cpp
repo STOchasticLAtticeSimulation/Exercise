@@ -20,7 +20,7 @@ STOLAS::STOLAS(std::string Model, double DN, std::string sourcedir, int noisefil
   biasfile.open(sourcedir + std::string("/") + biasfilename);
   biasfilefail = biasfile.fail();
   
-  if (!noisefile.fail() && !biasfile.fail() && !Nfile.fail()) {
+  if (!noisefile.fail() && !biasfile.fail()) {
     std::cout << "model : " << model << std::endl;
     
     std::string str;
@@ -52,6 +52,7 @@ STOLAS::STOLAS(std::string Model, double DN, std::string sourcedir, int noisefil
     Nfile.open(Nfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
     Hfile.open(Hfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
     pifile.open(pifileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
+    wfile.open(wfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
 
     Hdata = std::vector<std::vector<double>>(noisedata[0].size(), std::vector<double>(NL*NL*NL,0));
     pidata = std::vector<std::vector<double>>(noisedata[0].size(), std::vector<double>(NL*NL*NL,0));
@@ -83,10 +84,15 @@ bool STOLAS::pifilefail() {
   return pifile.fail();
 }
 
+bool STOLAS::wfilefail() {
+  return wfile.fail();
+}
+
 void STOLAS::dNmap() {
   Nfile << std::setprecision(10);
   Hfile << std::setprecision(14);
   pifile << std::setprecision(14);
+  wfile << std::setprecision(10);
   int complete = 0;
   
 #ifdef _OPENMP
@@ -127,6 +133,15 @@ void STOLAS::dNmap() {
     }
   }
   std::cout << std::endl;
+  
+  //calculation of weight 
+  double logw=0.;
+  for(size_t n=0; n<noisedata[0].size(); n++){
+    double N=n*dN;
+    double Bias=bias *1./dNbias/sqrt(2*M_PI) * exp(-(N-Nbias)*(N-Nbias)/2./dNbias/dNbias);
+    logw+=-Bias*noisedata[0][n]*sqrt(dN)-(Bias*Bias*dN)/2;
+  }
+  wfile << logw << std::endl;
 }
 
 void STOLAS::animation() {

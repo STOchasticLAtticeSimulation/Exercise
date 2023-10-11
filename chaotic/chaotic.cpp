@@ -8,8 +8,8 @@ const double dN = 0.01;
 const std::string sourcedir = "../source";
 const std::vector<double> phii{15.,-0.1*mm*mm};
 const double bias = 10.;
-const double Nbias = 3.5;
-const double dNbias = 0.01;
+const double Nbias = 3.0;
+const double dNbias = 1.0;
 
 
 double STOLAS::VV(double phi) {
@@ -56,7 +56,7 @@ int main(int argc, char* argv[])
     return -1;
   }
 
-  if (stolas.Nfilefail()||stolas.Hfilefail()||stolas.pifilefail()) {
+  if (stolas.Nfilefail()||stolas.wfilefail()) {
     std::cout << "The export file couldn't be opened." << std::endl;
     return -1;
   }
