@@ -51,7 +51,7 @@ int main(int argc, char* argv[])
     return -1;
   }
 
-  if (stolas.Nfilefail()||stolas.Hfilefail()||stolas.pifilefail()) {
+  if (stolas.Nfilefail()||stolas.Hfilefail()||stolas.pifilefail()||stolas.wfilefail()) {
     std::cout << "The export file couldn't be opened." << std::endl;
     return -1;
   }
