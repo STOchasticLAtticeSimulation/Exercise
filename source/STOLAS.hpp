@@ -36,7 +36,7 @@ protected:
   std::ifstream noisefile, biasfile;
   std::ofstream Nfile, Hfile, pifile;
   std::vector<double> phii;
-  std::vector<std::vector<double>> noisedata, biasdata;
+  std::vector<std::vector<double>> noisedata, biasdata, Hdata, pidata;
 
 public:
   STOLAS(){}
@@ -44,6 +44,7 @@ public:
 
   bool checknoisefile();
   bool checkbiasfile();
+  bool noisebiassize();
   bool Nfilefail();
   bool Hfilefail();
   bool pifilefail();
@@ -52,6 +53,7 @@ public:
   double Vp(double phi);
   
   void dNmap();
+  void animation();
 
   double ep(double phi, double pi);
   double hubble(double phi, double pi);
