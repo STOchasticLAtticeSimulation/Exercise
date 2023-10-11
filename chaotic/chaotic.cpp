@@ -8,8 +8,8 @@ const double dN = 0.01;
 const std::string sourcedir = "../source";
 const std::vector<double> phii{15.,-0.1*mm*mm};
 const double bias = 10.;
-const double Nbias = 3.5;
-const double dNbias = 0.01;
+const double Nbias = 3.0;
+const double dNbias = 1.0;
 
 
 double STOLAS::VV(double phi) {
