@@ -20,7 +20,7 @@ STOLAS::STOLAS(std::string Model, double DN, std::string sourcedir, int noisefil
   biasfile.open(sourcedir + std::string("/") + biasfilename);
   biasfilefail = biasfile.fail();
   
-  if (!noisefile.fail() && !biasfile.fail() && !Nfile.fail()) {
+  if (!noisefile.fail() && !biasfile.fail()) {
     std::cout << "model : " << model << std::endl;
     
     std::string str;
@@ -53,6 +53,9 @@ STOLAS::STOLAS(std::string Model, double DN, std::string sourcedir, int noisefil
     Hfile.open(Hfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
     pifile.open(pifileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
     wfile.open(wfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
+
+    Hdata = std::vector<std::vector<double>>(noisedata[0].size(), std::vector<double>(NL*NL*NL,0));
+    pidata = std::vector<std::vector<double>>(noisedata[0].size(), std::vector<double>(NL*NL*NL,0));
   }
 }
 
@@ -63,6 +66,10 @@ bool STOLAS::checknoisefile() {
 
 bool STOLAS::checkbiasfile() {
   return !biasfilefail;
+}
+
+bool STOLAS::noisebiassize() {
+  return (noisedata.size() == biasdata.size());
 }
 
 bool STOLAS::Nfilefail() {
@@ -87,9 +94,6 @@ void STOLAS::dNmap() {
   pifile << std::setprecision(14);
   wfile << std::setprecision(10);
   int complete = 0;
-
-  std::vector<std::vector<double>> Hdata(noisedata[0].size(), std::vector<double>(NL*NL*NL,0));
-  std::vector<std::vector<double>> pidata(noisedata[0].size(), std::vector<double>(NL*NL*NL,0));
   
 #ifdef _OPENMP
 #pragma omp parallel for
@@ -129,19 +133,8 @@ void STOLAS::dNmap() {
     }
   }
   std::cout << std::endl;
-
-  for (size_t n=0; n<Hdata.size(); n++) {
-    for (size_t i=0; i<Hdata[n].size(); i++) {
-      Hfile << Hdata[n][i] << ' ';
-      pifile << pidata[n][i] << ' ';
-    }
-    Hfile << std::endl;
-    pifile << std::endl;
-    std::cout << "\rAnimeDataExporting : " << std::setw(3) << 100*n/Hdata.size() << "%" << std::flush;
-  }
-  std::cout << "\rAnimeDataExporting : 100%" << std::endl;
-
-  //calculation of weight
+  
+  //calculation of weight 
   double logw=0.;
   for(size_t n=0; n<noisedata[0].size(); n++){
     double N=n*dN;
@@ -149,7 +142,19 @@ void STOLAS::dNmap() {
     logw+=-Bias*noisedata[0][n]*sqrt(dN)-(Bias*Bias*dN)/2;
   }
   wfile << logw << std::endl;
+}
 
+void STOLAS::animation() {
+  for (size_t n=0; n<Hdata.size(); n++) {
+    for (size_t i=0; i<Hdata[n].size(); i++) {
+      Hfile << Hdata[n][i] << ' ';
+      pifile << pidata[n][i] << ' ';
+    }
+    Hfile << std::endl;
+    pifile << std::endl;
+    std::cout << "\rAnimeDataExporting : " << std::setw(3) << 100*(n+1)/Hdata.size() << "%" << std::flush;
+  }
+  std::cout << std::endl;
 }
 
 
