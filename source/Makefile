@@ -2,12 +2,12 @@ NOISE = noisemap
 BIAS = biasmap
 
 #CXX := g++-13
-CXX := g++
-#CXX := icpc
+#CXX := g++
+CXX := icpc
 
 #CXXFLAGS := -std=c++11 -O2 -fopenmp
-CXXFLAGS := -std=c++11 -O2 -Xpreprocessor -fopenmp -lomp
-#CXXFLAGS := -std=c++11 -O2 -qopenmp
+#CXXFLAGS := -std=c++11 -O2 -Xpreprocessor -fopenmp -lomp
+CXXFLAGS := -std=c++11 -O2 -qopenmp
 
 LDFLAGS := -L/opt/homebrew/opt/libomp/lib
 CPPFLAGS := -I/opt/homebrew/opt/libomp/include
