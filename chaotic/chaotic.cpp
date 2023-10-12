@@ -57,13 +57,15 @@ int main(int argc, char* argv[])
   }
 
   if (stolas.Nfilefail()||stolas.wfilefail()) {
-    std::cout << "The export file couldn't be opened." << std::endl;
+    std::cout << "The export file couldn't be opened. 'mkdir data'" << std::endl;
     return -1;
   }
 
+  /*
   if (stolas.Hfilefail()||stolas.pifilefail()) {
     std::cout << "Caution: export files for animation couldn't be opened." << std::endl;
   }
+  */
 
   stolas.dNmap();
   //stolas.animation();

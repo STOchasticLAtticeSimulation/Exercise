@@ -2,7 +2,7 @@
 #include "vec_op.hpp"
 
 
-STOLAS::STOLAS(std::string Model, double DN, std::string sourcedir, int noisefileNo, std::vector<double> Phii, double Bias, double NBias, double DNbias) {
+STOLAS::STOLAS(std::string Model, double DN, std::string sourcedir, int NoisefileNo, std::vector<double> Phii, double Bias, double NBias, double DNbias) {
 
 #ifdef _OPENMP
   std::cout << "OpenMP : Enabled (Max # of threads = " << omp_get_max_threads() << ")" << std::endl;
@@ -10,6 +10,7 @@ STOLAS::STOLAS(std::string Model, double DN, std::string sourcedir, int noisefil
   
   model = Model;
   dN = DN;
+  noisefileNo = NoisefileNo;
   phii = Phii;
   bias = Bias;
   Nbias = NBias;
@@ -50,8 +51,8 @@ STOLAS::STOLAS(std::string Model, double DN, std::string sourcedir, int noisefil
     NL = cbrt(noisedata.size());
     std::cout << "Noise/Bias data imported. Box size is " << NL << "." << std::endl;
     Nfile.open(Nfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
-    Hfile.open(Hfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
-    pifile.open(pifileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
+    //Hfile.open(Hfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
+    //pifile.open(pifileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
     wfile.open(wfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
 
     Hdata = std::vector<std::vector<double>>(noisedata[0].size(), std::vector<double>(NL*NL*NL,0));
@@ -76,6 +77,7 @@ bool STOLAS::Nfilefail() {
   return Nfile.fail();
 }
 
+/*
 bool STOLAS::Hfilefail() {
   return Hfile.fail();
 }
@@ -83,10 +85,12 @@ bool STOLAS::Hfilefail() {
 bool STOLAS::pifilefail() {
   return pifile.fail();
 }
+*/
 
 bool STOLAS::wfilefail() {
   return wfile.fail();
 }
+
 
 void STOLAS::dNmap() {
   Nfile << std::setprecision(10);
@@ -145,6 +149,9 @@ void STOLAS::dNmap() {
 }
 
 void STOLAS::animation() {
+  Hfile.open(Hfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
+  pifile.open(pifileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
+  
   for (size_t n=0; n<Hdata.size(); n++) {
     for (size_t i=0; i<Hdata[n].size(); i++) {
       Hfile << Hdata[n][i] << ' ';

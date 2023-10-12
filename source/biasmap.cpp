@@ -41,7 +41,7 @@ int main()
 {
   std::ofstream ofs(filename);
   if (ofs.fail()) {
-    std::cout << "The bias file couldn't be opened." << std::endl;
+    std::cout << "The bias file couldn't be opened. 'mkdir biasdata'" << std::endl;
     return -1;
   }
 

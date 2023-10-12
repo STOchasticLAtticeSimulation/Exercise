@@ -48,7 +48,7 @@ int main(int argc, char* argv[])
 
   std::ofstream ofs(filename + std::string(argv[1]) + std::string(".dat"));
   if (ofs.fail()) {
-    std::cout << "The noise file couldn't be opened." << std::endl;
+    std::cout << "The noise file couldn't be opened. 'mkdir noisedata'" << std::endl;
     return -1;
   }
 
