@@ -29,15 +29,17 @@ protected:
   const std::string Hfileprefix = "H_";
   const std::string pifileprefix = "pi_";
   const std::string wfileprefix = "logw_";
+  const std::string powfileprefix = "power_";
   bool noisefilefail, biasfilefail;
 
   std::string model;
-  int NL;
+  int NL,x,y,z;
   double dN, bias, Nbias, dNbias;
   std::ifstream noisefile, biasfile;
-  std::ofstream Nfile, Hfile, pifile,wfile;
+  std::ofstream Nfile, Hfile, pifile,wfile,powfile;
   std::vector<double> phii;
   std::vector<std::vector<double>> noisedata, biasdata;
+  std::vector<std::vector<std::vector<double>>> Nmap3D;
 
 public:
   STOLAS(){}
@@ -49,6 +51,7 @@ public:
   bool Hfilefail();
   bool pifilefail();
   bool wfilefail();
+  bool powfilefail();
   
   double VV(double phi);
   double Vp(double phi);

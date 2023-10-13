@@ -127,6 +127,11 @@ void STOLAS::dNmap() {
       complete++;
       std::cout << "\rLatticeSimulation : " << std::setw(3) << 100*complete/NL/NL/NL << "%" << std::flush;
     }
+
+    //power spectrum
+    int x=i/NL/NL ,y=(i%(NL*NL))/NL, z=i%NL;
+    Nmap3D[x][y][z]=N;
+
   }
   std::cout << std::endl;
 
