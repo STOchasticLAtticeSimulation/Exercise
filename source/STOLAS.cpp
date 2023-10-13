@@ -1,5 +1,9 @@
 #include "STOLAS.hpp"
 #include "vec_op.hpp"
+#include "fft.hpp"
+
+// useful macro
+#define LOOP for(int i = 0; i < NL; i++) for(int j = 0; j < NL; j++) for(int k = 0; k < NL; k++)
 
 
 STOLAS::STOLAS(std::string Model, double DN, std::string sourcedir, int noisefileNo, std::vector<double> Phii, double Bias, double NBias, double DNbias) {
@@ -53,6 +57,7 @@ STOLAS::STOLAS(std::string Model, double DN, std::string sourcedir, int noisefil
     Hfile.open(Hfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
     pifile.open(pifileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
     wfile.open(wfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
+    Nmap3D = std::vector<std::vector<std::vector<double>>>(NL,std::vector<std::vector<double>>(NL,std::vector<double>(NL,0)));
   }
 }
 
@@ -79,6 +84,10 @@ bool STOLAS::pifilefail() {
 
 bool STOLAS::wfilefail() {
   return wfile.fail();
+}
+
+bool STOLAS::powfilefail() {
+  return powfile.fail();
 }
 
 void STOLAS::dNmap() {
@@ -178,6 +187,40 @@ std::vector<double> STOLAS::dphidN(double N, std::vector<double> phi) {
   dphidN[1] = -3*pp - Vp(xx)/HH;
   
   return dphidN;
+}
+
+void STOLAS::powerspec(){
+  std::vector<std::vector<std::vector<double>>> Nk;
+  Nk = std::vector<std::vector<std::vector<double>>>(NL,std::vector<std::vector<double>>(NL,std::vector<double>(NL,0)));
+
+  std::vector<std::vector<std::vector<std::complex<double>>>> Nmap3Dfft = fft(Nmap3D);
+  LOOP{
+    Nk[i][j][k] = Nmap3Dfft[i][j][k].real();
+
+      // reflection
+    int ip, jp, kp; // reflected index
+      if (i==0) {
+      ip = 0;
+    } else {
+      ip = NL-i;
+    }
+    
+    if (j==0) {
+      jp = 0;
+    } else {
+      jp = NL-j;
+    }
+    
+    if (k==0) {
+      kp = 0;
+    } else {
+      kp = NL-k;
+    }
+
+    double rk=ip*ip+jp+jp+kp+kp;
+    powfile << rk <<"     "<< Nk[i][j][k]* Nk[i][j][k] << std::endl;
+  }
+
 }
 
 /*

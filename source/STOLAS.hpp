@@ -33,7 +33,7 @@ protected:
   bool noisefilefail, biasfilefail;
 
   std::string model;
-  int NL,x,y,z;
+  int NL;
   double dN, bias, Nbias, dNbias;
   std::ifstream noisefile, biasfile;
   std::ofstream Nfile, Hfile, pifile,wfile,powfile;
@@ -57,6 +57,7 @@ public:
   double Vp(double phi);
   
   void dNmap();
+  void powerspec();
 
   double ep(double phi, double pi);
   double hubble(double phi, double pi);
