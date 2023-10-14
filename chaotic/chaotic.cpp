@@ -57,6 +57,7 @@ int main(int argc, char* argv[])
   }
 
   stolas.dNmap();
+  stolas.powerspec();
 
   // ---------- stop timer ----------
   gettimeofday(&Nv, &Nz);
