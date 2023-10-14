@@ -57,7 +57,8 @@ STOLAS::STOLAS(std::string Model, double DN, std::string sourcedir, int noisefil
     Hfile.open(Hfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
     pifile.open(pifileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
     wfile.open(wfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
-    Nmap3D = std::vector<std::vector<std::vector<double>>>(NL,std::vector<std::vector<double>>(NL,std::vector<double>(NL,0)));
+    powfile.open(powfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
+    Nmap3D = std::vector<std::vector<std::vector<std::complex<double>>>>(NL, std::vector<std::vector<std::complex<double>>>(NL, std::vector<std::complex<double>>(NL, 0)));
   }
 }
 
@@ -139,7 +140,9 @@ void STOLAS::dNmap() {
 
     //power spectrum
     int x=i/NL/NL ,y=(i%(NL*NL))/NL, z=i%NL;
-    Nmap3D[x][y][z]=N;
+    const std::complex<double> II(0,1);
+
+    Nmap3D[x][y][z]=N+II*0.0;
 
   }
   std::cout << std::endl;
@@ -190,6 +193,7 @@ std::vector<double> STOLAS::dphidN(double N, std::vector<double> phi) {
 }
 
 void STOLAS::powerspec(){
+  powfile << std::setprecision(10);
   std::vector<std::vector<std::vector<double>>> Nk;
   Nk = std::vector<std::vector<std::vector<double>>>(NL,std::vector<std::vector<double>>(NL,std::vector<double>(NL,0)));
 

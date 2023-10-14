@@ -9,6 +9,7 @@
 #include <iomanip>
 #include <vector>
 #include <functional>
+#include <complex>
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -39,7 +40,7 @@ protected:
   std::ofstream Nfile, Hfile, pifile,wfile,powfile;
   std::vector<double> phii;
   std::vector<std::vector<double>> noisedata, biasdata;
-  std::vector<std::vector<std::vector<double>>> Nmap3D;
+  std::vector<std::vector<std::vector<std::complex<double>>>> Nmap3D;
 
 public:
   STOLAS(){}
