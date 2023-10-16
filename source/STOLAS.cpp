@@ -222,7 +222,7 @@ void STOLAS::powerspec(){
     }
 
     double rk=ip*ip+jp+jp+kp+kp;
-    powfile<< rk <<"     "<< Nk[i][j][k]* Nk[i][j][k] << std::endl;
+    powfile<< rk <<"     "<< abs(Nk[i][j][k]* Nk[i][j][k]) << std::endl;
   }
 
 }
