@@ -219,7 +219,7 @@ void STOLAS::powerspec(){
   }
     
     double rk=nxt*nxt+nyt*nyt+nzt*nzt;
-    powfile<< sqrt(rk) <<"     "<< norm(Nk[i][j][k]) << std::endl;
+    powfile<< sqrt(rk) <<"     "<< norm(Nk[i][j][k])/(NL*NL*NL*NL*NL*NL) << std::endl;
   }
 
 }
