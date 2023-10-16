@@ -142,7 +142,7 @@ void STOLAS::dNmap() {
     int x=i/NL/NL ,y=(i%(NL*NL))/NL, z=i%NL;
     const std::complex<double> II(0,1);
 
-    Nmap3D[x][y][z]=N+II*0.0;
+    Nmap3D[x][y][z]=N;
 
   }
   std::cout << std::endl;
@@ -194,35 +194,32 @@ std::vector<double> STOLAS::dphidN(double N, std::vector<double> phi) {
 
 void STOLAS::powerspec(){
   powfile << std::setprecision(10);
-  std::vector<std::vector<std::vector<double>>> Nk;
-  Nk = std::vector<std::vector<std::vector<double>>>(NL,std::vector<std::vector<double>>(NL,std::vector<double>(NL,0)));
+  std::vector<std::vector<std::vector<std::complex<double>>>> Nk=fft(Nmap3D);
+  //Nk = std::vector<std::vector<std::vector<double>>>(NL,std::vector<std::vector<double>>(NL,std::vector<double>(NL,0)));
 
-  std::vector<std::vector<std::vector<std::complex<double>>>> Nmap3Dfft = fft(Nmap3D);
+  //std::vector<std::vector<std::vector<std::complex<double>>>> Nmap3Dfft = fft(Nmap3D);
   LOOP{
-    Nk[i][j][k] = Nmap3Dfft[i][j][k].real();
+      int nxt, nyt, nzt; // shifted index
+  if (i<=NL/2) {
+    nxt = i;
+  } else {
+    nxt = i-NL;
+  }
 
-      // reflection
-    int ip, jp, kp; // reflected index
-      if (i==0) {
-      ip = 0;
-    } else {
-      ip = NL-i;
-    }
-    
-    if (j==0) {
-      jp = 0;
-    } else {
-      jp = NL-j;
-    }
-    
-    if (k==0) {
-      kp = 0;
-    } else {
-      kp = NL-k;
-    }
+  if (j<=NL/2) {
+    nyt = j;
+  } else {
+    nyt = j-NL;
+  }
 
-    double rk=ip*ip+jp+jp+kp+kp;
-    powfile<< rk <<"     "<< abs(Nk[i][j][k]* Nk[i][j][k]) << std::endl;
+  if (k<=NL/2) {
+    nzt = k;
+  } else {
+    nzt = k-NL;
+  }
+    
+    double rk=i*i+j+j+k+k;
+    powfile<< sqrt(rk) <<"     "<< norm(Nk[i][j][k]) << std::endl;
   }
 
 }
