@@ -13,9 +13,9 @@ const double CUP = 0.0382;
 
 const std::string model = "inflection";
 const double dN = 0.01;
-const std::string noisedir = "../source/noisedata";
+const std::string sourcedir = "../source";
 const std::vector<double> phii{3.60547,-2.37409e-7};
-const double bias = 0; //7.5;
+const double bias = 0.0; //7.5;
 const double Nbias = 2;
 const double dNbias = 0.01;
 
@@ -52,19 +52,36 @@ int main(int argc, char* argv[])
 
   int noisefileNo = atoi(argv[1]);
   
-  STOLAS stolas(model,dN,noisedir,noisefileNo,phii,bias,Nbias,dNbias);
+  STOLAS stolas(model,dN,sourcedir,noisefileNo,phii,bias,Nbias,dNbias);
 
   if (!stolas.checknoisefile()) {
     std::cout << "The noise file couldn't be opened." << std::endl;
     return -1;
   }
 
-  if (stolas.Nfilefail()||stolas.Hfilefail()||stolas.pifilefail()) {
-    std::cout << "The export file couldn't be opened." << std::endl;
+  if (!stolas.checkbiasfile()) {
+    std::cout << "The bias file couldn't be opened." << std::endl;
     return -1;
   }
 
+  if (!stolas.noisebiassize()) {
+    std::cout << "The box sizes of the noise and the bias are inconsistent." << std::endl;
+    return -1;
+  }
+
+  if (stolas.Nfilefail()||stolas.wfilefail()) {
+    std::cout << "The export file couldn't be opened. 'mkdir data'" << std::endl;
+    return -1;
+  }
+
+  /*
+  if (stolas.Hfilefail()||stolas.pifilefail()) {
+    std::cout << "Caution: export files for animation couldn't be opened." << std::endl;
+  }
+  */
+
   stolas.dNmap();
+  stolas.powerspec();
 
   // ---------- stop timer ----------
   gettimeofday(&Nv, &Nz);
