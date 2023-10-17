@@ -6,7 +6,7 @@
 #define LOOP for(int i = 0; i < NL; i++) for(int j = 0; j < NL; j++) for(int k = 0; k < NL; k++)
 
 
-STOLAS::STOLAS(std::string Model, double DN, std::string sourcedir, int noisefileNo, std::vector<double> Phii, double Bias, double NBias, double DNbias) {
+STOLAS::STOLAS(std::string Model, double DN, std::string sourcedir, int NoisefileNo, std::vector<double> Phii, double Bias, double NBias, double DNbias) {
 
 #ifdef _OPENMP
   std::cout << "OpenMP : Enabled (Max # of threads = " << omp_get_max_threads() << ")" << std::endl;
@@ -14,6 +14,7 @@ STOLAS::STOLAS(std::string Model, double DN, std::string sourcedir, int noisefil
   
   model = Model;
   dN = DN;
+  noisefileNo = NoisefileNo;
   phii = Phii;
   bias = Bias;
   Nbias = NBias;
@@ -24,7 +25,7 @@ STOLAS::STOLAS(std::string Model, double DN, std::string sourcedir, int noisefil
   biasfile.open(sourcedir + std::string("/") + biasfilename);
   biasfilefail = biasfile.fail();
   
-  if (!noisefile.fail() && !biasfile.fail() && !Nfile.fail()) {
+  if (!noisefile.fail() && !biasfile.fail()) {
     std::cout << "model : " << model << std::endl;
     
     std::string str;
@@ -54,11 +55,14 @@ STOLAS::STOLAS(std::string Model, double DN, std::string sourcedir, int noisefil
     NL = cbrt(noisedata.size());
     std::cout << "Noise/Bias data imported. Box size is " << NL << "." << std::endl;
     Nfile.open(Nfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
-    Hfile.open(Hfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
-    pifile.open(pifileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
+    //Hfile.open(Hfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
+    //pifile.open(pifileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
     wfile.open(wfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
     powfile.open(powfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
     Nmap3D = std::vector<std::vector<std::vector<std::complex<double>>>>(NL, std::vector<std::vector<std::complex<double>>>(NL, std::vector<std::complex<double>>(NL, 0)));
+
+    Hdata = std::vector<std::vector<double>>(noisedata[0].size(), std::vector<double>(NL*NL*NL,0));
+    pidata = std::vector<std::vector<double>>(noisedata[0].size(), std::vector<double>(NL*NL*NL,0));
   }
 }
 
@@ -71,10 +75,15 @@ bool STOLAS::checkbiasfile() {
   return !biasfilefail;
 }
 
+bool STOLAS::noisebiassize() {
+  return (noisedata.size() == biasdata.size());
+}
+
 bool STOLAS::Nfilefail() {
   return Nfile.fail();
 }
 
+/*
 bool STOLAS::Hfilefail() {
   return Hfile.fail();
 }
@@ -82,6 +91,7 @@ bool STOLAS::Hfilefail() {
 bool STOLAS::pifilefail() {
   return pifile.fail();
 }
+*/
 
 bool STOLAS::wfilefail() {
   return wfile.fail();
@@ -91,15 +101,13 @@ bool STOLAS::powfilefail() {
   return powfile.fail();
 }
 
+
 void STOLAS::dNmap() {
   Nfile << std::setprecision(10);
   Hfile << std::setprecision(14);
   pifile << std::setprecision(14);
   wfile << std::setprecision(10);
   int complete = 0;
-
-  std::vector<std::vector<double>> Hdata(noisedata[0].size(), std::vector<double>(NL*NL*NL,0));
-  std::vector<std::vector<double>> pidata(noisedata[0].size(), std::vector<double>(NL*NL*NL,0));
   
 #ifdef _OPENMP
 #pragma omp parallel for
@@ -146,19 +154,8 @@ void STOLAS::dNmap() {
 
   }
   std::cout << std::endl;
-
-  for (size_t n=0; n<Hdata.size(); n++) {
-    for (size_t i=0; i<Hdata[n].size(); i++) {
-      Hfile << Hdata[n][i] << ' ';
-      pifile << pidata[n][i] << ' ';
-    }
-    Hfile << std::endl;
-    pifile << std::endl;
-    std::cout << "\rAnimeDataExporting : " << std::setw(3) << 100*n/Hdata.size() << "%" << std::flush;
-  }
-  std::cout << "\rAnimeDataExporting : 100%" << std::endl;
-
-  //calculation of weight
+  
+  //calculation of weight 
   double logw=0.;
   for(size_t n=0; n<noisedata[0].size(); n++){
     double N=n*dN;
@@ -166,7 +163,22 @@ void STOLAS::dNmap() {
     logw+=-Bias*noisedata[0][n]*sqrt(dN)-(Bias*Bias*dN)/2;
   }
   wfile << logw << std::endl;
+}
 
+void STOLAS::animation() {
+  Hfile.open(Hfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
+  pifile.open(pifileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
+  
+  for (size_t n=0; n<Hdata.size(); n++) {
+    for (size_t i=0; i<Hdata[n].size(); i++) {
+      Hfile << Hdata[n][i] << ' ';
+      pifile << pidata[n][i] << ' ';
+    }
+    Hfile << std::endl;
+    pifile << std::endl;
+    std::cout << "\rAnimeDataExporting : " << std::setw(3) << 100*(n+1)/Hdata.size() << "%" << std::flush;
+  }
+  std::cout << std::endl;
 }
 
 

@@ -18,7 +18,7 @@
 // -------------- User may change ------------------
 const double sigma = 0.1; // ksigma = 2pi sigma exp(N) / L, nsigma = sigma exp(N)
 const double dn = 1; // thickness of nsigma sphere shell
-const int NL = pow(2,5); // box size L
+const int NL = pow(2,6); // box size L
 const double dN = 0.01; // e-folds step
 const std::string filename = "noisedata/noisemap_";
 // -------------------------------------------------
@@ -48,7 +48,7 @@ int main(int argc, char* argv[])
 
   std::ofstream ofs(filename + std::string(argv[1]) + std::string(".dat"));
   if (ofs.fail()) {
-    std::cout << "The noise file couldn't be opened." << std::endl;
+    std::cout << "The noise file couldn't be opened. 'mkdir noisedata'" << std::endl;
     return -1;
   }
 

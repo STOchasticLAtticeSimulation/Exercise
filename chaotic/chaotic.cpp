@@ -51,12 +51,24 @@ int main(int argc, char* argv[])
     return -1;
   }
 
-  if (stolas.Nfilefail()||stolas.Hfilefail()||stolas.pifilefail()||stolas.wfilefail()) {
-    std::cout << "The export file couldn't be opened." << std::endl;
+  if (!stolas.noisebiassize()) {
+    std::cout << "The box sizes of the noise and the bias are inconsistent." << std::endl;
     return -1;
   }
 
+  if (stolas.Nfilefail()||stolas.wfilefail()) {
+    std::cout << "The export file couldn't be opened. 'mkdir data'" << std::endl;
+    return -1;
+  }
+
+  /*
+  if (stolas.Hfilefail()||stolas.pifilefail()) {
+    std::cout << "Caution: export files for animation couldn't be opened." << std::endl;
+  }
+  */
+
   stolas.dNmap();
+  //stolas.animation();
   stolas.powerspec();
 
   // ---------- stop timer ----------
