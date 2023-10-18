@@ -38,6 +38,7 @@ protected:
   std::ofstream Nfile, Hfile, pifile,wfile;
   std::vector<double> phii;
   std::vector<std::vector<double>> noisedata, biasdata, Hdata, pidata;
+  std::vector<double> Ndata;
 
 public:
   STOLAS(){}

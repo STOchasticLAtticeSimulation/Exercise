@@ -57,6 +57,7 @@ STOLAS::STOLAS(std::string Model, double DN, std::string sourcedir, int Noisefil
 
     Hdata = std::vector<std::vector<double>>(noisedata[0].size(), std::vector<double>(NL*NL*NL,0));
     pidata = std::vector<std::vector<double>>(noisedata[0].size(), std::vector<double>(NL*NL*NL,0));
+    Ndata = std::vector<double>(NL*NL*NL,0);
   }
 }
 
@@ -131,6 +132,7 @@ void STOLAS::dNmap() {
 #pragma omp critical
 #endif
     {
+      Ndata[i] = N;
       Nfile << i << ' ' << N << std::endl;
       complete++;
       std::cout << "\rLatticeSimulation : " << std::setw(3) << 100*complete/NL/NL/NL << "%" << std::flush;
@@ -145,7 +147,72 @@ void STOLAS::dNmap() {
     double Bias=bias *1./dNbias/sqrt(2*M_PI) * exp(-(N-Nbias)*(N-Nbias)/2./dNbias/dNbias);
     logw+=-Bias*noisedata[0][n]*sqrt(dN)-(Bias*Bias*dN)/2;
   }
-  wfile << logw << std::endl;
+  wfile << logw << ' ';// << std::endl;
+
+  // calculation of compaction function
+  // average
+  double Naverage = 0;
+  int dr = 1;
+  for (size_t n = 0; n < Ndata.size(); n++) {
+    Naverage += Ndata[n];
+  }
+  Naverage /= NL*NL*NL;
+
+  // zeta map
+  for (size_t n = 0; n < Ndata.size(); n++) {
+    Ndata[n] -= Naverage;
+  }
+
+  // radial profile
+  std::vector<std::vector<double>> zeta(2, std::vector<double>(NL/2,0));
+  for (size_t i=0; i<NL*NL*NL; i++) {
+    int nx, ny, nz = 0;
+    nx = floor(i/NL/NL);
+    ny = floor(i%(NL*NL)/NL);
+    nz = (i%(NL*NL))%NL;
+
+    // centering
+    if (nx<=NL/2) {nx = nx;} else {nx = nx-NL;}
+    if (ny<=NL/2) {ny = ny;} else {ny = ny-NL;}
+    if (nz<=NL/2) {nz = nz;} else {nz = nz-NL;}
+
+    for (size_t r=0; r<NL/2; r++) {
+      double norm = abs(sqrt(nx*nx+ny*ny+nz*nz)-r/2.);
+      if(norm<=dr/2.) {
+        zeta[0][r]++;
+        zeta[1][r]+=Ndata[i];
+        break;
+      }
+    }
+  }
+  for (size_t r=0; r<NL/2; r++) {
+    zeta[1][r] /= zeta[0][r];
+    // std::cout << zeta[0][r] << ' ' << zeta[1][r] << std::endl;
+  }
+
+  // derivative zeta
+  std::vector<double> dzeta(NL/2,0);
+  dzeta[0] = 0; // boundary?
+  // dzeta[NL] = 0;
+  for(size_t r=1; r<NL/2-1; r++){
+    dzeta[r] = (zeta[1][r+1] - zeta[1][r-1])/(2*dr/2.);
+    // std::cout << r << ' ' << dzeta[r] << std::endl;
+  }
+
+  // compaction function
+  double CompactionMax, krbias = 0;
+  for(size_t r=0; r<NL/2; r++){
+    double CompactionTemp = 2./3.*(1.-pow(1+r/2.*dzeta[r], 2));
+    if (CompactionMax<CompactionTemp) {
+      CompactionMax = CompactionTemp;
+      krbias = 2.*M_PI*sigma*exp(Nbias)/NL * r/2.;
+    }
+    // std::cout << CompactionTemp << std::endl;
+    
+  }
+  wfile << CompactionMax << ' ' << krbias << std::endl;
+  std::cout << "CompactionMax=" << CompactionMax << ' ' << krbias << std::endl;
+
 }
 
 void STOLAS::animation() {
