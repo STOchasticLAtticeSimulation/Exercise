@@ -57,6 +57,7 @@ public:
   
   void dNmap();
   void animation();
+  void compaction();
 
   double ep(double phi, double pi);
   double hubble(double phi, double pi);

@@ -69,6 +69,7 @@ int main(int argc, char* argv[])
 
   stolas.dNmap();
   //stolas.animation();
+  stolas.compaction();
 
   // ---------- stop timer ----------
   gettimeofday(&Nv, &Nz);
