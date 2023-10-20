@@ -233,7 +233,7 @@ void STOLAS::compaction(){
     }
 
     for (size_t ri=0; ri<NL/2; ri++) {
-      double norm = abs(sqrt(nx*nx+ny*ny+nz*nz)-ri/2.);
+      double norm = abs(sqrt(nx*nx+ny*ny+nz*nz)-ri); // ri
       if(norm<=dr/2.) {
         zeta[0][ri]++;
         zeta[1][ri]+=Ndata[i];
@@ -247,21 +247,20 @@ void STOLAS::compaction(){
 
   // derivative zeta
   std::vector<double> dzeta(NL/2,0);
-  dzeta[0] = 0; // boundary?
+  dzeta[0] = 0; // boundary
   for(size_t ri=1; ri<NL/2-1; ri++){
-    dzeta[ri] = (zeta[1][ri+1] - zeta[1][ri-1])/(2*dr/2.);
-    // std::cout << r << ' ' << dzeta[r] << std::endl;
+    dzeta[ri] = (zeta[1][ri+1] - zeta[1][ri-1])/(2.*dr);
   }
 
   // compaction function
   double CompactionMax, krbias = 0;
   for(size_t ri=0; ri<NL/2; ri++){
-    double CompactionTemp = 2./3.*(1.-pow(1+ri/2.*dzeta[ri], 2));
+    double CompactionTemp = 2./3.*(1.-pow(1+ri*dzeta[ri], 2));
     if (CompactionMax<CompactionTemp) {
       CompactionMax = CompactionTemp;
-      krbias = 2.*M_PI*sigma*exp(Nbias)/NL * ri/2.;
+      krbias = 2.*M_PI*sigma*exp(Nbias)/NL * ri; // kr ~ 2.7
     }
-    // std::cout << CompactionTemp << std::endl;
+    std::cout << CompactionTemp << std::endl;
     
   }
   wfile << CompactionMax << ' ' << krbias << std::endl;
