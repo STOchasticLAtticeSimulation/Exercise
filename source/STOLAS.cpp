@@ -152,7 +152,10 @@ void STOLAS::dNmap() {
     double Bias=bias *1./dNbias/sqrt(2*M_PI) * exp(-(N-Nbias)*(N-Nbias)/2./dNbias/dNbias);
     logw+=-Bias*noisedata[0][n]*sqrt(dN)-(Bias*Bias*dN)/2;
   }
-  wfile << logw << ' ' << std::endl;
+  
+  //calculation of compaction function
+  double compactionMax = STOLAS::compaction();
+  wfile << logw << ' ' << compactionMax << std::endl;
 
 }
 
@@ -197,7 +200,7 @@ std::vector<double> STOLAS::dphidN(double N, std::vector<double> phi) {
 
 
 // calculation of compaction function
-void STOLAS::compaction(){
+double STOLAS::compaction(){
   cmpfile << std::setprecision(10);
   double Naverage = 0;
   int dr = 1;
@@ -272,7 +275,8 @@ void STOLAS::compaction(){
     cmpfile << krbias << ' ' << CompactionTemp << std::endl;
     
   }
-  std::cout << "CompactionMax=" << CompactionMax << ' ' << krmax << std::endl;
+  // std::cout << "CompactionMax=" << CompactionMax << ' ' << krmax << std::endl;
+  return CompactionMax;
 }
 
 /*
