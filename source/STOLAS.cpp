@@ -54,6 +54,7 @@ STOLAS::STOLAS(std::string Model, double DN, std::string sourcedir, int Noisefil
     //Hfile.open(Hfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
     //pifile.open(pifileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
     wfile.open(wfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
+    cmpfile.open(cmpfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
 
     Hdata = std::vector<std::vector<double>>(noisedata[0].size(), std::vector<double>(NL*NL*NL,0));
     pidata = std::vector<std::vector<double>>(noisedata[0].size(), std::vector<double>(NL*NL*NL,0));
@@ -90,6 +91,10 @@ bool STOLAS::pifilefail() {
 
 bool STOLAS::wfilefail() {
   return wfile.fail();
+}
+
+bool STOLAS::cmpfilefail() {
+  return cmpfile.fail();
 }
 
 
@@ -190,8 +195,10 @@ std::vector<double> STOLAS::dphidN(double N, std::vector<double> phi) {
   return dphidN;
 }
 
+
 // calculation of compaction function
 void STOLAS::compaction(){
+  cmpfile << std::setprecision(10);
   double Naverage = 0;
   int dr = 1;
   for (size_t n = 0; n < Ndata.size(); n++) {
@@ -205,7 +212,7 @@ void STOLAS::compaction(){
   }
 
   // radial profile
-  std::vector<std::vector<double>> zeta(2, std::vector<double>(NL/2,0));
+  std::vector<std::vector<double>> zetar(2, std::vector<double>(NL/2,0));
   for (size_t i=0; i<NL*NL*NL; i++) {
     int nx, ny, nz = 0;
     nx = floor(i/NL/NL);
@@ -233,38 +240,39 @@ void STOLAS::compaction(){
     }
 
     for (size_t ri=0; ri<NL/2; ri++) {
-      double norm = abs(sqrt(nx*nx+ny*ny+nz*nz)-ri); // ri
+      double norm = abs(sqrt(nx*nx+ny*ny+nz*nz)-ri);
       if(norm<=dr/2.) {
-        zeta[0][ri]++;
-        zeta[1][ri]+=Ndata[i];
+        zetar[0][ri]++;
+        zetar[1][ri]+=Ndata[i];
         break;
       }
     }
   }
   for (size_t ri=0; ri<NL/2; ri++) {
-    zeta[1][ri] /= zeta[0][ri]; // average
+    zetar[1][ri] /= zetar[0][ri]; // average
   }
 
   // derivative zeta
-  std::vector<double> dzeta(NL/2,0);
-  dzeta[0] = 0; // boundary
+  std::vector<double> dzetar(NL/2,0);
+  dzetar[0] = 0;
+  dzetar[NL/2] = 0;
   for(size_t ri=1; ri<NL/2-1; ri++){
-    dzeta[ri] = (zeta[1][ri+1] - zeta[1][ri-1])/(2.*dr);
+    dzetar[ri] = (zetar[1][ri+1] - zetar[1][ri-1])/(2.*dr);
   }
 
   // compaction function
-  double CompactionMax, krbias = 0;
+  double CompactionMax, krmax = 0;
   for(size_t ri=0; ri<NL/2; ri++){
-    double CompactionTemp = 2./3.*(1.-pow(1+ri*dzeta[ri], 2));
+    double CompactionTemp = 2./3.*(1. - pow(1 + ri*dzetar[ri], 2));
+    double krbias = 2.*M_PI*sigma*exp(Nbias)/NL*ri;
     if (CompactionMax<CompactionTemp) {
       CompactionMax = CompactionTemp;
-      krbias = 2.*M_PI*sigma*exp(Nbias)/NL * ri; // kr ~ 2.7
+      krmax = krbias; // kr ~ 2.7
     }
-    std::cout << CompactionTemp << std::endl;
+    cmpfile << krbias << ' ' << CompactionTemp << std::endl;
     
   }
-  wfile << CompactionMax << ' ' << krbias << std::endl;
-  std::cout << "CompactionMax=" << CompactionMax << ' ' << krbias << std::endl;
+  std::cout << "CompactionMax=" << CompactionMax << ' ' << krmax << std::endl;
 }
 
 /*

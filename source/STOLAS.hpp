@@ -29,13 +29,14 @@ protected:
   const std::string Hfileprefix = "data/H_";
   const std::string pifileprefix = "data/pi_";
   const std::string wfileprefix = "data/logw_";
+  const std::string cmpfileprefix = "data/compaction_";
   bool noisefilefail, biasfilefail;
 
   std::string model;
   int NL, noisefileNo;
   double dN, bias, Nbias, dNbias;
   std::ifstream noisefile, biasfile;
-  std::ofstream Nfile, Hfile, pifile,wfile;
+  std::ofstream Nfile, Hfile, pifile, wfile, cmpfile;
   std::vector<double> phii;
   std::vector<std::vector<double>> noisedata, biasdata, Hdata, pidata;
   std::vector<double> Ndata;
@@ -51,6 +52,7 @@ public:
   //bool Hfilefail();
   //bool pifilefail();
   bool wfilefail();
+  bool cmpfilefail();
   
   double VV(double phi);
   double Vp(double phi);
