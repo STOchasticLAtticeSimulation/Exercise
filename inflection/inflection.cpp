@@ -14,7 +14,7 @@ const double CUP = 0.0382;
 const std::string model = "inflection";
 const double dN = 0.01;
 const std::string sourcedir = "../source";
-const std::vector<double> phii{6.08726, -4.43529e-6};
+const std::vector<double> phii{6.82869,-2.85674e-6}; //phii{6.08726, -4.43529e-6};
 const double bias = 0.0; //7.5;
 const double Nbias = 2;
 const double dNbias = 0.01;

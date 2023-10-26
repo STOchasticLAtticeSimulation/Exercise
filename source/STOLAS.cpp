@@ -151,7 +151,6 @@ void STOLAS::dNmap() {
     const std::complex<double> II(0,1);
 
     Nmap3D[x][y][z]=N;
-
   }
   std::cout << std::endl;
   
@@ -231,7 +230,7 @@ void STOLAS::powerspec(){
   }
     
     double rk=nxt*nxt+nyt*nyt+nzt*nzt;
-    powfile<< sqrt(rk) <<"     "<< norm(Nk[i][j][k])/(NL*NL*NL*NL*NL*NL) << std::endl;
+    powfile<< sqrt(rk) <<"     "<< norm(Nk[i][j][k])/NL/NL/NL/NL/NL/NL << std::endl;
   }
 
 }

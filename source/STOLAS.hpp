@@ -30,7 +30,7 @@ protected:
   const std::string Hfileprefix = "data/H_";
   const std::string pifileprefix = "data/pi_";
   const std::string wfileprefix = "data/logw_";
-  const std::string powfileprefix = "power_";
+  const std::string powfileprefix = "data/power_";
   bool noisefilefail, biasfilefail;
 
   std::string model;
