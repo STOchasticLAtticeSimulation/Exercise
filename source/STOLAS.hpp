@@ -59,7 +59,7 @@ public:
   
   void dNmap();
   void animation();
-  double compaction();
+  std::vector<double> compaction();
 
   double ep(double phi, double pi);
   double hubble(double phi, double pi);

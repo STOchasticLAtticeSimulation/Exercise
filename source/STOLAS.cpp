@@ -154,8 +154,8 @@ void STOLAS::dNmap() {
   }
   
   //calculation of compaction function
-  double compactionMax = STOLAS::compaction();
-  wfile << logw << ' ' << compactionMax << std::endl;
+  std::vector<double> compaction = STOLAS::compaction();
+  wfile << logw << ' ' << compaction[0] << ' ' << compaction[1] << ' ' << compaction[2] << ' ' << compaction[3] << std::endl;
 
 }
 
@@ -200,7 +200,7 @@ std::vector<double> STOLAS::dphidN(double N, std::vector<double> phi) {
 
 
 // calculation of compaction function
-double STOLAS::compaction(){
+std::vector<double> STOLAS::compaction(){
   cmpfile << std::setprecision(10);
   double Naverage = 0;
   int dr = 1;
@@ -258,25 +258,35 @@ double STOLAS::compaction(){
   // derivative zeta
   std::vector<double> dzetar(NL/2,0);
   dzetar[0] = 0;
-  dzetar[NL/2] = 0;
   for(size_t ri=1; ri<NL/2-1; ri++){
     dzetar[ri] = (zetar[1][ri+1] - zetar[1][ri-1])/(2.*dr);
   }
 
   // compaction function
-  double CompactionMax, krmax = 0;
+  double CompactionMax, CompactionInt, rmax, Rmax, IntTemp = 0;
   for(size_t ri=0; ri<NL/2; ri++){
     double CompactionTemp = 2./3.*(1. - pow(1 + ri*dzetar[ri], 2));
-    double krbias = 2.*M_PI*sigma*exp(Nbias)/NL*ri;
+    IntTemp += ri*ri*CompactionTemp*exp(3.*zetar[1][ri])*(1 + ri*dzetar[ri]);
+
     if (CompactionMax<CompactionTemp) {
       CompactionMax = CompactionTemp;
-      krmax = krbias; // kr ~ 2.7
+      rmax = ri;
+      Rmax = exp(zetar[1][ri])*ri;
+      CompactionInt += IntTemp;
+      IntTemp = 0;
     }
-    cmpfile << krbias << ' ' << CompactionTemp << std::endl;
+    cmpfile << ri << ' ' << CompactionTemp << std::endl;
     
   }
-  // std::cout << "CompactionMax=" << CompactionMax << ' ' << krmax << std::endl;
-  return CompactionMax;
+  CompactionInt /= pow(Rmax, 3)/3.;
+
+  // std::cout << CompactionInt << ' ' << CompactionMax << ' ' << Rmax << ' ' << rmax << std::endl;
+  std::vector<double> Compaction(4,0);
+  Compaction[0] = CompactionInt;
+  Compaction[1] = CompactionMax;
+  Compaction[2] = Rmax;
+  Compaction[3] = rmax;
+  return Compaction;
 }
 
 /*
