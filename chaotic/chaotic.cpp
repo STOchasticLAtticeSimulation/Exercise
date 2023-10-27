@@ -56,7 +56,7 @@ int main(int argc, char* argv[])
     return -1;
   }
 
-  if (stolas.Nfilefail()||stolas.wfilefail()) {
+  if (stolas.Nfilefail()||stolas.wfilefail()||stolas.cmpfilefail()) {
     std::cout << "The export file couldn't be opened. 'mkdir data'" << std::endl;
     return -1;
   }

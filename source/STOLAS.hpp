@@ -31,15 +31,17 @@ protected:
   const std::string pifileprefix = "data/pi_";
   const std::string wfileprefix = "data/logw_";
   const std::string powfileprefix = "data/power_";
+  const std::string cmpfileprefix = "data/compaction_";
   bool noisefilefail, biasfilefail;
 
   std::string model;
   int NL, noisefileNo;
   double dN, bias, Nbias, dNbias;
   std::ifstream noisefile, biasfile;
-  std::ofstream Nfile, Hfile, pifile,wfile,powfile;
+  std::ofstream Nfile, Hfile, pifile, wfile, powfile, cmpfile;
   std::vector<double> phii;
   std::vector<std::vector<double>> noisedata, biasdata, Hdata, pidata;
+  std::vector<double> Ndata;
   std::vector<std::vector<std::vector<std::complex<double>>>> Nmap3D;
 
 public:
@@ -54,6 +56,7 @@ public:
   //bool pifilefail();
   bool wfilefail();
   bool powfilefail();
+  bool cmpfilefail();
   
   double VV(double phi);
   double Vp(double phi);
@@ -61,6 +64,7 @@ public:
   void dNmap();
   void animation();
   void powerspec();
+  std::vector<double> compaction();
 
   double ep(double phi, double pi);
   double hubble(double phi, double pi);

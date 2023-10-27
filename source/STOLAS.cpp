@@ -59,10 +59,12 @@ STOLAS::STOLAS(std::string Model, double DN, std::string sourcedir, int Noisefil
     //pifile.open(pifileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
     wfile.open(wfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
     powfile.open(powfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
-    Nmap3D = std::vector<std::vector<std::vector<std::complex<double>>>>(NL, std::vector<std::vector<std::complex<double>>>(NL, std::vector<std::complex<double>>(NL, 0)));
+    cmpfile.open(cmpfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
 
     Hdata = std::vector<std::vector<double>>(noisedata[0].size(), std::vector<double>(NL*NL*NL,0));
     pidata = std::vector<std::vector<double>>(noisedata[0].size(), std::vector<double>(NL*NL*NL,0));
+    Ndata = std::vector<double>(NL*NL*NL,0);
+    Nmap3D = std::vector<std::vector<std::vector<std::complex<double>>>>(NL, std::vector<std::vector<std::complex<double>>>(NL, std::vector<std::complex<double>>(NL, 0)));
   }
 }
 
@@ -99,6 +101,10 @@ bool STOLAS::wfilefail() {
 
 bool STOLAS::powfilefail() {
   return powfile.fail();
+}
+
+bool STOLAS::cmpfilefail() {
+  return cmpfile.fail();
 }
 
 
@@ -141,6 +147,7 @@ void STOLAS::dNmap() {
 #pragma omp critical
 #endif
     {
+      Ndata[i] = N;
       Nfile << i << ' ' << N << std::endl;
       complete++;
       std::cout << "\rLatticeSimulation : " << std::setw(3) << 100*complete/NL/NL/NL << "%" << std::flush;
@@ -161,7 +168,11 @@ void STOLAS::dNmap() {
     double Bias=bias *1./dNbias/sqrt(2*M_PI) * exp(-(N-Nbias)*(N-Nbias)/2./dNbias/dNbias);
     logw+=-Bias*noisedata[0][n]*sqrt(dN)-(Bias*Bias*dN)/2;
   }
-  wfile << logw << std::endl;
+  
+  //calculation of compaction function
+  std::vector<double> compaction = STOLAS::compaction();
+  wfile << logw << ' ' << compaction[0] << ' ' << compaction[1] << ' ' << compaction[2] << ' ' << compaction[3] << std::endl;
+
 }
 
 void STOLAS::animation() {
@@ -232,7 +243,96 @@ void STOLAS::powerspec(){
     double rk=nxt*nxt+nyt*nyt+nzt*nzt;
     powfile<< sqrt(rk) <<"     "<< norm(Nk[i][j][k])/NL/NL/NL/NL/NL/NL << std::endl;
   }
+}
 
+// calculation of compaction function
+std::vector<double> STOLAS::compaction(){
+  cmpfile << std::setprecision(10);
+  double Naverage = 0;
+  int dr = 1;
+  for (size_t n = 0; n < Ndata.size(); n++) {
+    Naverage += Ndata[n];
+  }
+  Naverage /= NL*NL*NL;
+
+  // zeta map
+  for (size_t n = 0; n < Ndata.size(); n++) {
+    Ndata[n] -= Naverage;
+  }
+
+  // radial profile
+  std::vector<std::vector<double>> zetar(2, std::vector<double>(NL/2,0));
+  for (size_t i=0; i<NL*NL*NL; i++) {
+    int nx, ny, nz = 0;
+    nx = floor(i/NL/NL);
+    ny = floor(i%(NL*NL)/NL);
+    nz = (i%(NL*NL))%NL;
+
+    // centering
+    if (nx<=NL/2) {
+      nx = nx;
+    }
+    else {
+      nx = nx-NL;
+    }
+    if (ny<=NL/2) {
+      ny = ny;
+    }
+    else {
+      ny = ny-NL;
+    }
+    if (nz<=NL/2) {
+      nz = nz;
+    }
+    else {
+      nz = nz-NL;
+    }
+
+    for (size_t ri=0; ri<NL/2; ri++) {
+      double norm = abs(sqrt(nx*nx+ny*ny+nz*nz)-ri);
+      if(norm<=dr/2.) {
+        zetar[0][ri]++;
+        zetar[1][ri]+=Ndata[i];
+        break;
+      }
+    }
+  }
+  for (size_t ri=0; ri<NL/2; ri++) {
+    zetar[1][ri] /= zetar[0][ri]; // average
+  }
+
+  // derivative zeta
+  std::vector<double> dzetar(NL/2,0);
+  dzetar[0] = 0;
+  for(size_t ri=1; ri<NL/2-1; ri++){
+    dzetar[ri] = (zetar[1][ri+1] - zetar[1][ri-1])/(2.*dr);
+  }
+
+  // compaction function
+  double CompactionMax, CompactionInt, rmax, Rmax, IntTemp = 0;
+  for(size_t ri=0; ri<NL/2; ri++){
+    double CompactionTemp = 2./3.*(1. - pow(1 + ri*dzetar[ri], 2));
+    IntTemp += ri*ri*CompactionTemp*exp(3.*zetar[1][ri])*(1 + ri*dzetar[ri]);
+
+    if (CompactionMax<CompactionTemp) {
+      CompactionMax = CompactionTemp;
+      rmax = ri;
+      Rmax = exp(zetar[1][ri])*ri;
+      CompactionInt += IntTemp;
+      IntTemp = 0;
+    }
+    cmpfile << ri << ' ' << CompactionTemp << std::endl;
+    
+  }
+  CompactionInt /= pow(Rmax, 3)/3.;
+
+  // std::cout << CompactionInt << ' ' << CompactionMax << ' ' << Rmax << ' ' << rmax << std::endl;
+  std::vector<double> Compaction(4,0);
+  Compaction[0] = CompactionInt;
+  Compaction[1] = CompactionMax;
+  Compaction[2] = Rmax;
+  Compaction[3] = rmax;
+  return Compaction;
 }
 
 /*
