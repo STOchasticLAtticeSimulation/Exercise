@@ -9,6 +9,7 @@
 #include <iomanip>
 #include <vector>
 #include <functional>
+#include <complex>
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -29,6 +30,7 @@ protected:
   const std::string Hfileprefix = "data/H_";
   const std::string pifileprefix = "data/pi_";
   const std::string wfileprefix = "data/logw_";
+  const std::string powfileprefix = "data/power_";
   const std::string cmpfileprefix = "data/compaction_";
   bool noisefilefail, biasfilefail;
 
@@ -36,10 +38,11 @@ protected:
   int NL, noisefileNo;
   double dN, bias, Nbias, dNbias;
   std::ifstream noisefile, biasfile;
-  std::ofstream Nfile, Hfile, pifile, wfile, cmpfile;
+  std::ofstream Nfile, Hfile, pifile, wfile, powfile, cmpfile;
   std::vector<double> phii;
   std::vector<std::vector<double>> noisedata, biasdata, Hdata, pidata;
   std::vector<double> Ndata;
+  std::vector<std::vector<std::vector<std::complex<double>>>> Nmap3D;
 
 public:
   STOLAS(){}
@@ -52,6 +55,7 @@ public:
   //bool Hfilefail();
   //bool pifilefail();
   bool wfilefail();
+  bool powfilefail();
   bool cmpfilefail();
   
   double VV(double phi);
@@ -59,6 +63,7 @@ public:
   
   void dNmap();
   void animation();
+  void powerspec();
   std::vector<double> compaction();
 
   double ep(double phi, double pi);

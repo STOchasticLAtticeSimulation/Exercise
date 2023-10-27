@@ -7,7 +7,7 @@ const std::string model = "chaotic";
 const double dN = 0.01;
 const std::string sourcedir = "../source";
 const std::vector<double> phii{15.,-0.1*mm*mm};
-const double bias = 10.;
+const double bias = 0.;
 const double Nbias = 3.0;
 const double dNbias = 1.0;
 
@@ -69,6 +69,7 @@ int main(int argc, char* argv[])
 
   stolas.dNmap();
   //stolas.animation();
+  stolas.powerspec();
 
   // ---------- stop timer ----------
   gettimeofday(&Nv, &Nz);

@@ -1,5 +1,9 @@
 #include "STOLAS.hpp"
 #include "vec_op.hpp"
+#include "fft.hpp"
+
+// useful macro
+#define LOOP for(int i = 0; i < NL; i++) for(int j = 0; j < NL; j++) for(int k = 0; k < NL; k++)
 
 
 STOLAS::STOLAS(std::string Model, double DN, std::string sourcedir, int NoisefileNo, std::vector<double> Phii, double Bias, double NBias, double DNbias) {
@@ -54,11 +58,13 @@ STOLAS::STOLAS(std::string Model, double DN, std::string sourcedir, int Noisefil
     //Hfile.open(Hfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
     //pifile.open(pifileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
     wfile.open(wfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
+    powfile.open(powfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
     cmpfile.open(cmpfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
 
     Hdata = std::vector<std::vector<double>>(noisedata[0].size(), std::vector<double>(NL*NL*NL,0));
     pidata = std::vector<std::vector<double>>(noisedata[0].size(), std::vector<double>(NL*NL*NL,0));
     Ndata = std::vector<double>(NL*NL*NL,0);
+    Nmap3D = std::vector<std::vector<std::vector<std::complex<double>>>>(NL, std::vector<std::vector<std::complex<double>>>(NL, std::vector<std::complex<double>>(NL, 0)));
   }
 }
 
@@ -91,6 +97,10 @@ bool STOLAS::pifilefail() {
 
 bool STOLAS::wfilefail() {
   return wfile.fail();
+}
+
+bool STOLAS::powfilefail() {
+  return powfile.fail();
 }
 
 bool STOLAS::cmpfilefail() {
@@ -142,6 +152,12 @@ void STOLAS::dNmap() {
       complete++;
       std::cout << "\rLatticeSimulation : " << std::setw(3) << 100*complete/NL/NL/NL << "%" << std::flush;
     }
+
+    //power spectrum
+    int x=i/NL/NL ,y=(i%(NL*NL))/NL, z=i%NL;
+    const std::complex<double> II(0,1);
+
+    Nmap3D[x][y][z]=N;
   }
   std::cout << std::endl;
   
@@ -198,6 +214,36 @@ std::vector<double> STOLAS::dphidN(double N, std::vector<double> phi) {
   return dphidN;
 }
 
+void STOLAS::powerspec(){
+  powfile << std::setprecision(10);
+  std::vector<std::vector<std::vector<std::complex<double>>>> Nk=fft(Nmap3D);
+  //Nk = std::vector<std::vector<std::vector<double>>>(NL,std::vector<std::vector<double>>(NL,std::vector<double>(NL,0)));
+
+  //std::vector<std::vector<std::vector<std::complex<double>>>> Nmap3Dfft = fft(Nmap3D);
+  LOOP{
+      int nxt, nyt, nzt; // shifted index
+  if (i<=NL/2) {
+    nxt = i;
+  } else {
+    nxt = i-NL;
+  }
+
+  if (j<=NL/2) {
+    nyt = j;
+  } else {
+    nyt = j-NL;
+  }
+
+  if (k<=NL/2) {
+    nzt = k;
+  } else {
+    nzt = k-NL;
+  }
+    
+    double rk=nxt*nxt+nyt*nyt+nzt*nzt;
+    powfile<< sqrt(rk) <<"     "<< norm(Nk[i][j][k])/NL/NL/NL/NL/NL/NL << std::endl;
+  }
+}
 
 // calculation of compaction function
 std::vector<double> STOLAS::compaction(){
