@@ -1,14 +1,11 @@
 #!/bin/sh
 
-#$ -S /bin/sh
-#$ -cwd
-#$ -V
-#$ -q all.q
-#$ -N biasmap
-#$ -o job_out
-#$ -e job_out
-#$ -pe OpenMP 36
+#PBS -N biasmap
+#PBS -q Smem
+#PBS -l select=1:ncpus=56:ompthreads=56
+#PBS -o ./biasmap.out
+#PBS -j oe
 
-source /opt/intel/bin/compilervars.sh intel64
-export OMP_NUM_THREADS=$NSLOTS
+cd $PBS_O_WORKDIR
+
 ./biasmap
