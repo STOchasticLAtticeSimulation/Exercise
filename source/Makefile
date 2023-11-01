@@ -16,8 +16,10 @@ all: $(NOISE) $(BIAS)
 
 $(NOISE): $(NOISE).o
 	$(CXX) $(LDFLAGS) $(CPPFLAGS) $(CXXFLAGS) -o $(NOISE) $(NOISE).o
+	chmod o+w $(NOISE) $(NOISE).o
 $(BIAS): $(BIAS).o
 	$(CXX) $(LDFLAGS) $(CPPFLAGS) $(CXXFLAGS) -o $(BIAS) $(BIAS).o 
+	chmod o+w $(BIAS) $(BIAS).o
 
 $(NOISE).o: vec_op.hpp fft.hpp
 $(BIAS).o: vec_op.hpp fft.hpp
