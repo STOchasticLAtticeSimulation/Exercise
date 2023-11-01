@@ -110,8 +110,8 @@ bool STOLAS::cmpfilefail() {
 
 void STOLAS::dNmap() {
   Nfile << std::setprecision(10);
-  Hfile << std::setprecision(14);
-  pifile << std::setprecision(14);
+  //Hfile << std::setprecision(14);
+  //pifile << std::setprecision(14);
   wfile << std::setprecision(10);
   int complete = 0;
   
@@ -178,6 +178,9 @@ void STOLAS::dNmap() {
 void STOLAS::animation() {
   Hfile.open(Hfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
   pifile.open(pifileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
+
+  Hfile << std::setprecision(14);
+  pifile << std::setprecision(14);
   
   for (size_t n=0; n<Hdata.size(); n++) {
     for (size_t i=0; i<Hdata[n].size(); i++) {
