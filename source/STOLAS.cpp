@@ -142,7 +142,7 @@ void STOLAS::dNmap() {
       phi[1] = prephi[1];
       dN1 *= 0.1;
     }
-
+    
 #ifdef _OPENMP
 #pragma omp critical
 #endif
@@ -150,8 +150,8 @@ void STOLAS::dNmap() {
       Ndata[i] = N;
       Nfile << i << ' ' << N << std::endl;
       complete++;
-      std::cout << "\rLatticeSimulation : " << std::setw(3) << 100*complete/NL/NL/NL << "%" << std::flush;
-    }
+      // std::cout << "\rLatticeSimulation : " << std::setw(3) << 100*complete/NL/NL/NL << "%" << std::flush;
+      }
 
     //power spectrum
     int x=i/NL/NL ,y=(i%(NL*NL))/NL, z=i%NL;
@@ -189,9 +189,9 @@ void STOLAS::animation() {
     }
     Hfile << std::endl;
     pifile << std::endl;
-    std::cout << "\rAnimeDataExporting : " << std::setw(3) << 100*(n+1)/Hdata.size() << "%" << std::flush;
+    // std::cout << "\rAnimeDataExporting : " << std::setw(3) << 100*(n+1)/Hdata.size() << "%" << std::flush;
   }
-  std::cout << std::endl;
+  // std::cout << std::endl;
 }
 
 
