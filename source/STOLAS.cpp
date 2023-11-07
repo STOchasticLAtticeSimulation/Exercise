@@ -333,7 +333,6 @@ void STOLAS::compaction(){
   // Compaction[3] = rmax;
 
   // writing compaction function
-  // std::vector<double> compaction = STOLAS::compaction();
   prbfile << noisefileNo << ' ' << logw << ' ' << CompactionInt << ' ' << CompactionMax << ' ' << Rmax << ' ' << rmax << std::endl;
 
   // return Compaction;

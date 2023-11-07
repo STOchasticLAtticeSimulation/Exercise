@@ -32,7 +32,7 @@ protected:
   const std::string wfileprefix = "data/logw_";
   const std::string powfileprefix = "data/power_";
   const std::string cmpfileprefix = "data/compaction_";
-  const std::string prbfileprefix = "data/probability";
+  const std::string prbfileprefix = "data/probabilities";
   bool noisefilefail, biasfilefail;
 
   std::string model;
