@@ -85,7 +85,7 @@ bool STOLAS::Nfilefail() {
   return Nfile.fail();
 }
 
-/*
+
 bool STOLAS::Hfilefail() {
   return Hfile.fail();
 }
@@ -93,7 +93,7 @@ bool STOLAS::Hfilefail() {
 bool STOLAS::pifilefail() {
   return pifile.fail();
 }
-*/
+
 
 bool STOLAS::wfilefail() {
   return wfile.fail();

@@ -52,8 +52,8 @@ public:
   bool checkbiasfile();
   bool noisebiassize();
   bool Nfilefail();
-  //bool Hfilefail();
-  //bool pifilefail();
+  bool Hfilefail();
+  bool pifilefail();
   bool wfilefail();
   bool powfilefail();
   bool cmpfilefail();
