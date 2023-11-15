@@ -68,7 +68,7 @@ int main(int argc, char* argv[])
   */
 
   stolas.dNmap();
-  stolas.compaction();
+  //stolas.compaction();
   //stolas.animation();
   stolas.powerspec();
 
