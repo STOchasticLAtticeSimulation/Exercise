@@ -55,11 +55,11 @@ STOLAS::STOLAS(std::string Model, double DN, std::string sourcedir, int Noisefil
     NL = cbrt(noisedata.size());
     std::cout << "Noise/Bias data imported. Box size is " << NL << "." << std::endl;
     Nfile.open(Nfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
-    //Hfile.open(Hfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
-    //pifile.open(pifileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
-    wfile.open(wfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
-    //powfile.open(powfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
-    //cmpfile.open(cmpfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
+    // Hfile.open(Hfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
+    // pifile.open(pifileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
+    // wfile.open(wfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
+    // powfile.open(powfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
+    // cmpfile.open(cmpfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
 
     Hdata = std::vector<std::vector<double>>(noisedata[0].size(), std::vector<double>(NL*NL*NL,0));
     pidata = std::vector<std::vector<double>>(noisedata[0].size(), std::vector<double>(NL*NL*NL,0));
@@ -95,9 +95,9 @@ bool STOLAS::pifilefail() {
 }
 */
 
-bool STOLAS::wfilefail() {
-  return wfile.fail();
-}
+// bool STOLAS::wfilefail() {
+//   return wfile.fail();
+// }
 
 bool STOLAS::powfilefail() {
   return powfile.fail();
@@ -110,9 +110,10 @@ bool STOLAS::cmpfilefail() {
 
 void STOLAS::dNmap() {
   Nfile << std::setprecision(10);
-  //Hfile << std::setprecision(14);
-  //pifile << std::setprecision(14);
-  wfile << std::setprecision(10);
+  // Hfile << std::setprecision(14);
+  // pifile << std::setprecision(14);
+  // wfile << std::setprecision(10);
+  
   int complete = 0;
   
 #ifdef _OPENMP
@@ -160,18 +161,6 @@ void STOLAS::dNmap() {
     Nmap3D[x][y][z]=N;
   }
   std::cout << std::endl;
-  
-  //calculation of weight 
-  double logw=0.;
-  for(size_t n=0; n<noisedata[0].size(); n++){
-    double N=n*dN;
-    double Bias=bias *1./dNbias/sqrt(2*M_PI) * exp(-(N-Nbias)*(N-Nbias)/2./dNbias/dNbias);
-    logw+=-Bias*noisedata[0][n]*sqrt(dN)-(Bias*Bias*dN)/2;
-  }
-  
-  //calculation of compaction function
-  std::vector<double> compaction = STOLAS::compaction();
-  wfile << logw << ' ' << compaction[0] << ' ' << compaction[1] << ' ' << compaction[2] << ' ' << compaction[3] << std::endl;
 
 }
 
@@ -219,42 +208,72 @@ std::vector<double> STOLAS::dphidN(double N, std::vector<double> phi) {
 
 void STOLAS::powerspec(){
   powfile.open(powfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
-
   powfile << std::setprecision(10);
   std::vector<std::vector<std::vector<std::complex<double>>>> Nk=fft(Nmap3D);
   //Nk = std::vector<std::vector<std::vector<double>>>(NL,std::vector<std::vector<double>>(NL,std::vector<double>(NL,0)));
 
   //std::vector<std::vector<std::vector<std::complex<double>>>> Nmap3Dfft = fft(Nmap3D);
+  
+  powsfile.open(powsfileprefix + std::string(".dat"), std::ios::app);
+  powsfile << std::setprecision(10);
+  double cn = 0.1;
+  int imax = ceil(log(NL/2)/cn);
+  std::vector<double> disc_power(imax, 0);
+
   LOOP{
-      int nxt, nyt, nzt; // shifted index
-  if (i<=NL/2) {
-    nxt = i;
-  } else {
-    nxt = i-NL;
-  }
+    int nxt, nyt, nzt; // shifted index
+    if (i<=NL/2) {
+      nxt = i;
+    } else {
+      nxt = i-NL;
+    }
 
-  if (j<=NL/2) {
-    nyt = j;
-  } else {
-    nyt = j-NL;
-  }
+    if (j<=NL/2) {
+      nyt = j;
+    } else {
+      nyt = j-NL;
+    }
 
-  if (k<=NL/2) {
-    nzt = k;
-  } else {
-    nzt = k-NL;
-  }
+    if (k<=NL/2) {
+      nzt = k;
+    } else {
+      nzt = k-NL;
+    }
     
     double rk=nxt*nxt+nyt*nyt+nzt*nzt;
     powfile<< sqrt(rk) <<"     "<< norm(Nk[i][j][k])/NL/NL/NL/NL/NL/NL << std::endl;
+
+    double LogNk = log(sqrt(rk));
+    double calPk = norm(Nk[i][j][k])/NL/NL/NL/NL/NL/NL;
+    for (size_t ii = 0; ii < imax; ii++) {
+      if (abs(cn*ii-LogNk)<=cn/2.) {
+        disc_power[ii] += calPk/cn;
+        break;
+      }
+    }
   }
+  powsfile << noisefileNo << " ";
+  for (size_t ii = 0; ii < imax; ii++) {
+    powsfile << disc_power[ii] << " " ;
+  }
+    powsfile << std::endl;
 }
 
 // calculation of compaction function
-std::vector<double> STOLAS::compaction(){
+void STOLAS::compaction(){
+  prbfile.open(prbfileprefix + std::string(".dat"), std::ios::app);
   cmpfile.open(cmpfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
-
+  prbfile << std::setprecision(10);
   cmpfile << std::setprecision(10);
+
+  //calculation of weight 
+  double logw=0.;
+  for(size_t n=0; n<noisedata[0].size(); n++){
+    double N=n*dN;
+    double Bias=bias *1./dNbias/sqrt(2*M_PI) * exp(-(N-Nbias)*(N-Nbias)/2./dNbias/dNbias);
+    logw+=-Bias*noisedata[0][n]*sqrt(dN)-(Bias*Bias*dN)/2;
+  }
+
   double Naverage = 0;
   int dr = 1;
   for (size_t n = 0; n < Ndata.size(); n++) {
@@ -310,7 +329,6 @@ std::vector<double> STOLAS::compaction(){
 
   // derivative zeta
   std::vector<double> dzetar(NL/2,0);
-  dzetar[0] = 0;
   for(size_t ri=1; ri<NL/2-1; ri++){
     dzetar[ri] = (zetar[1][ri+1] - zetar[1][ri-1])/(2.*dr);
   }
@@ -333,13 +351,8 @@ std::vector<double> STOLAS::compaction(){
   }
   CompactionInt /= pow(Rmax, 3)/3.;
 
-  // std::cout << CompactionInt << ' ' << CompactionMax << ' ' << Rmax << ' ' << rmax << std::endl;
-  std::vector<double> Compaction(4,0);
-  Compaction[0] = CompactionInt;
-  Compaction[1] = CompactionMax;
-  Compaction[2] = Rmax;
-  Compaction[3] = rmax;
-  return Compaction;
+  prbfile << noisefileNo << ' ' << logw << ' ' << CompactionInt << ' ' << CompactionMax << ' ' << Rmax << ' ' << rmax << std::endl;
+
 }
 
 /*
