@@ -95,9 +95,9 @@ bool STOLAS::pifilefail() {
 }
 */
 
-bool STOLAS::wfilefail() {
-  return wfile.fail();
-}
+// bool STOLAS::wfilefail() {
+//   return wfile.fail();
+// }
 
 bool STOLAS::powfilefail() {
   return powfile.fail();
@@ -112,7 +112,7 @@ void STOLAS::dNmap() {
   Nfile << std::setprecision(10);
   Hfile << std::setprecision(14);
   pifile << std::setprecision(14);
-  wfile << std::setprecision(10);
+  // wfile << std::setprecision(10);
   int complete = 0;
   
 #ifdef _OPENMP
@@ -203,34 +203,56 @@ std::vector<double> STOLAS::dphidN(double N, std::vector<double> phi) {
 }
 
 void STOLAS::powerspec(){
+  powfile.open(powfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
   powfile << std::setprecision(10);
   std::vector<std::vector<std::vector<std::complex<double>>>> Nk=fft(Nmap3D);
   //Nk = std::vector<std::vector<std::vector<double>>>(NL,std::vector<std::vector<double>>(NL,std::vector<double>(NL,0)));
 
   //std::vector<std::vector<std::vector<std::complex<double>>>> Nmap3Dfft = fft(Nmap3D);
+  
+  powsfile.open(powsfileprefix + std::string(".dat"), std::ios::app);
+  powsfile << std::setprecision(10);
+  double cn = 0.1;
+  int imax = ceil(log(NL/2)/cn);
+  std::vector<double> disc_power(imax, 0);
+
   LOOP{
-      int nxt, nyt, nzt; // shifted index
-  if (i<=NL/2) {
-    nxt = i;
-  } else {
-    nxt = i-NL;
-  }
+    int nxt, nyt, nzt; // shifted index
+    if (i<=NL/2) {
+      nxt = i;
+    } else {
+      nxt = i-NL;
+    }
 
-  if (j<=NL/2) {
-    nyt = j;
-  } else {
-    nyt = j-NL;
-  }
+    if (j<=NL/2) {
+      nyt = j;
+    } else {
+      nyt = j-NL;
+    }
 
-  if (k<=NL/2) {
-    nzt = k;
-  } else {
-    nzt = k-NL;
-  }
+    if (k<=NL/2) {
+      nzt = k;
+    } else {
+      nzt = k-NL;
+    }
     
     double rk=nxt*nxt+nyt*nyt+nzt*nzt;
     powfile<< sqrt(rk) <<"     "<< norm(Nk[i][j][k])/NL/NL/NL/NL/NL/NL << std::endl;
+
+    double LogNk = log(sqrt(rk));
+    double calPk = norm(Nk[i][j][k])/NL/NL/NL/NL/NL/NL;
+    for (size_t ii = 0; ii < imax; ii++) {
+      if (abs(cn*ii-LogNk)<=cn/2.) {
+        disc_power[ii] += calPk/cn;
+        break;
+      }
+    }
   }
+  powsfile << noisefileNo << " ";
+  for (size_t ii = 0; ii < imax; ii++) {
+    powsfile << disc_power[ii] << " " ;
+  }
+    powsfile << std::endl;
 }
 
 // calculation of compaction function
@@ -325,17 +347,8 @@ void STOLAS::compaction(){
   }
   CompactionInt /= pow(Rmax, 3)/3.;
 
-  // std::cout << CompactionInt << ' ' << CompactionMax << ' ' << Rmax << ' ' << rmax << std::endl;
-  // std::vector<double> Compaction(4,0);
-  // Compaction[0] = CompactionInt;
-  // Compaction[1] = CompactionMax;
-  // Compaction[2] = Rmax;
-  // Compaction[3] = rmax;
-
-  // writing compaction function
   prbfile << noisefileNo << ' ' << logw << ' ' << CompactionInt << ' ' << CompactionMax << ' ' << Rmax << ' ' << rmax << std::endl;
 
-  // return Compaction;
 }
 
 /*
