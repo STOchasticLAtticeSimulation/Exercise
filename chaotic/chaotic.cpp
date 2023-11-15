@@ -9,7 +9,7 @@ const std::string sourcedir = "../source";
 const std::vector<double> phii{15.,-0.1*mm*mm};
 const double bias = 0.;
 const double Nbias = 3.0;
-const double dNbias = 1.0;
+const double dNbias = 0.10;
 
 
 double STOLAS::VV(double phi) {
@@ -56,7 +56,7 @@ int main(int argc, char* argv[])
     return -1;
   }
 
-  if (stolas.Nfilefail()||stolas.wfilefail()||stolas.cmpfilefail()) {
+  if (stolas.Nfilefail()||stolas.cmpfilefail()) {//(stolas.Nfilefail()||stolas.wfilefail()||stolas.cmpfilefail()) {
     std::cout << "The export file couldn't be opened. 'mkdir data'" << std::endl;
     return -1;
   }
@@ -68,6 +68,7 @@ int main(int argc, char* argv[])
   */
 
   stolas.dNmap();
+  stolas.compaction();
   //stolas.animation();
   stolas.powerspec();
 
