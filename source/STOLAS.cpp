@@ -243,12 +243,14 @@ void STOLAS::powerspec(){
     double rk=nxt*nxt+nyt*nyt+nzt*nzt;
     powfile<< sqrt(rk) <<"     "<< norm(Nk[i][j][k])/NL/NL/NL/NL/NL/NL << std::endl;
 
-    double LogNk = log(sqrt(rk));
-    double calPk = norm(Nk[i][j][k])/NL/NL/NL/NL/NL/NL;
-    for (size_t ii = 0; ii < imax; ii++) {
-      if (abs(cn*ii-LogNk)<=cn/2.) {
-        disc_power[ii] += calPk/cn;
+    if(rk!=0){
+      double LogNk = log(sqrt(rk));
+      double calPk = norm(Nk[i][j][k])/NL/NL/NL/NL/NL/NL;
+      for (size_t ii = 0; ii < imax; ii++) {
+	if (abs(cn*ii-LogNk)<=cn/2.) {
+	  disc_power[ii] += calPk/cn;
         break;
+	}
       }
     }
   }
