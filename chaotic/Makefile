@@ -2,12 +2,12 @@ MODEL = chaotic
 SOURCE = ../source
 DATA = ./data
 
-CXX := g++-13
-#CXX := g++
+#CXX := g++-13
+CXX := g++
 #CXX := icpc
 
-CXXFLAGS := -std=c++17 -O2 -fopenmp
-#CXXFLAGS := -std=c++11 -O2 -Xpreprocessor -fopenmp -lomp
+#CXXFLAGS := -std=c++17 -O2 -fopenmp
+CXXFLAGS := -std=c++11 -O2 -Xpreprocessor -fopenmp -lomp
 #CXXFLAGS := -std=c++11 -O2 -qopenmp
 
 #LDFLAGS := -L/opt/homebrew/opt/libomp/lib
