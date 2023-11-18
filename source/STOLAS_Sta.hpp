@@ -38,7 +38,7 @@ protected:
 
   std::string model;
   int NL, noisefileNo;
-  double dN, bias, Nbias, dNbias;
+  double dN, bias, Nbias, dNbias, phif;
   std::ifstream noisefile, biasfile;
   std::ofstream Nfile, Hfile, pifile, powfile, cmpfile, prbfile, powsfile; //, wfile
   std::vector<double> phii;
@@ -48,7 +48,7 @@ protected:
 
 public:
   STOLAS(){}
-  STOLAS(std::string Model, double DN, std::string sourcedir, int NoisefileNo, std::vector<double> Phii, double Bias, double NBias, double DNbias);
+  STOLAS(std::string Model, double DN, std::string sourcedir, int NoisefileNo, std::vector<double> Phii, double Bias, double NBias, double DNbias, double Phif);
 
   bool checknoisefile();
   bool checkbiasfile();
@@ -70,6 +70,7 @@ public:
   double calPphi(double &N, std::vector<double> &phi, double N0, bool broken);
   double calPpi(double &N, std::vector<double> &phi, double N0, bool broken);
   double RecalPphipi(double &N, std::vector<double> &phi, double N0, bool broken);
+  bool EoI(std::vector<double> &phi);
 
   std::vector<double> dphidN(double N, std::vector<double> phi);
 

@@ -6,7 +6,7 @@
 #define LOOP for(int i = 0; i < NL; i++) for(int j = 0; j < NL; j++) for(int k = 0; k < NL; k++)
 
 
-STOLAS::STOLAS(std::string Model, double DN, std::string sourcedir, int NoisefileNo, std::vector<double> Phii, double Bias, double NBias, double DNbias) {
+STOLAS::STOLAS(std::string Model, double DN, std::string sourcedir, int NoisefileNo, std::vector<double> Phii, double Bias, double NBias, double DNbias, double Phif) {
 
 #ifdef _OPENMP
   std::cout << "OpenMP : Enabled (Max # of threads = " << omp_get_max_threads() << ")" << std::endl;
@@ -19,6 +19,7 @@ STOLAS::STOLAS(std::string Model, double DN, std::string sourcedir, int Noisefil
   bias = Bias;
   Nbias = NBias;
   dNbias = DNbias;
+  phif = Phif;
 
   noisefile.open(sourcedir + std::string("/") + noisefilename + std::to_string(noisefileNo) + std::string(".dat"));
   noisefilefail = noisefile.fail();
@@ -112,7 +113,8 @@ void STOLAS::dNmap() {
     double dN1 = dN;
     std::vector<double> prephi(2);
     while (dN1 >= Nprec) {
-      while (ep(phi[0],phi[1])<=1.) {
+      while (//ep(phi[0],phi[1])<=1.
+	     EoI(phi)) {
 	prephi[0] = phi[0];
 	prephi[1] = phi[1];
 	RK4(N,phi,dN1);
@@ -328,6 +330,11 @@ double STOLAS::calPpi(double &N, std::vector<double> &phi, double N0, bool broke
 
 double STOLAS::RecalPphipi(double &N, std::vector<double> &phi, double N0, bool broken) {
   return 1;
+}
+
+bool STOLAS::EoI(std::vector<double> &phi) {
+  //return ep(phi[0],phi[1]) <= 1;
+  return phi[0] >= phif;
 }
 
 
