@@ -1,4 +1,4 @@
-#include "STOLAS.hpp"
+#include "STOLAS_Sta.hpp"
 #include "vec_op.hpp"
 #include "fft.hpp"
 
@@ -55,11 +55,6 @@ STOLAS::STOLAS(std::string Model, double DN, std::string sourcedir, int Noisefil
     NL = cbrt(noisedata.size());
     std::cout << "Noise/Bias data imported. Box size is " << NL << "." << std::endl;
     Nfile.open(Nfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
-    //Hfile.open(Hfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
-    //pifile.open(pifileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
-    // wfile.open(wfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
-    // powfile.open(powfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
-    // cmpfile.open(cmpfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
 
     Hdata = std::vector<std::vector<double>>(noisedata[0].size(), std::vector<double>(NL*NL*NL,0));
     pidata = std::vector<std::vector<double>>(noisedata[0].size(), std::vector<double>(NL*NL*NL,0));
@@ -86,19 +81,6 @@ bool STOLAS::Nfilefail() {
 }
 
 /*
-bool STOLAS::Hfilefail() {
-  return Hfile.fail();
-}
-
-bool STOLAS::pifilefail() {
-  return pifile.fail();
-}
-*/
-
-// bool STOLAS::wfilefail() {
-//   return wfile.fail();
-// }
-
 bool STOLAS::powfilefail() {
   return powfile.fail();
 }
@@ -106,26 +88,25 @@ bool STOLAS::powfilefail() {
 bool STOLAS::cmpfilefail() {
   return cmpfile.fail();
 }
+*/
 
 
 void STOLAS::dNmap() {
   Nfile << std::setprecision(10);
-  Hfile << std::setprecision(14);
-  pifile << std::setprecision(14);
-  // wfile << std::setprecision(10);
+  
   int complete = 0;
   
 #ifdef _OPENMP
 #pragma omp parallel for
 #endif
   for (int i=0; i<NL*NL*NL; i++) {
-    double N=0;
+    double N=0, N0;
+    bool broken;
     std::vector<double> phi = phii;
     for (size_t n=0; n<noisedata[i].size(); n++) {
       Hdata[n][i] = pow(hubble(phi[0],phi[1]),2);
       pidata[n][i] = phi[1]*phi[1];
-      //RK4Mbias(N,phi,dN,noisedata[i][n],i);
-      RK4Mbias(N,phi,dN,noisedata[i][n],biasdata[i][n]);
+      RK4Mbias(N,phi,dN,noisedata[i][n],biasdata[i][n],N0,broken);
     }
 
     double dN1 = dN;
@@ -167,6 +148,9 @@ void STOLAS::animation() {
   Hfile.open(Hfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
   pifile.open(pifileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
   
+  Hfile << std::setprecision(14);
+  pifile << std::setprecision(14);
+  
   for (size_t n=0; n<Hdata.size(); n++) {
     for (size_t i=0; i<Hdata[n].size(); i++) {
       Hfile << Hdata[n][i] << ' ';
@@ -179,37 +163,11 @@ void STOLAS::animation() {
   std::cout << std::endl;
 }
 
-
-double STOLAS::ep(double phi, double pi) {
-  double HH = hubble(phi,pi);
-  return pi*pi/2./HH/HH;
-}
-
-double STOLAS::hubble(double phi, double pi) {
-  return sqrt((pi*pi/2. + VV(phi))/3.);
-}
-
-std::vector<double> STOLAS::dphidN(double N, std::vector<double> phi) {
-  std::vector<double> dphidN(2);
-
-  double xx = phi[0]; // phi
-  double pp = phi[1]; // pi
-  double HH = hubble(xx,pp);
-
-  dphidN[0] = pp/HH;
-  dphidN[1] = -3*pp - Vp(xx)/HH;
-  
-  return dphidN;
-}
-
 void STOLAS::powerspec(){
   powfile.open(powfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
   powfile << std::setprecision(10);
-  std::vector<std::vector<std::vector<std::complex<double>>>> Nk=fft(Nmap3D);
-  //Nk = std::vector<std::vector<std::vector<double>>>(NL,std::vector<std::vector<double>>(NL,std::vector<double>(NL,0)));
-
-  //std::vector<std::vector<std::vector<std::complex<double>>>> Nmap3Dfft = fft(Nmap3D);
-  
+  std::vector<std::vector<std::vector<std::complex<double>>>> Nk = fft(Nmap3D);
+    
   powsfile.open(powsfileprefix + std::string(".dat"), std::ios::app);
   powsfile << std::setprecision(10);
   double cn = 0.1;
@@ -348,38 +306,44 @@ void STOLAS::compaction(){
   CompactionInt /= pow(Rmax, 3)/3.;
 
   prbfile << noisefileNo << ' ' << logw << ' ' << CompactionInt << ' ' << CompactionMax << ' ' << Rmax << ' ' << rmax << std::endl;
-
 }
 
-/*
-std::vector<double> STOLAS::dphidNbias(double N, std::vector<double> phi, int pos) {
-  std::vector<double> dphidNbias(2);
+
+double STOLAS::ep(double phi, double pi) {
+  double HH = hubble(phi,pi);
+  return pi*pi/2./HH/HH;
+}
+
+double STOLAS::hubble(double phi, double pi) {
+  return sqrt((pi*pi/2. + VV(phi))/3.);
+}
+
+double STOLAS::calPphi(double &N, std::vector<double> &phi, double N0, bool broken) {
+  return pow(hubble(phi[0],phi[1])/2./M_PI,2);
+}
+
+double STOLAS::calPpi(double &N, std::vector<double> &phi, double N0, bool broken) {
+  return 0;
+}
+
+double STOLAS::RecalPphipi(double &N, std::vector<double> &phi, double N0, bool broken) {
+  return 1;
+}
+
+
+std::vector<double> STOLAS::dphidN(double N, std::vector<double> phi) {
+  std::vector<double> dphidN(2);
 
   double xx = phi[0]; // phi
   double pp = phi[1]; // pi
   double HH = hubble(xx,pp);
 
-  // bias
-  double GaussianFactor = 1./dNbias /sqrt(2.*M_PI) * exp(-(N-Nbias)*(N-Nbias)/2./dNbias/dNbias);
-  double GaussianBias = bias * GaussianFactor;
-
-  int ix = pos / (NL*NL);
-  int iy = (pos%(NL*NL)) / NL;
-  int iz = pos % NL;
-
-  double r = sqrt(ix*ix + iy*iy + iz*iz);
-  double ksigma = 2.*M_PI*sigma*exp(N)/NL;
-
-  if (r!=0) {
-    GaussianBias *= sin(ksigma*r)/ksigma/r;
-  }
-
-  dphidNbias[0] = pp/HH + HH/2./M_PI * GaussianBias;
-  dphidNbias[1] = -3*pp - Vp(xx)/HH;
+  dphidN[0] = pp/HH;
+  dphidN[1] = -3*pp - Vp(xx)/HH;
   
-  return dphidNbias;
+  return dphidN;
 }
-*/
+
 
 void STOLAS::RK4(double &t, std::vector<double> &x, double dt) {
   std::vector<double> kx[4]; // 4-stage slopes kx
@@ -416,58 +380,17 @@ void STOLAS::RK4(double &t, std::vector<double> &x, double dt) {
   x += dt*(b[0]*kx[0] + b[1]*kx[1] + b[2]*kx[2] + b[3]*kx[3]);
 }
 
-/*
-void STOLAS::RK4bias(double &t, std::vector<double> &x, double dt, int pos) {
-  std::vector<double> kx[4]; // 4-stage slopes kx
-  double a[4][4],b[4],c[4]; // Butcher
+void STOLAS::RK4Mbias(double &N, std::vector<double> &phi, double dN, double dw, double Bias, double N0, bool broken) {
+  //double HH = hubble(phi[0],phi[1]);
 
-  // -------------- initialise kx, a, b, c --------------- //
-  for(int i=0;i<=3;i++){
-    kx[i] = x;
-    vec_op::init(kx[i]);
-    
-    for(int j=0;j<=3;j++){
-      a[i][j]=0.;
-    }
-  }
-  
-  a[1][0]=1./2;  a[2][1]=1./2;  a[3][2]=1.;
-  b[0]=1./6;     b[1]=1./3;     b[2]=1./3;    b[3]=1./6; 
-  c[0]=0;        c[1]=1./2;     c[2]=1./2;    c[3]=1;
-  // ----------------------------------------------------- //
-  
+  double preN = N;
+  std::vector<double> prephi = phi;
 
-  std::vector<double> X = x; // position at i-stage
-    
-  for(int i=0;i<=3;i++){
-    X = x; // initialise X
-    
-    for(int j=0;j<=3;j++){
-      X += dt * a[i][j] * kx[j];
-      kx[i] = dphidNbias(t,X,pos);
-    }
-  }
-
-  t += dt;
-  x += dt*(b[0]*kx[0] + b[1]*kx[1] + b[2]*kx[2] + b[3]*kx[3]);
-}
-
-void STOLAS::RK4M(double &N, std::vector<double> &phi, double dN, double dw) {
-  double HH = hubble(phi[0],phi[1]);
-  
   RK4(N,phi,dN);
-  phi[0] += HH/2./M_PI * dw * sqrt(dN);
-}
-*/
-
-void STOLAS::RK4Mbias(double &N, std::vector<double> &phi, double dN, double dw, double Bias //int pos
-		      ) {
-  double HH = hubble(phi[0],phi[1]);
-
-  //RK4bias(N,phi,dN,pos);
-  RK4(N,phi,dN);
-  phi[0] += HH/2./M_PI * dw * sqrt(dN);
+  //phi[0] += HH/2./M_PI * dw * sqrt(dN);
+  phi[0] += sqrt(calPphi(preN,prephi,N0,broken)) * dw * sqrt(dN);
 
   double GaussianFactor = 1./dNbias/sqrt(2*M_PI) * exp(-(N-Nbias)*(N-Nbias)/2./dNbias/dNbias);
-  phi[0] += HH/2./M_PI * bias * Bias * GaussianFactor * dN;
+  //phi[0] += HH/2./M_PI * bias * Bias * GaussianFactor * dN;
+  phi[0] += sqrt(calPphi(preN,prephi,N0,broken)) * bias * Bias * GaussianFactor *dN;
 }

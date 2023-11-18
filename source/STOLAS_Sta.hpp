@@ -54,11 +54,8 @@ public:
   bool checkbiasfile();
   bool noisebiassize();
   bool Nfilefail();
-  //bool Hfilefail();
-  //bool pifilefail();
-  // bool wfilefail();
-  bool powfilefail();
-  bool cmpfilefail();
+  //bool powfilefail();
+  //bool cmpfilefail();
   
   double VV(double phi);
   double Vp(double phi);
@@ -70,15 +67,14 @@ public:
 
   double ep(double phi, double pi);
   double hubble(double phi, double pi);
+  double calPphi(double &N, std::vector<double> &phi, double N0, bool broken);
+  double calPpi(double &N, std::vector<double> &phi, double N0, bool broken);
+  double RecalPphipi(double &N, std::vector<double> &phi, double N0, bool broken);
 
   std::vector<double> dphidN(double N, std::vector<double> phi);
-  //std::vector<double> dphidNbias(double N, std::vector<double> phi, int pos);
 
   void RK4(double &t, std::vector<double> &x, double dt);
-  //void RK4bias(double &t, std::vector<double> &x, double dt, int pos);
-  //void RK4M(double &N, std::vector<double> &phi, double dN, double dw);
-  void RK4Mbias(double &N, std::vector<double> &phi, double dN, double dw, double Bias //int pos
-		);
+  void RK4Mbias(double &N, std::vector<double> &phi, double dN, double dw, double Bias, double N0, bool broken);
 };
 
 #endif
