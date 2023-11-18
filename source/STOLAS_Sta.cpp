@@ -390,14 +390,27 @@ void STOLAS::RK4(double &t, std::vector<double> &x, double dt) {
 void STOLAS::RK4Mbias(double &N, std::vector<double> &phi, double dN, double dw, double Bias, double N0, bool broken) {
   //double HH = hubble(phi[0],phi[1]);
 
-  double preN = N;
-  std::vector<double> prephi = phi;
+  double phiamp = sqrt(calPphi(N,phi,N0,broken));
+  double piamp = sqrt(calPpi(N,phi,N0,broken));
+  double crosscor = RecalPphipi(N,phi,N0,broken);
 
   RK4(N,phi,dN);
   //phi[0] += HH/2./M_PI * dw * sqrt(dN);
-  phi[0] += sqrt(calPphi(preN,prephi,N0,broken)) * dw * sqrt(dN);
+  phi[0] += phiamp * dw * sqrt(dN);
+
+  if (crosscor > 0) {
+    pi[0] += piamp * dw * sqrt(dN);
+  } else {
+    pi[0] -= piamp * dw * sqrt(dN);
+  }
 
   double GaussianFactor = 1./dNbias/sqrt(2*M_PI) * exp(-(N-Nbias)*(N-Nbias)/2./dNbias/dNbias);
   //phi[0] += HH/2./M_PI * bias * Bias * GaussianFactor * dN;
-  phi[0] += sqrt(calPphi(preN,prephi,N0,broken)) * bias * Bias * GaussianFactor *dN;
+  phi[0] += phiamp * bias * Bias * GaussianFactor * dN;
+
+  if (crosscor > 0) {
+    pi[0] += piamp * bias * Bias * GaussianFactor * dN;
+  } else {
+    pi[0] -= piamp * bias * Bias * GaussianFactor * dN;
+  }
 }
