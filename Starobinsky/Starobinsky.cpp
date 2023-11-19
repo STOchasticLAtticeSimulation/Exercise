@@ -4,6 +4,7 @@
 const std::string model = "Starobinsky";
 const std::string sourcedir = "../source";
 const double dN = 0.01;
+const double sigma = 0.1;
 
 const double H0 = 1e-5;
 const double calPRIR = 8.5e-10;
@@ -31,6 +32,29 @@ double STOLAS::Vp(double phi) {
     return Ap;
   } else {
     return Am;
+  }
+}
+
+double STOLAS::calPphi(double &N, std::vector<double> &phi, double N0, bool broken) {
+  if (!broken) {
+    return pow(hubble(phi[0],phi[1])/2./M_PI,2);
+  } else {
+    double alpha = exp(N-N0);
+    return ((1 + pow(sigma,2))*(9*pow(1 + pow(alpha,2)*pow(sigma,2),2) - 
+				18*Lambda*pow(1 + pow(alpha,2)*pow(sigma,2),2) + 
+				pow(Lambda,2)*(9 + 18*pow(alpha,2)*pow(sigma,2) + 9*pow(alpha,4)*pow(sigma,4) + 
+					       2*pow(alpha,6)*pow(sigma,6))) + 
+	    3*(-3*(1 + (-1 + 4*alpha)*pow(sigma,2) - (-4 + alpha)*pow(alpha,3)*pow(sigma,4) + 
+		   pow(alpha,4)*pow(sigma,6)) + Lambda*
+	       (6 + 6*(-1 + 4*alpha)*pow(sigma,2) + 2*(14 - 5*alpha)*pow(alpha,3)*pow(sigma,4) + 
+		2*(5 - 2*alpha)*pow(alpha,4)*pow(sigma,6)) + 
+	       pow(Lambda,2)*(-3 + (3 - 12*alpha)*pow(sigma,2) + pow(alpha,3)*(-16 + 7*alpha)*pow(sigma,4) + 
+			      pow(alpha,4)*(-7 + 4*alpha)*pow(sigma,6)))*cos(2*(-1 + alpha)*sigma) + 
+	    6*sigma*(-3*pow(-1 + Lambda,2) + pow(alpha,4)*(3 - 10*Lambda + 7*pow(Lambda,2))*pow(sigma,4) - 
+		     3*alpha*pow(-1 + Lambda,2)*(-1 + pow(sigma,2)) - 
+		     pow(alpha,3)*(3 - 7*Lambda + 4*pow(Lambda,2))*pow(sigma,2)*(-1 + pow(sigma,2)) + 
+		     pow(alpha,5)*(-1 + Lambda)*Lambda*pow(sigma,4)*(-1 + pow(sigma,2)))*sin(2*sigma - 2*alpha*sigma))/
+      (2.*pow(alpha,6)*pow(Lambda,2)*pow(sigma,6));
   }
 }
 

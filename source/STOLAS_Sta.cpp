@@ -320,9 +320,11 @@ double STOLAS::hubble(double phi, double pi) {
   return sqrt((pi*pi/2. + VV(phi))/3.);
 }
 
+/*
 double STOLAS::calPphi(double &N, std::vector<double> &phi, double N0, bool broken) {
   return pow(hubble(phi[0],phi[1])/2./M_PI,2);
 }
+*/
 
 double STOLAS::calPpi(double &N, std::vector<double> &phi, double N0, bool broken) {
   return 0;
@@ -399,9 +401,9 @@ void STOLAS::RK4Mbias(double &N, std::vector<double> &phi, double dN, double dw,
   phi[0] += phiamp * dw * sqrt(dN);
 
   if (crosscor > 0) {
-    pi[0] += piamp * dw * sqrt(dN);
+    phi[1] += piamp * dw * sqrt(dN);
   } else {
-    pi[0] -= piamp * dw * sqrt(dN);
+    phi[1] -= piamp * dw * sqrt(dN);
   }
 
   double GaussianFactor = 1./dNbias/sqrt(2*M_PI) * exp(-(N-Nbias)*(N-Nbias)/2./dNbias/dNbias);
@@ -409,8 +411,8 @@ void STOLAS::RK4Mbias(double &N, std::vector<double> &phi, double dN, double dw,
   phi[0] += phiamp * bias * Bias * GaussianFactor * dN;
 
   if (crosscor > 0) {
-    pi[0] += piamp * bias * Bias * GaussianFactor * dN;
+    phi[1] += piamp * bias * Bias * GaussianFactor * dN;
   } else {
-    pi[0] -= piamp * bias * Bias * GaussianFactor * dN;
+    phi[1] -= piamp * bias * Bias * GaussianFactor * dN;
   }
 }
