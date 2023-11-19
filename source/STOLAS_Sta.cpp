@@ -21,6 +21,8 @@ STOLAS::STOLAS(std::string Model, double DN, std::string sourcedir, int Noisefil
   dNbias = DNbias;
   phif = Phif;
 
+  std::cout << "Noise file No : " << noisefileNo << std::endl;
+
   noisefile.open(sourcedir + std::string("/") + noisefilename + std::to_string(noisefileNo) + std::string(".dat"));
   noisefilefail = noisefile.fail();
   biasfile.open(sourcedir + std::string("/") + biasfilename);
@@ -102,12 +104,17 @@ void STOLAS::dNmap() {
 #endif
   for (int i=0; i<NL*NL*NL; i++) {
     double N=0, N0;
-    bool broken;
+    bool broken = false;
     std::vector<double> phi = phii;
     for (size_t n=0; n<noisedata[i].size(); n++) {
       Hdata[n][i] = pow(hubble(phi[0],phi[1]),2);
       pidata[n][i] = phi[1]*phi[1];
       RK4Mbias(N,phi,dN,noisedata[i][n],biasdata[i][n],N0,broken);
+
+      if (!broken && phi[0] < 0) {
+	N0 = N;
+	broken = true;
+      }
     }
 
     double dN1 = dN;

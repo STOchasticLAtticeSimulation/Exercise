@@ -40,7 +40,8 @@ double STOLAS::calPphi(double &N, std::vector<double> &phi, double N0, bool brok
     return pow(hubble(phi[0],phi[1])/2./M_PI,2);
   } else {
     double alpha = exp(N-N0);
-    return ((1 + pow(sigma,2))*(9*pow(1 + pow(alpha,2)*pow(sigma,2),2) - 
+    return pow(hubble(phi[0],phi[1])/2./M_PI,2) *
+      ((1 + pow(sigma,2))*(9*pow(1 + pow(alpha,2)*pow(sigma,2),2) - 
 				18*Lambda*pow(1 + pow(alpha,2)*pow(sigma,2),2) + 
 				pow(Lambda,2)*(9 + 18*pow(alpha,2)*pow(sigma,2) + 9*pow(alpha,4)*pow(sigma,4) + 
 					       2*pow(alpha,6)*pow(sigma,6))) + 
@@ -110,5 +111,6 @@ int main(int argc, char* argv[])
   gettimeofday(&Nv, &Nz);
   after = (double)Nv.tv_sec + (double)Nv.tv_usec * 1.e-6;
   std::cout << after - before << " sec." << std::endl;
+  std::cout << std::endl;
   // -------------------------------------
 }
