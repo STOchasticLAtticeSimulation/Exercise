@@ -6,7 +6,7 @@ const double mm = 0.01;
 const std::string model = "chaotic";
 const double dN = 0.01;
 const std::string sourcedir = "../source";
-const std::vector<double> phii{15.,-0.1*mm*mm};
+const std::vector<double> phii{15, -0.00815}; //phii{15.,-0.1*mm*mm};
 const double bias = 0.; // 10;
 const double Nbias = 4.0;
 const double dNbias = 1.0;

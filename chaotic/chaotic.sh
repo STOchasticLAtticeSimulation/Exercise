@@ -12,7 +12,7 @@
 #source /opt/intel/bin/compilervars.sh intel64
 #export OMP_NUM_THREADS=$NSLOTS
 
-for ((i=0; i<300; i++))
+for ((i=1; i<300; i++))
     do
 	./chaotic $i
 done
