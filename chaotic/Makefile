@@ -1,7 +1,7 @@
 MODEL = chaotic
 SOURCE = ../source
 
-CXX := g++-13
+CXX := g++-12
 #CXX := g++
 #CXX := icpc
 
