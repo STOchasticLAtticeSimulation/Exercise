@@ -20,6 +20,8 @@ STOLAS::STOLAS(std::string Model, double DN, std::string sourcedir, int Noisefil
   Nbias = NBias;
   dNbias = DNbias;
 
+  std::cout << "Noise file No. : " << noisefileNo << std::endl;
+
   noisefile.open(sourcedir + std::string("/") + noisefilename + std::to_string(noisefileNo) + std::string(".dat"));
   noisefilefail = noisefile.fail();
   biasfile.open(sourcedir + std::string("/") + biasfilename);

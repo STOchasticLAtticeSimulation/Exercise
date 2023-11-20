@@ -76,5 +76,6 @@ int main(int argc, char* argv[])
   gettimeofday(&Nv, &Nz);
   after = (double)Nv.tv_sec + (double)Nv.tv_usec * 1.e-6;
   std::cout << after - before << " sec." << std::endl;
+  std::cout << std::endl;
   // -------------------------------------
 }
