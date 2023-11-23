@@ -69,6 +69,7 @@ int main()
 #endif
   for (int i=0; i<totalstep; i++) {
     biasdata[i] = biaslist(i*dN);
+    /*
 #ifdef _OPENMP
 #pragma omp critical
 #endif
@@ -76,17 +77,18 @@ int main()
       count++;
       std::cout << "\rBiasGenerating : " << std::setw(3) << 100*count/totalstep << "%" << std::flush;
     }
+    */
   }
-  std::cout << std::endl;
+  // std::cout << std::endl;
   
   for (size_t i=0; i<biasdata[0].size(); i++) {
     for (size_t n=0; n<biasdata.size(); n++) {
       ofs << biasdata[n][i] << ' ';
     }
     ofs << std::endl;
-    std::cout << "\rExporting : " << std::setw(3) << 100*i/biasdata[0].size() << "%" << std::flush;
+    // std::cout << "\rExporting : " << std::setw(3) << 100*i/biasdata[0].size() << "%" << std::flush;
   }
-  std::cout << "\rExporting : 100%" << std::endl;
+  // std::cout << "\rExporting : 100%" << std::endl;
 
   // ---------- stop timer ----------
   gettimeofday(&Nv, &Nz);
