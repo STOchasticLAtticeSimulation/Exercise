@@ -8,4 +8,4 @@
 
 cd $PBS_O_WORKDIR
 
-./chaotic 0
+./chaotic 5
