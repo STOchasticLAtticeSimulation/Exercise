@@ -2,8 +2,8 @@ MODEL = chaotic
 SOURCE = ../source
 DATA = ./data
 
-CXX := g++-13
-#CXX := g++
+#CXX := g++ -13
+CXX := g++
 #CXX := icpc
 
 CXXFLAGS := -std=c++11 -O2 -fopenmp
