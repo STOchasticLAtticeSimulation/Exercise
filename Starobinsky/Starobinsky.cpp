@@ -8,12 +8,12 @@ const double sigma = 0.1;
 
 const double H0 = 1e-5;
 const double calPRIR = 8.5e-10;
-const double Lambda = 1000; //4574; //1e+4;
+const double Lambda = 2000; //4574; //1e+4;
 const double Ap = sqrt(9./4/M_PI/M_PI*H0*H0*H0*H0*H0*H0/calPRIR);
 const double Am = Ap/Lambda;
 const double V0 = 3*H0*H0;
 const std::vector<double> phii{0.00294,-5.46e-7}; //{0.0302,-5.45e-7};
-const double phif = -0.0186; //-0.0182;
+const double phif = -0.0184; //-0.0186; //-0.0182;
 const double Nbias = 3.5; //4.;
 const double dNbias = 0.1;
 const double bias = 14.1*sqrt(dNbias);
