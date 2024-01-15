@@ -57,8 +57,8 @@ STOLAS::STOLAS(std::string Model, double DN, std::string sourcedir, int Noisefil
     NL = cbrt(noisedata.size());
     std::cout << "Noise/Bias data imported. Box size is " << NL << "." << std::endl;
     Nfile.open(Nfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
-    //Hfile.open(Hfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
-    //pifile.open(pifileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
+    // Hfile.open(Hfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
+    // pifile.open(pifileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
     // wfile.open(wfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
     // powfile.open(powfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
     // cmpfile.open(cmpfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
@@ -112,9 +112,10 @@ bool STOLAS::cmpfilefail() {
 
 void STOLAS::dNmap() {
   Nfile << std::setprecision(10);
-  Hfile << std::setprecision(14);
-  pifile << std::setprecision(14);
+  // Hfile << std::setprecision(14);
+  // pifile << std::setprecision(14);
   // wfile << std::setprecision(10);
+  
   int complete = 0;
   
 #ifdef _OPENMP
@@ -144,7 +145,7 @@ void STOLAS::dNmap() {
       phi[1] = prephi[1];
       dN1 *= 0.1;
     }
-
+    
 #ifdef _OPENMP
 #pragma omp critical
 #endif
@@ -152,8 +153,8 @@ void STOLAS::dNmap() {
       Ndata[i] = N;
       Nfile << i << ' ' << N << std::endl;
       complete++;
-      std::cout << "\rLatticeSimulation : " << std::setw(3) << 100*complete/NL/NL/NL << "%" << std::flush;
-    }
+      // std::cout << "\rLatticeSimulation : " << std::setw(3) << 100*complete/NL/NL/NL << "%" << std::flush;
+      }
 
     //power spectrum
     int x=i/NL/NL ,y=(i%(NL*NL))/NL, z=i%NL;
@@ -168,6 +169,9 @@ void STOLAS::dNmap() {
 void STOLAS::animation() {
   Hfile.open(Hfileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
   pifile.open(pifileprefix + std::to_string(NL) + std::string("_") + std::to_string(noisefileNo) + std::string(".dat"));
+
+  Hfile << std::setprecision(14);
+  pifile << std::setprecision(14);
   
   for (size_t n=0; n<Hdata.size(); n++) {
     for (size_t i=0; i<Hdata[n].size(); i++) {
@@ -176,9 +180,9 @@ void STOLAS::animation() {
     }
     Hfile << std::endl;
     pifile << std::endl;
-    std::cout << "\rAnimeDataExporting : " << std::setw(3) << 100*(n+1)/Hdata.size() << "%" << std::flush;
+    // std::cout << "\rAnimeDataExporting : " << std::setw(3) << 100*(n+1)/Hdata.size() << "%" << std::flush;
   }
-  std::cout << std::endl;
+  // std::cout << std::endl;
 }
 
 
@@ -241,12 +245,14 @@ void STOLAS::powerspec(){
     double rk=nxt*nxt+nyt*nyt+nzt*nzt;
     powfile<< sqrt(rk) <<"     "<< norm(Nk[i][j][k])/NL/NL/NL/NL/NL/NL << std::endl;
 
-    double LogNk = log(sqrt(rk));
-    double calPk = norm(Nk[i][j][k])/NL/NL/NL/NL/NL/NL;
-    for (size_t ii = 0; ii < imax; ii++) {
-      if (abs(cn*ii-LogNk)<=cn/2.) {
-        disc_power[ii] += calPk/cn;
+    if(rk!=0){
+      double LogNk = log(sqrt(rk));
+      double calPk = norm(Nk[i][j][k])/NL/NL/NL/NL/NL/NL;
+      for (size_t ii = 0; ii < imax; ii++) {
+	if (abs(cn*ii-LogNk)<=cn/2.) {
+	  disc_power[ii] += calPk/cn;
         break;
+	}
       }
     }
   }

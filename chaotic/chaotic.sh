@@ -1,18 +1,12 @@
 #!/bin/sh
 
-#$ -S /bin/sh
-#$ -cwd
-#$ -V
-#$ -q all.q
-#$ -N chaotic
-#$ -o job_out
-#$ -e job_out
-#$ -pe OpenMP 36
+#PBS -N chaotic
+#PBS -q Smem
+#PBS -l select=1:ncpus=56:ompthreads=56
+#PBS -o ./chaotic.out
+#PBS -j oe
+#PBS -V
 
-#source /opt/intel/bin/compilervars.sh intel64
-#export OMP_NUM_THREADS=$NSLOTS
+cd $PBS_O_WORKDIR
 
-for ((i=1; i<300; i++))
-    do
-	./chaotic $i
-done
+./chaotic 5
