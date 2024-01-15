@@ -8,7 +8,7 @@
 
 cd $PBS_O_WORKDIR
 
-for ((i=5;i<1000;i++))
+for ((i=1000;i<10001;i++))
 do
     ./noisemap $i
 done
