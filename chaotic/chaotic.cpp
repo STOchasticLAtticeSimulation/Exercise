@@ -9,7 +9,7 @@ const std::string sourcedir = "../source";
 const std::vector<double> phii{11.,-sqrt(2./3)*mm}; //phii{15, -8.153e-6};  //-0.00815}; //phii{15.,-0.1*mm*mm};
 const double Nbias = 3.5; //4.0;
 const double dNbias = 0.1; //1.0;
-const double bias = 14.1*sqrt(dNbias); //0.; // 10;
+const double bias = 0; //14.1*sqrt(dNbias); //0.; // 10;
 
 
 double STOLAS::VV(double phi) {
@@ -68,9 +68,9 @@ int main(int argc, char* argv[])
   */
 
   stolas.dNmap();
-  stolas.compaction();
+  //stolas.compaction();
   //stolas.animation();
-  //stolas.powerspec();
+  stolas.powerspec();
 
   // ---------- stop timer ----------
   gettimeofday(&Nv, &Nz);
