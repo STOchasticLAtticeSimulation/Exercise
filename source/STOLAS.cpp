@@ -20,6 +20,8 @@ STOLAS::STOLAS(std::string Model, double DN, std::string sourcedir, int Noisefil
   Nbias = NBias;
   dNbias = DNbias;
 
+  std::cout << "Noise file No. : " << noisefileNo << std::endl;
+
   noisefile.open(sourcedir + std::string("/") + noisefilename + std::to_string(noisefileNo) + std::string(".dat"));
   noisefilefail = noisefile.fail();
   biasfile.open(sourcedir + std::string("/") + biasfilename);
@@ -337,17 +339,25 @@ void STOLAS::compaction(){
 
   // compaction function
   double CompactionMax, CompactionInt, rmax, Rmax, IntTemp = 0;
+  bool Cnegative = false;
   for(size_t ri=0; ri<NL/2; ri++){
     double CompactionTemp = 2./3.*(1. - pow(1 + ri*dzetar[ri], 2));
     IntTemp += ri*ri*CompactionTemp*exp(3.*zetar[1][ri])*(1 + ri*dzetar[ri]);
 
-    if (CompactionMax<CompactionTemp) {
-      CompactionMax = CompactionTemp;
-      rmax = ri;
-      Rmax = exp(zetar[1][ri])*ri;
-      CompactionInt += IntTemp;
-      IntTemp = 0;
+    if (!Cnegative) {
+      if (CompactionTemp < -0.2) {
+	Cnegative = true;
+      }
+      
+      if (CompactionMax<CompactionTemp) {
+	CompactionMax = CompactionTemp;
+	rmax = ri;
+	Rmax = exp(zetar[1][ri])*ri;
+	CompactionInt += IntTemp;
+	IntTemp = 0;
+      }
     }
+    
     cmpfile << ri << ' ' << CompactionTemp << std::endl;
     
   }

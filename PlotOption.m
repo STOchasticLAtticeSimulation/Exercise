@@ -8,7 +8,7 @@ SetOptions[{ListPlot, ListLogPlot, ListLogLogPlot, ListLogLinearPlot,
         ImageSize -> Large,
         LabelStyle -> Directive[Large, Black, FontFamily -> "Palatino"],
         PlotStyle -> AbsoluteThickness[3], Joined -> True}]
-SetOptions[{ContourPlot,ListContourPlot,ParametricPlot}, {Frame -> True, FrameStyle -> Black,
+SetOptions[{ContourPlot,ListContourPlot,ListDensityPlot,Histogram,DensityHistogram}, {Frame -> True, FrameStyle -> Black,
     LabelStyle -> Directive[Large, Black, FontFamily -> "Palatino"],
     ImageSize -> Large,
     AspectRatio -> 1/GoldenRatio
