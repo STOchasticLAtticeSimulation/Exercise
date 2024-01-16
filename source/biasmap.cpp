@@ -144,5 +144,5 @@ bool innsigma(int nx, int ny, int nz, int Num, double nsigma, double dn) {
     nzt = nz-Num;
   }
 
-  return abs(sqrt(nxt*nxt + nyt*nyt + nzt*nzt) - nsigma) <= dn/2.;
+  return std::abs(sqrt(nxt*nxt + nyt*nyt + nzt*nzt) - nsigma) <= dn/2.;
 }

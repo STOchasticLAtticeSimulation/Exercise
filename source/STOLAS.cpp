@@ -249,10 +249,10 @@ void STOLAS::powerspec(){
       double LogNk = log(sqrt(rk));
       double calPk = norm(Nk[i][j][k])/NL/NL/NL/NL/NL/NL;
       for (size_t ii = 0; ii < imax; ii++) {
-	if (abs(cn*ii-LogNk)<=cn/2.) {
-	  disc_power[ii] += calPk/cn;
-        break;
-	}
+    	  if (abs(cn*ii-LogNk)<=cn/2.) {
+	        disc_power[ii] += calPk/cn;
+          break;
+	      }
       }
     }
   }
@@ -319,7 +319,7 @@ void STOLAS::compaction(){
     }
 
     for (size_t ri=0; ri<NL/2; ri++) {
-      double norm = abs(sqrt(nx*nx+ny*ny+nz*nz)-ri);
+      double norm = std::abs(sqrt(nx*nx+ny*ny+nz*nz)-ri);
       if(norm<=dr/2.) {
         zetar[0][ri]++;
         zetar[1][ri]+=Ndata[i];
