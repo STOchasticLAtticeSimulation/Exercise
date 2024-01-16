@@ -72,6 +72,7 @@ int main(int argc, char* argv[])
   //stolas.animation();
   stolas.powerspec();
 
+
   // ---------- stop timer ----------
   gettimeofday(&Nv, &Nz);
   after = (double)Nv.tv_sec + (double)Nv.tv_usec * 1.e-6;

@@ -140,7 +140,7 @@ void STOLAS::dNmap() {
       Ndata[i] = N;
       Nfile << i << ' ' << N << std::endl;
       complete++;
-      std::cout << "\rLatticeSimulation : " << std::setw(3) << 100*complete/NL/NL/NL << "%" << std::flush;
+      //std::cout << "\rLatticeSimulation : " << std::setw(3) << 100*complete/NL/NL/NL << "%" << std::flush;
     }
 
     //power spectrum
@@ -149,7 +149,7 @@ void STOLAS::dNmap() {
 
     Nmap3D[x][y][z]=N;
   }
-  std::cout << std::endl;
+  //std::cout << std::endl;
 
 }
 
@@ -167,9 +167,9 @@ void STOLAS::animation() {
     }
     Hfile << std::endl;
     pifile << std::endl;
-    std::cout << "\rAnimeDataExporting : " << std::setw(3) << 100*(n+1)/Hdata.size() << "%" << std::flush;
+    //std::cout << "\rAnimeDataExporting : " << std::setw(3) << 100*(n+1)/Hdata.size() << "%" << std::flush;
   }
-  std::cout << std::endl;
+  //std::cout << std::endl;
 }
 
 void STOLAS::powerspec(){
@@ -202,18 +202,23 @@ void STOLAS::powerspec(){
     } else {
       nzt = k-NL;
     }
+
+    std::cout << nxt<<"  "<<nyt<<"  "<< nzt<<"  ";
     
     double rk=nxt*nxt+nyt*nyt+nzt*nzt;
     powfile<< sqrt(rk) <<"     "<< norm(Nk[i][j][k])/NL/NL/NL/NL/NL/NL << std::endl;
 
     double LogNk = log(sqrt(rk));
     double calPk = norm(Nk[i][j][k])/NL/NL/NL/NL/NL/NL;
+    std::cout <<  rk <<"  "<<LogNk <<"  "<<calPk/cn<<"  ";
     for (size_t ii = 0; ii < imax; ii++) {
       if (std::abs(cn*ii-LogNk)<=cn/2.) {
         disc_power[ii] += calPk/cn;
-        break;
+	std::cout << cn*ii;
+	break;
       }
     }
+    std::cout <<std::endl;
   }
   powsfile << noisefileNo << " ";
   for (size_t ii = 0; ii < imax; ii++) {

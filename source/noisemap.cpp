@@ -76,24 +76,26 @@ int main(int argc, char* argv[])
 #endif
   for (int i=0; i<totalstep; i++) {
     noisedata[i] = dwlist(i*dN);
-#ifdef _OPENMP
+
+    /*#ifdef _OPENMP
 #pragma omp critical
 #endif
     {
       count++;
       std::cout << "\rNoiseGenerating : " << std::setw(3) << 100*count/totalstep << "%" << std::flush;
     }
+    */
   }
-  std::cout << std::endl;
+  //  std::cout << std::endl;
   
   for (size_t i=0; i<noisedata[0].size(); i++) {
     for (size_t n=0; n<noisedata.size(); n++) {
       ofs << noisedata[n][i] << ' ';
     }
     ofs << std::endl;
-    std::cout << "\rExporting : " << std::setw(3) << 100*i/noisedata[0].size() << "%" << std::flush;
+    //std::cout << "\rExporting : " << std::setw(3) << 100*i/noisedata[0].size() << "%" << std::flush;
   }
-  std::cout << "\rExporting : 100%" << std::endl;
+  //  std::cout << "\rExporting : 100%" << std::endl;
 
   // ---------- stop timer ----------
   gettimeofday(&Nv, &Nz);
