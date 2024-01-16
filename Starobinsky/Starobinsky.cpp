@@ -102,10 +102,10 @@ int main(int argc, char* argv[])
   }
 
   
-  //stolas.dNmap();
+  stolas.dNmap();
   //stolas.compaction();
   //stolas.animation();
-  //stolas.powerspec();
+  stolas.powerspec();
 
   // ---------- stop timer ----------
   gettimeofday(&Nv, &Nz);
