@@ -249,10 +249,10 @@ void STOLAS::powerspec(){
       double LogNk = log(sqrt(rk));
       double calPk = norm(Nk[i][j][k])/NL/NL/NL/NL/NL/NL;
       for (size_t ii = 0; ii < imax; ii++) {
-    	  if (abs(cn*ii-LogNk)<=cn/2.) {
-	        disc_power[ii] += calPk/cn;
+	if (std::abs(cn*ii-LogNk)<=cn/2.) {
+	  disc_power[ii] += calPk/cn;
           break;
-	      }
+	}
       }
     }
   }
@@ -260,7 +260,7 @@ void STOLAS::powerspec(){
   for (size_t ii = 0; ii < imax; ii++) {
     powsfile << disc_power[ii] << " " ;
   }
-    powsfile << std::endl;
+  powsfile << std::endl;
 }
 
 // calculation of compaction function

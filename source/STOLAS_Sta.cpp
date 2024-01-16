@@ -203,28 +203,25 @@ void STOLAS::powerspec(){
       nzt = k-NL;
     }
 
-    std::cout << nxt<<"  "<<nyt<<"  "<< nzt<<"  ";
-    
     double rk=nxt*nxt+nyt*nyt+nzt*nzt;
     powfile<< sqrt(rk) <<"     "<< norm(Nk[i][j][k])/NL/NL/NL/NL/NL/NL << std::endl;
 
-    double LogNk = log(sqrt(rk));
-    double calPk = norm(Nk[i][j][k])/NL/NL/NL/NL/NL/NL;
-    std::cout <<  rk <<"  "<<LogNk <<"  "<<calPk/cn<<"  ";
-    for (size_t ii = 0; ii < imax; ii++) {
-      if (std::abs(cn*ii-LogNk)<=cn/2.) {
-        disc_power[ii] += calPk/cn;
-	std::cout << cn*ii;
-	break;
+    if (rk!=0) {
+      double LogNk = log(sqrt(rk));
+      double calPk = norm(Nk[i][j][k])/NL/NL/NL/NL/NL/NL;
+      for (size_t ii = 0; ii < imax; ii++) {
+	if (std::abs(cn*ii-LogNk)<=cn/2.) {
+	  disc_power[ii] += calPk/cn;
+	  break;
+	}
       }
     }
-    std::cout <<std::endl;
   }
   powsfile << noisefileNo << " ";
   for (size_t ii = 0; ii < imax; ii++) {
     powsfile << disc_power[ii] << " " ;
   }
-    powsfile << std::endl;
+  powsfile << std::endl;
 }
 
 // calculation of compaction function

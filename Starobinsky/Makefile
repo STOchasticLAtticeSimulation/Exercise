@@ -15,6 +15,7 @@ CPPFLAGS := -I/opt/homebrew/opt/libomp/include
 
 $(MODEL): $(MODEL).o $(SOURCE)/STOLAS_Sta.o
 	$(CXX) $(LDFLAGS) $(CPPFLAGS) $(CXXFLAGS) -o $(MODEL) $(MODEL).o $(SOURCE)/STOLAS_Sta.o
+	chmod o+w $(MODEL) $(MODEL).o $(SOURCE)/STOLAS_Sta.o
 
 $(MODEL).o: $(SOURCE)/STOLAS_Sta.hpp
 STOLAS_Sta.o: $(SOURCE)/STOLAS_Sta.hpp $(SOURCE)/RK4.hpp $(SOURCE)/vec_op.hpp
