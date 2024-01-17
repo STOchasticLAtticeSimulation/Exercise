@@ -16,7 +16,7 @@ const std::vector<double> phii{0.00294,-5.46e-7}; //{0.0302,-5.45e-7};
 const double phif = -0.0184; //-0.0186; //-0.0182;
 const double Nbias = 3.5; //4.;
 const double dNbias = 0.1;
-const double bias = 14.1*sqrt(dNbias);
+const double bias = 0; //14.1*sqrt(dNbias);
 
 
 double STOLAS::VV(double phi) {
@@ -103,9 +103,9 @@ int main(int argc, char* argv[])
 
   
   stolas.dNmap();
-  stolas.compaction();
+  //stolas.compaction();
   //stolas.animation();
-  //stolas.powerspec();
+  stolas.powerspec();
 
   // ---------- stop timer ----------
   gettimeofday(&Nv, &Nz);
