@@ -11,6 +11,8 @@
 #include <functional>
 #include <complex>
 
+#define euler_gamma 0.57721566490153286061
+
 #ifdef _OPENMP
 #include <omp.h>
 #endif

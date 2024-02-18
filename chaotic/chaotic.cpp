@@ -69,7 +69,7 @@ int main(int argc, char* argv[])
 
   stolas.dNmap();
   //stolas.compaction();
-  //stolas.animation();
+  // stolas.animation();
   stolas.powerspec();
 
   // ---------- stop timer ----------
