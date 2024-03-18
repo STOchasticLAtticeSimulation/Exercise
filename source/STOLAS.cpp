@@ -473,11 +473,14 @@ void STOLAS::RK4M(double &N, std::vector<double> &phi, double dN, double dw) {
 void STOLAS::RK4Mbias(double &N, std::vector<double> &phi, double dN, double dw, double Bias //int pos
 		      ) {
   double HH = hubble(phi[0],phi[1]);
+  double eps = ep(phi[0],phi[1]);
+  double Hi = hubble(phii[0],phii[1]);
+  double NoiseNLO = sqrt(1. + eps*(6.-4.*euler_gamma-8.*log(2.))) * pow(sigma*Hi/2./HH, -2.*eps);
 
   //RK4bias(N,phi,dN,pos);
   RK4(N,phi,dN);
-  phi[0] += HH/2./M_PI * dw * sqrt(dN);
+  phi[0] += HH/2./M_PI * dw * sqrt(dN) * NoiseNLO;
 
   double GaussianFactor = 1./dNbias/sqrt(2*M_PI) * exp(-(N-Nbias)*(N-Nbias)/2./dNbias/dNbias);
-  phi[0] += HH/2./M_PI * bias * Bias * GaussianFactor * dN;
+  phi[0] += HH/2./M_PI * bias * Bias * GaussianFactor * dN * NoiseNLO;
 }
